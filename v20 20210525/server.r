@@ -32,6 +32,7 @@ registerDoParallel(min(20, parallel::detectCores() - 1))
 source('agg_helpers.r')
 source('BM_helpers.r')
 source('BM_Rhat_helpers.r')
+source("FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R")
 
 # load sample data to use as default 
 sample_df <- read.csv("sample_data_Loyalty.csv")
@@ -70,23 +71,46 @@ shinyServer(function(input, output, session) {
   
   # Data
   output$radio_y <- renderUI({
-    radioButtons("radio_y",
-                 label = h5(em("Dependent Variable (y). Select one.")),
-                 choices = df_column_list(), 
-                 selected = 'y1')
+    selectInput("radio_y", label = h5(em("Dependent Variable (y). Select one.")),
+                choices = df_column_list(), selected = "y1")
   })
   
   output$radio_m <- renderUI({
-    radioButtons("radio_m", label = h5(em("Mediator (m). Select one.")),
-                 choices = df_column_list()[df_column_list() != input$radio_y], 
-                 selected = 'avg_m')
+    selectInput("radio_m", label = h5(em("Mediator (m). Select one.")),
+                choices = df_column_list()[df_column_list() != input$radio_y], 
+                selected = 'avg_m')
   })
   
   output$checkGroup_x <- renderUI({
-  checkboxGroupInput("checkGroup_x",
-              label    = h5(em("Independent Variables (X). Select all that apply.")), 
-              choices  = df_column_list()[df_column_list() != input$radio_y & df_column_list() != input$radio_m],
-              selected = c('x1', 'x2'))
+    input$covariates
+    print("Selected X")
+    isolate({
+      print(input$checkGroup_x)
+      selectizeInput("checkGroup_x",
+                     label    = h5(em("Independent Variables (X). Select all that apply.")), 
+                     choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$covariates)),
+                     selected = if (!is.null(input$checkGroup_x)[1]) input$checkGroup_x else NA,
+                     options = list(
+                       placeholder = "Choose"
+                     ),
+                     multiple = TRUE)
+    })
+  })
+  
+  output$covariates <- renderUI({
+    input$checkGroup_x
+    isolate({
+      print("Selected Covariates")
+      print(input$covariates)
+      selectizeInput("covariates",
+                     label    = h5(em("Covariates. Select all that apply.")), 
+                     choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$checkGroup_x)),
+                     selected = if (!is.null(input$covariates)[1]) input$covariates else NA,
+                     options = list(
+                       placeholder = "None"
+                     ),
+                     multiple = TRUE)
+    })
   })
   
   # Priors
@@ -228,10 +252,19 @@ shinyServer(function(input, output, session) {
   observeEvent(input$runA, {
     aggregate_outputs$checkGroup_x <- input$checkGroup_x
     aggregate_outputs$select_burnin <- input$select_burnin
+    
+    x <- input_listA()
+    save(x, file = "x.RData")
       
-      output_listA <<- FUN_MediationGibbs_oneMediator_Aggregate_forShinyApp(Data  = input_listA()$Data,
-                                                                  Prior = input_listA()$Prior,
-                                                                  Mcmc  = input_listA()$Mcmc)
+      output_listA <<- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
+        Model = 1,
+        Data  = input_listA()$Data,
+        Prior = input_listA()$Prior,
+        Mcmc  = input_listA()$Mcmc)
+      
+      save(output_listA, file = "test.RData")
+      print(aggregate_outputs$checkGroup_x)
+      print(aggregate_outputs$select_burnin)
       
   })
   
@@ -302,6 +335,7 @@ shinyServer(function(input, output, session) {
   # generate scatterplots of posterior draws for each parameter
   output_scatterplots <- eventReactive(input$runA, {
       if(is.null(output_listA)) {return(NULL)}
+    save(output_listA, file = "wtf.RData")
       return(FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot(dataset  = "",
                                                                     filename = output_listA,
                                                                     burnin   = aggregate_outputs$select_burnin,

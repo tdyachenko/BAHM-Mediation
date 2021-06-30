@@ -65,7 +65,24 @@ dashboardPage(
                    fluidRow(
                      column(width = 4,
                             h5('INSTRUCTIONS: Upload your data and select variable for analysis'),
-
+hr(),
+                            # add widgets for user to select variables
+                            # this is dynamically done based on the file they upload using the RenderUI function in the server
+                            h4(strong("Select Variables:")),
+                            helpText("Note: only unique variable selections will be allowed"),
+                            fluidRow(
+                              column(width = 5,
+                                     uiOutput("radio_y"),
+                                     uiOutput("radio_m")
+                              ),
+                              column(width = 7,
+                                     uiOutput("checkGroup_x"),
+                                     uiOutput("covariates")
+                              )
+                            ),
+                            hr(),
+                            h4(strong("Upload Data:")),
+                            
                             fileInput('file1', 
                                       em('Upload CSV file or use default data'),
                                       accept = c("text/csv",
@@ -73,14 +90,6 @@ dashboardPage(
                                                  ".csv",
                                                  ".xls")
                             ),
-                            
-                            # add widgets for user to select variables
-                            # this is dynamically done based on the file they upload using the RenderUI function in the server
-                            h4(strong("Select Variables:")),
-                            helpText("Note: only unique variable selections will be allowed"),
-                            uiOutput("radio_y"),
-                            uiOutput("radio_m"),
-                            uiOutput("checkGroup_x")
                      ),
                      column(width = 8,
                             box(width = NULL,

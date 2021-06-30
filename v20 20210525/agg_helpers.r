@@ -30,8 +30,8 @@ get_inputs_agg <-function(df, x_vars, y_var, m_var,
   X   = df[,x_vars]
   nhh = nrow(df)
   
-  y = df[,y_var]
-  m = df[,m_var]
+  y = df[,y_var, drop=FALSE]
+  m = df[,m_var, drop=FALSE]
   
   nvarX = 1 + length(x_vars) # number of X variables selected on the menu. intercept is added here
   nvarM = 1
@@ -39,14 +39,15 @@ get_inputs_agg <-function(df, x_vars, y_var, m_var,
   Data = list(
     X = cbind(rep(1, nhh), X), # datafile with only variables selected as X (independent variable(s))
     y = y, # datafile with only one variable selected as y (dependent variable)
-    m = m  # datafile with only one variable selected as m (mediator))
+    m = m,  # datafile with only one variable selected as m (mediator))
+    Z = cbind(rep(1, nhh))
   ) 
   
   Prior = list(
     ma  = c(rep(0, nvarX)),
     Aa  = Aa_var * diag(nvarX), # "input Aa parameter, default is 0.01"
-    mbg = c(rep(0, nvarX+nvarM)),
-    Abg = Abg_var * diag(nvarX+nvarM), #"input Abg parameter, default is 0.01"
+    mgb = c(rep(0, nvarX+nvarM)),
+    Agb = Abg_var * diag(nvarX+nvarM), #"input Abg parameter, default is 0.01"
     nu  = nu_var,       # "input nu parameter, default is 5" 
     qy  = qy_var,  # "input qy parameter, default is var(y)"
     qm  = qm_var   # "input qy parameter, default is var(m)"
@@ -191,16 +192,17 @@ FUN_MediationGibbs_oneMediator_Aggregate_forShinyApp = function (Data, Prior, Mc
 # Proportion of joint (alpha, beta) in each quadrant MULTIX
 
 FUN_PDF_Mediation_AlphaBetaProportion_Aggregate_forShiny  = function(filename, burnin, x_vars)
-  { nvarX = ncol(filename$alphadraw) - 1
+  { 
+  nvarX = ncol(filename$alphadraw) - 1
   QuadrantsCounts = array(0, dim=c(4, nvarX))
-  DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LLtotal), by = 1))
+  DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LL_total), by = 1))
   pp=pn=np=nn=0
   for(j in 2:(nvarX+1)){  
     for(r in DrawsAnalysis){ 
-      pp = pp + ifelse(filename$alphadraw[r,j]>0,ifelse(filename$betadraw[r]>0,1,0),0)
-      pn = pn + ifelse(filename$alphadraw[r,j]>0,ifelse(filename$betadraw[r]<0,1,0),0)
-      np = np + ifelse(filename$alphadraw[r,j]<0,ifelse(filename$betadraw[r]>0,1,0),0)
-      nn = nn + ifelse(filename$alphadraw[r,j]<0,ifelse(filename$betadraw[r]<0,1,0),0)
+      pp = pp + ifelse(filename$alphadraw[r,j,1]>0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+      pn = pn + ifelse(filename$alphadraw[r,j,1]>0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
+      np = np + ifelse(filename$alphadraw[r,j,1]<0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+      nn = nn + ifelse(filename$alphadraw[r,j,1]<0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
     }
     QuadrantsCounts[,(j-1)]=c(pp,pn,np,nn)
     pp=pn=np=nn=0
@@ -216,7 +218,7 @@ FUN_PDF_Mediation_AlphaBetaProportion_Aggregate_forShiny  = function(filename, b
 # Proportion of joint (alpha, beta) in each quadrant MULTIX
 
 FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny  = function(filename, burnin)
-  { outputTable = matrix(round(logMargDenNR(filename$LLtotal[-1:-burnin]),2),1,1)
+  { outputTable = matrix(round(logMargDenNR(filename$LL_total[-1:-burnin]),2),1,1)
     rownames(outputTable) <- c("LMD NR")
     return(outputTable)
 }
@@ -228,14 +230,14 @@ FUN_PDF_Mediation_HDPI_Aggregate_forShiny  = function(filename, burnin, x_vars)
   { nvarX = ncol(filename$alphadraw)
   outputTable = NULL
   for(j in 1:(nvarX)){  
-    tempa = hdi(filename$alphadraw[-1:-burnin,j], credMass = 0.95)
-    outputTable = rbind(outputTable,c(mean(filename$alphadraw[-1:-burnin,j]),tempa))
+    tempa = hdi(filename$alphadraw[-1:-burnin,j,1], credMass = 0.95)
+    outputTable = rbind(outputTable,c(mean(filename$alphadraw[-1:-burnin,j,1]),tempa))
   }
-  tempb = hdi(filename$betadraw[-1:-burnin], credMass = 0.95)
-  outputTable = rbind(outputTable,c(mean(filename$betadraw[-1:-burnin]),tempb))
+  tempb = hdi(filename$betaMdraw[-1:-burnin,1], credMass = 0.95)
+  outputTable = rbind(outputTable,c(mean(filename$betaMdraw[-1:-burnin,1]),tempb))
   for(j in 1:(nvarX)){  
-    tempg = hdi(filename$gammadraw[-1:-burnin,j], credMass = 0.95)
-    outputTable = rbind(outputTable,c(mean(filename$gammadraw[-1:-burnin,j]),tempg))
+    tempg = hdi(filename$gammabetaSdraw[-1:-burnin,j], credMass = 0.95)
+    outputTable = rbind(outputTable,c(mean(filename$gammabetaSdraw[-1:-burnin,j]),tempg))
   }
   
   #data.frame(outputTable)
@@ -282,14 +284,16 @@ FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot = function(dataset, filen
   #pdf(paste(dataset, "Posterior Draws.pdf", sep = " "), width=pdfW, height=pdfH)
   par(oma=c(0,0,2,0));
   QuadrantsCounts = array(0, dim=c(4, nvarX))
-  DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LLtotal), by = 1))
+  print(burnin)
+  print(length(filename$LL_total))
+  DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LL_total), by = 1))
   pp=pn=np=nn=0
   for(j in 1:nvarX){  
     for(r in DrawsAnalysis){ 
-      pp = pp + ifelse(filename$alphadraw[r,j+1]>0,ifelse(filename$betadraw[r]>0,1,0),0)
-      pn = pn + ifelse(filename$alphadraw[r,j+1]>0,ifelse(filename$betadraw[r]<0,1,0),0)
-      np = np + ifelse(filename$alphadraw[r,j+1]<0,ifelse(filename$betadraw[r]>0,1,0),0)
-      nn = nn + ifelse(filename$alphadraw[r,j+1]<0,ifelse(filename$betadraw[r]<0,1,0),0)
+      pp = pp + ifelse(filename$alphadraw[r,j+1,1]>0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+      pn = pn + ifelse(filename$alphadraw[r,j+1,1]>0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
+      np = np + ifelse(filename$alphadraw[r,j+1,1]<0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+      nn = nn + ifelse(filename$alphadraw[r,j+1,1]<0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
     }
     QuadrantsCounts[,j]=c(pp,pn,np,nn)
     pp=pn=np=nn=0
@@ -297,15 +301,15 @@ FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot = function(dataset, filen
   Proportions <- QuadrantsCounts/length(DrawsAnalysis)
   
   par(mfrow=c(nvarX,2))
-  ylimB = c( min(filename$betadraw[-1:-burnin])-0.1*min(filename$betadraw[-1:-burnin]),
-           max(filename$betadraw[-1:-burnin])+0.1*max(filename$betadraw[-1:-burnin]))
+  ylimB = c( min(filename$betaMdraw[-1:-burnin])-0.1*min(filename$betaMdraw[-1:-burnin,1]),
+           max(filename$betaMdraw[-1:-burnin])+0.1*max(filename$betaMdraw[-1:-burnin,1]))
   for(j in 1:nvarX){
-    ylimA = c( min(filename$alphadraw[-1:-burnin,j+1])-0.1*min(filename$alphadraw[-1:-burnin,j+1]),
-             max(filename$alphadraw[-1:-burnin,j+1])+0.1*max(filename$alphadraw[-1:-burnin,j+1]))
-    ylimG = c( min(filename$gammadraw[-1:-burnin,j+1])-0.1*min(filename$gammadraw[-1:-burnin,j+1]),
-             max(filename$gammadraw[-1:-burnin,j+1])+0.1*max(filename$gammadraw[-1:-burnin,j+1]))
+    ylimA = c( min(filename$alphadraw[-1:-burnin,j+1,1])-0.1*min(filename$alphadraw[-1:-burnin,j+1,1]),
+             max(filename$alphadraw[-1:-burnin,j+1,1])+0.1*max(filename$alphadraw[-1:-burnin,j+1,1]))
+    ylimG = c( min(filename$gammabetaSdraw[-1:-burnin,j+1])-0.1*min(filename$gammabetaSdraw[-1:-burnin,j+1]),
+             max(filename$gammabetaSdraw[-1:-burnin,j+1])+0.1*max(filename$gammabetaSdraw[-1:-burnin,j+1]))
     breaksCalc = (ylimG[2]-ylimG[1])/25
-    plot(filename$alphadraw[-1:-burnin,j+1], filename$betadraw[-1:-burnin], 
+    plot(filename$alphadraw[-1:-burnin,j+1,1], filename$betaMdraw[-1:-burnin,1], 
          main=bquote("Scatterplot of " ~ alpha[.(j)] ~ " and " ~ beta ~ " for variable " ~ .(x_vars[j])),
          xlab=bquote(alpha[.(j)]), ylab=expression(beta), xlim=ylimA,ylim=ylimB)
     abline(h=0,v=0,col="gray")
@@ -325,9 +329,9 @@ FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot = function(dataset, filen
       text(x=c(ylimA[1]),  y=c(ylimB[2]), 
          labels = c(paste("IV (",round(Proportions[3,j],4),")")), pos=4, font=2,cex=0.9)
     }
-    hist(filename$gammadraw[-1:-burnin,j+1], main=bquote(paste("Histogram of ",gamma[.(j)])),
+    hist(filename$gammabetaSdraw[-1:-burnin,j+1], main=bquote(paste("Histogram of ",gamma[.(j)])),
          xlab=bquote(gamma[.(j)]), xlim=ylimG,
-         breaks=c(seq(min(filename$gammadraw[-1:-burnin,j+1]),(max(filename$gammadraw[-1:-burnin,j+1])+breaksCalc),breaksCalc )))
+         breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,j+1]),(max(filename$gammabetaSdraw[-1:-burnin,j+1])+breaksCalc),breaksCalc )))
     abline(v=0,col="darkred", lwd=2)
   }
   #title(main=paste(dataset, "Aggregate Model.  Posterior Draws of parameters."),outer=T)
