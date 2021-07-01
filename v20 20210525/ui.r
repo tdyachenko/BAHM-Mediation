@@ -62,44 +62,48 @@ dashboardPage(
           # Raw Tab - show data that user has inputted
           tabPanel("Data", value='Raw Data', 
                    
-                   fluidRow(
-                     column(width = 4,
-                            h5('INSTRUCTIONS: Upload your data and select variable for analysis'),
-hr(),
+                  #fluidRow(
+                  #h4('INSTRUCTIONS: Upload your data and select variables for analysis'),
+                  hr(),
                             # add widgets for user to select variables
                             # this is dynamically done based on the file they upload using the RenderUI function in the server
-                            h4(strong("Select Variables:")),
-                            helpText("Note: only unique variable selections will be allowed"),
+                  h4(strong("Upload Data:")),
+                  fileInput('file1', 
+                           em('Upload CSV file or use default data'),
+                           accept = c("text/csv",
+                                      "text/comma-separated-values,text/plain",
+                                      ".csv",
+                                      ".xls")
+                  ),
+                  h4(strong("Select Variables:")),
+                  helpText("Note: only unique variable selections will be allowed"),
                             fluidRow(
-                              column(width = 5,
+                              column(width = 4,
                                      uiOutput("radio_y"),
                                      uiOutput("radio_m")
                               ),
-                              column(width = 7,
+                              column(width = 8,
                                      uiOutput("checkGroup_x"),
-                                     uiOutput("covariates")
+                                     uiOutput("covariates_z")
                               )
                             ),
-                            hr(),
-                            h4(strong("Upload Data:")),
-                            
-                            fileInput('file1', 
-                                      em('Upload CSV file or use default data'),
-                                      accept = c("text/csv",
-                                                 "text/comma-separated-values,text/plain",
-                                                 ".csv",
-                                                 ".xls")
-                            ),
-                     ),
-                     column(width = 8,
-                            box(width = NULL,
-                                solidHeader = FALSE,
-                                title = "Table: Raw Data",
-                                status = "primary",
-                                tableOutput("Raw_table")
-                            )
-                     )
-                   )
+                   
+                   #column(width = 4,
+                   #),
+                   #column(width = 8,
+                  
+                   # NEED TO HAVE THIS CODED
+                   #helpText("Your file has " " observations and " "variables."),
+                   helpText("Your file has *** observations and *** variables."),  # placeholder
+                  
+                   box(width = NULL,
+                        solidHeader = FALSE,
+                        title = "Table: Raw Data",
+                        status = "primary",
+                        tableOutput("Raw_table")
+                        )
+            #)
+                   #)
           ),
             
           # Input Tab - show model settings and default parameters, allow user to change them
@@ -111,6 +115,7 @@ hr(),
              p(textOutput("XSelection")), 
              p(textOutput("ySelection")),  
              p(textOutput("mSelection")),
+             p(textOutput("ZSelection")),
              br(),
              
              h5(strong('Selected Parameters:')),
@@ -131,13 +136,11 @@ hr(),
                column(6, "Keep (thinning parameter to minimize autocorrelation in draws (default is R/1000))"),
                column(3, uiOutput("select_keep"))
              ),
-             #helpText("Keep (thinning parameter to minimize autocorrelation in draws (default is R/1000))"),
              #uiOutput("select_keep"),
              fluidRow(
                column(6, "Burnin (number of saved MCMC draws to remove before analysis (default is 0.5*R/keep))"),
                column(3, uiOutput("select_burnin"))
              ),
-             #helpText("Burnin (number of saved MCMC draws to remove before analysis (default is 0.5*R/keep))"),
              #uiOutput("select_burnin"),
              fluidRow(
                column(6, "Number of MCMC chains for the Binary Mixture model (default is 10)"),
@@ -158,6 +161,11 @@ hr(),
              ),
              #uiOutput("select_Abg"),
              fluidRow(
+               column(6, HTML("<i>A<sub>&lambda;</sub> </i> (precision parameter for <i>&lambda;</i> parameters)")),
+               column(3, uiOutput("select_Al"))
+             ),
+             #uiOutput("select_Al"),
+             fluidRow(
                column(6,  HTML("<i>&nu;</i>   (degrees of freedom for the variance parameters)")),
                column(3, uiOutput("select_nu"))
              ),
@@ -174,10 +182,10 @@ hr(),
              #uiOutput("select_g"),
              # this block does not work foe me (TD))
              #if (radioButtons$model_button != 'Aggregate'){
-                 fluidRow(
-                          column(6,  HTML("<i>g</i> (proportion parameter - Beta prior disturbution is symmetric)")),
-                          column(3, uiOutput("select_g"))
-                       ),
+                 #fluidRow(
+                #          column(6,  HTML("<i>g</i> (proportion parameter - Beta prior disturbution is symmetric)")),
+                #          column(3, uiOutput("select_g"))
+                #       ),
                     # },
              br()
           ) # end of Data tabPanel "Settings"

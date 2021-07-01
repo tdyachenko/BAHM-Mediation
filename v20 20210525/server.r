@@ -29,6 +29,7 @@ library(foreach)
 library(doParallel)  
 registerDoParallel(min(20, parallel::detectCores() - 1))
 
+source('inputs_helpers.r')
 source('agg_helpers.r')
 source('BM_helpers.r')
 source('BM_Rhat_helpers.r')
@@ -82,13 +83,13 @@ shinyServer(function(input, output, session) {
   })
   
   output$checkGroup_x <- renderUI({
-    input$covariates
+    input$checkGroup_x  # ????
     print("Selected X")
     isolate({
       print(input$checkGroup_x)
       selectizeInput("checkGroup_x",
-                     label    = h5(em("Independent Variables (X). Select all that apply.")), 
-                     choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$covariates)),
+                     label    = h5(em("Independent Variables (X). Select all that apply. You must select at least one.")), 
+                     choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$covariates_z)),
                      selected = if (!is.null(input$checkGroup_x)[1]) input$checkGroup_x else NA,
                      options = list(
                        placeholder = "Choose"
@@ -97,15 +98,17 @@ shinyServer(function(input, output, session) {
     })
   })
   
-  output$covariates <- renderUI({
-    input$checkGroup_x
+  # NEED to have some warning pop up to not proceed unless y,m, and at least one x is selected
+  
+  output$covariates_z <- renderUI({
+    input$covariates_z # ????
     isolate({
       print("Selected Covariates")
-      print(input$covariates)
+      print(input$covariates_z)
       selectizeInput("covariates",
-                     label    = h5(em("Covariates. Select all that apply.")), 
+                     label    = h5(em("Covariates. Select all that apply. Leave 'None' if covariates are not inlcuded in the analysis")), 
                      choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$checkGroup_x)),
-                     selected = if (!is.null(input$covariates)[1]) input$covariates else NA,
+                     selected = if (!is.null(input$covariates_z)[1]) input$covariates_z else NA,
                      options = list(
                        placeholder = "None"
                      ),
@@ -120,6 +123,9 @@ shinyServer(function(input, output, session) {
   output$select_Abg <- renderUI({
     numericInput("select_Abg", label = NULL, value = 0.01, step = 0.1)
   })
+  output$select_Al <- renderUI({
+    numericInput("select_Al", label = NULL, value = 0.01, step = 0.1)
+  })
   output$select_nu <- renderUI({
     numericInput("select_nu", label = NULL, value = 5, step=1)
   })
@@ -129,10 +135,7 @@ shinyServer(function(input, output, session) {
   output$select_qm <- renderUI({
     numericInput("select_qm", label = NULL, value = round(var(df()[,input$radio_m]), 3), step = 0.5)
   })
-  output$select_g <- renderUI({
-    numericInput("select_g", label = NULL,  value = 3, step = 0.5)
-  })
-  
+ 
   # MCMC
   output$select_R <- renderUI({
     #numericInput("select_R", label=("R (# of draws)"), value = 10000, step=100)
@@ -171,16 +174,20 @@ shinyServer(function(input, output, session) {
     paste0('Independent Variables: ', paste(input$checkGroup_x, collapse = ", "))
   })
   
+  output$ZSelection <- renderText({
+    paste0('Covariates: ', paste(input$covariates_z, collapse = ", "))
+  })
+  
   # Forces output elements to initialize without tab being click
   outputOptions(output, 'radio_y', suspendWhenHidden=FALSE)
   outputOptions(output, 'radio_m', suspendWhenHidden=FALSE)
   outputOptions(output, 'checkGroup_x', suspendWhenHidden=FALSE)
+  outputOptions(output, 'covariates_z', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_Aa', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_Abg', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_nu', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_qy', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_qm', suspendWhenHidden=FALSE)
-  outputOptions(output, 'select_g', suspendWhenHidden=FALSE)
   outputOptions(output, "select_R", suspendWhenHidden=FALSE)
   outputOptions(output, "select_seed", suspendWhenHidden=FALSE)
   outputOptions(output, "select_keep", suspendWhenHidden=FALSE)
@@ -215,6 +222,7 @@ shinyServer(function(input, output, session) {
     x_vars <- input$checkGroup_x
     y_var  <- input$radio_y
     m_var  <- input$radio_m
+    z_var  <- input$covariates_z   # not used in aggregate model but might need it later
 
     # Priors
     Aa_var  <- input$select_Aa
@@ -222,7 +230,6 @@ shinyServer(function(input, output, session) {
     nu_var  <- input$select_nu
     qy_var  <- input$select_qy
     qm_var  <- input$select_qm
-    g_var   <- input$select_g # only BM
     
     # MCMC
     R_var    <- input$select_R
@@ -233,7 +240,7 @@ shinyServer(function(input, output, session) {
     numx_vars <<- length(input$checkGroup_x)
 
     return(get_inputs_agg(df(), 
-                            x_vars, y_var, m_var, # Data
+                            x_vars, y_var, m_var, z_var, # Data
                             Aa_var, Abg_var, nu_var, qy_var, qm_var, #Priors
                             R_var, seed_var, keep_var)) # MCMC
   
@@ -264,6 +271,7 @@ shinyServer(function(input, output, session) {
       
       save(output_listA, file = "test.RData")
       print(aggregate_outputs$checkGroup_x)
+      print(aggregate_outputs$covariates_z)
       print(aggregate_outputs$select_burnin)
       
   })
@@ -289,7 +297,7 @@ shinyServer(function(input, output, session) {
       ## Mediation
       tagList(
         strong("According to the aggregate model, mediation is present in the sample."),
-        paste0(scales::percent(max(prop_agg)), " of the joint posterior distirbution of parameters α and ß is in quadrant ", max_quad, "."),
+        paste0(scales::percent(max(prop_agg)), " of the joint posterior distirbution of parameters is in quadrant ", max_quad, "."),
         br(),br(),
         "The dependent variables are: ", paste0(aggregate_outputs$checkGroup_x, collapse = ", "), ".",
         br(),br(),
@@ -298,7 +306,7 @@ shinyServer(function(input, output, session) {
     } else {
       tagList(
         strong("According to the aggregate model, mediation is not present in the sample as proposed."),
-        paste0("This is based on the analysis of the joint posterior of parameters α and ß
+        paste0("This is based on the analysis of the joint posterior of parameters
                           where the largest propotion of the distribution is ", scales::percent(max(prop_agg)), ".")
       )
     }
@@ -403,18 +411,19 @@ shinyServer(function(input, output, session) {
     x_vars <- input$checkGroup_x
     y_var  <- input$radio_y
     m_var  <- input$radio_m
+    z_var  <- input$covariates_z
     Aa_var  <- input$select_Aa
     Abg_var <- input$select_Abg
+    Al_var <- input$select_Al
     nu_var  <- input$select_nu
     qy_var  <- input$select_qy
     qm_var  <- input$select_qm
     R_var    <- input$select_R
     keep_var <- input$select_keep
-    g_var <- input$select_g # only BM
-    
-    inputs_binary <- get_inputs_binary(df(), x_vars, y_var, m_var,
-                                       Aa_var, Abg_var, nu_var, qy_var, qm_var,
-                                       R_var, keep_var, g_var)
+
+    inputs_binary <- get_inputs_binary(df(), x_vars, y_var, m_var, z_var,
+                                       Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
+                                       R_var, keep_var)
     
     return(inputs_binary)
   })
@@ -436,9 +445,12 @@ shinyServer(function(input, output, session) {
     
     model_outputs$output_listBM <- foreach(j = 1:length(all_seeds)) %dopar% {
       tmp_input_list <- update_inputs_binary(my_inputs, seed_var = all_seeds[j])
-      model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_forShinyApp(Data = tmp_input_list$Data,
-                                                                  Prior = tmp_input_list$Prior,
-                                                                  Mcmc  = tmp_input_list$Mcmc)
+      
+      model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
+        Model = 2,
+        Data = tmp_input_list$Data,
+        Prior = tmp_input_list$Prior,
+        Mcmc  = tmp_input_list$Mcmc)
       
       return(model_run)
     }

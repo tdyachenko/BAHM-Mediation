@@ -53,7 +53,7 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
     nu = 5
     qy= c(var(y),var(y))
     qm= c(var(m),var(m))
-    g=3          # this is nu and q for the prior distribution for rho in (52)
+    #g=3          # this is nu and q for the prior distribution for rho in (52)
   } else {
     ma = Prior$ma
     Aa = Prior$Aa
@@ -64,7 +64,7 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
     qm = Prior$qm   # vector (M,G)
     ml =Prior$ml
 	  Al = Prior$Al
-    g=Prior$g      # this is nu and q for the prior distribution for rho in (52)
+    #g=Prior$g      # this is nu and q for the prior distribution for rho in (52)
   }
   
   if (is.null(qy)==T) {  
