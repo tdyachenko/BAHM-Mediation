@@ -343,7 +343,7 @@ shinyServer(function(input, output, session) {
   # generate scatterplots of posterior draws for each parameter
   output_scatterplots <- eventReactive(input$runA, {
       if(is.null(output_listA)) {return(NULL)}
-    save(output_listA, file = "wtf.RData")
+    save(output_listA, file = "aggTest.RData")
       return(FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot(dataset  = "",
                                                                     filename = output_listA,
                                                                     burnin   = aggregate_outputs$select_burnin,
