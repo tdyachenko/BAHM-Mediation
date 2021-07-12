@@ -228,5 +228,5 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
   return(list(alphadraw=alphadraw,betaMdraw=betaMdraw,gammabetaSdraw=gammabetaSdraw,lambdadraw=lambdadraw,
               sigma2mdraw=sigma2mdraw,sigma2ydraw=sigma2ydraw,rhodraw=rhodraw,wdraw=wdraw,LL=LL,LL_total=LL_total,
               slambda1=slambda1,slambda2=slambda2,
-              Aa=Aa,ma=ma, mgb=mgb,Agb=Agb,nu=nu,qy=qy,qm=qm,g=g,Al=Al,ml=ml,R=R,keep=keep,seed=Mcmc$seed,reject=reject))
+              Aa=Aa,ma=ma, mgb=mgb,Agb=Agb,nu=nu,qy=qy,qm=qm,Al=Al,ml=ml,R=R,keep=keep,seed=Mcmc$seed,reject=reject))
 }

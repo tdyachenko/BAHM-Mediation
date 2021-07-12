@@ -21,7 +21,7 @@
 #------(Aggregate model)--------------------------------#
 # prep inputs for aggregate model: returns a list of inputs for Data, Mcmc, Prior
 
-get_inputs_agg <-function(df, x_vars, y_var, m_var, z_var,
+get_inputs_agg <-function(df, x_vars, y_var, m_var, z_vars,
                           Aa_var, Abg_var, nu_var, qm_var, qy_var,
                           R_var, seed_var, keep_var){
   
@@ -75,7 +75,7 @@ get_inputs_agg <-function(df, x_vars, y_var, m_var, z_var,
 #------(BM model)--------------------------------#
 # prep inputs for BM model: returns a list of inputs for Data, Mcmc, Prior
 
-get_inputs_binary <-function(df, x_vars, y_var, m_var, z_var,
+get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
                              Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
                              R_var, keep_var)
 {
