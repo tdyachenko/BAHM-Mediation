@@ -30,6 +30,7 @@ library(doParallel)
 registerDoParallel(min(20, parallel::detectCores() - 1))
 
 source('inputs_helpers.r')
+source('output_helpers.r')
 source('agg_helpers.r')
 source('BM_helpers.r')
 source('BM_Rhat_helpers.r')
@@ -278,9 +279,10 @@ shinyServer(function(input, output, session) {
   
   agg_prop <- reactive({
     if(is.null(output_listA)) {return(NULL)}
-    return(FUN_PDF_Mediation_AlphaBetaProportion_Aggregate_forShiny(filename = output_listA,
-                                                                    x_vars   = aggregate_outputs$checkGroup_x,
-                                                                    burnin   = aggregate_outputs$select_burnin))
+    return(FUN_PDF_Mediation_AlphaBetaProportion_forShiny(model = 1,
+                                                          filename = output_listA,
+                                                          x_vars   = aggregate_outputs$checkGroup_x,
+                                                          burnin   = aggregate_outputs$select_burnin))
   })
   
   output$aggregation_results <- renderUI({
@@ -320,10 +322,13 @@ shinyServer(function(input, output, session) {
 
   # calculate HPD intervals 95%
   output_HDPI_A <- eventReactive(input$runA, { 
-      if(is.null(output_listA)) {return(NULL)}
-    clean_table(FUN_PDF_Mediation_HDPI_Aggregate_forShiny(filename = output_listA,
-                                                      x_vars   = aggregate_outputs$checkGroup_x,
-                                                      burnin   = aggregate_outputs$select_burnin))
+    if(is.null(output_listA)) {return(NULL)}
+    clean_table(FUN_PDF_Mediation_HDPI_forShiny(model=1,
+                                                filename = output_listA,
+                                                x_vars   = aggregate_outputs$checkGroup_x,
+                                                burnin   = aggregate_outputs$select_burnin,
+                                                CIband=0.95) # Need to change to a variable/input 7-13-2021
+                )
   })
 
   # calculate model fit (LMD NR)
@@ -344,10 +349,11 @@ shinyServer(function(input, output, session) {
   output_scatterplots <- eventReactive(input$runA, {
       if(is.null(output_listA)) {return(NULL)}
     save(output_listA, file = "aggTest.RData")
-      return(FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot(dataset  = "",
-                                                                    filename = output_listA,
-                                                                    burnin   = aggregate_outputs$select_burnin,
-                                                                    x_vars   = aggregate_outputs$checkGroup_x))
+      return(FUN_PDF_Mediation_ScatterPlots_forShiny(model=1,
+                                                     dataset  = "",
+                                                     filename = output_listA,
+                                                     burnin   = aggregate_outputs$select_burnin,
+                                                     x_vars   = aggregate_outputs$checkGroup_x))
   })
 
   #--------------- Aggregate: Format Results Page -------------------------------------#  
@@ -371,7 +377,8 @@ shinyServer(function(input, output, session) {
   output$downloadPDF <- downloadHandler(filename=function() { 'posterior_draws_A.pdf'} ,
                                         content= function(file){
                                           pdf(file=file)
-                                          FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot(
+                                          FUN_PDF_Mediation_ScatterPlots_forShiny(
+                                             model==1,
                                              dataset="",
                                              filename=output_listA,
                                              burnin=input$select_burnin,

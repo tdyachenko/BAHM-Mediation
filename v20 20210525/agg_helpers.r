@@ -25,86 +25,80 @@
 
 #---- (Aggregate model Results Page) --------------------------#
 # Proportion of joint (alpha, beta) in each quadrant MULTIX
+#TRANSFERRED TO output_helper (7-13-2021)
 
-FUN_PDF_Mediation_AlphaBetaProportion_Aggregate_forShiny  = function(filename, burnin, x_vars)
-  { 
-  nvarX = ncol(filename$alphadraw) - 1
-  QuadrantsCounts = array(0, dim=c(4, nvarX))
-  DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LL_total), by = 1))
-  pp=pn=np=nn=0
-  for(j in 2:(nvarX+1)){  
-    for(r in DrawsAnalysis){ 
-      pp = pp + ifelse(filename$alphadraw[r,j,1]>0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
-      pn = pn + ifelse(filename$alphadraw[r,j,1]>0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
-      np = np + ifelse(filename$alphadraw[r,j,1]<0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
-      nn = nn + ifelse(filename$alphadraw[r,j,1]<0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
-    }
-    QuadrantsCounts[,(j-1)]=c(pp,pn,np,nn)
-    pp=pn=np=nn=0
-  }
-  Proportions <- QuadrantsCounts/length(DrawsAnalysis)
-  colnames(Proportions) <- x_vars
-  rownames(Proportions) <- c("I (++)","II (+-)","III (-+)","IV (--)")
-  # return(list(Proportions = QuadrantsCounts/length(DrawsAnalysis)))
-  return(Proportions)
-}
+# FUN_PDF_Mediation_AlphaBetaProportion_Aggregate_forShiny  = function(filename, burnin, x_vars)
+#   { 
+#   nvarX = ncol(filename$alphadraw) - 1
+#   QuadrantsCounts = array(0, dim=c(4, nvarX))
+#   DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LL_total), by = 1))
+#   pp=pn=np=nn=0
+#   for(j in 2:(nvarX+1)){  
+#     for(r in DrawsAnalysis){ 
+#       pp = pp + ifelse(filename$alphadraw[r,j,1]>0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+#       pn = pn + ifelse(filename$alphadraw[r,j,1]>0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
+#       np = np + ifelse(filename$alphadraw[r,j,1]<0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+#       nn = nn + ifelse(filename$alphadraw[r,j,1]<0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
+#     }
+#     QuadrantsCounts[,(j-1)]=c(pp,pn,np,nn)
+#     pp=pn=np=nn=0
+#   }
+#   Proportions <- QuadrantsCounts/length(DrawsAnalysis)
+#   colnames(Proportions) <- x_vars
+#   rownames(Proportions) <- c("I (++)","II (+-)","III (-+)","IV (--)")
+#   # return(list(Proportions = QuadrantsCounts/length(DrawsAnalysis)))
+#   return(Proportions)
+# }
 
-#---- (Aggregate model Results Page) --------------------------#
-# Proportion of joint (alpha, beta) in each quadrant MULTIX
-
-FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny  = function(filename, burnin)
-  { outputTable = matrix(round(logMargDenNR(filename$LL_total[-1:-burnin]),2),1,1)
-    rownames(outputTable) <- c("LMD NR")
-    return(outputTable)
-}
 
 #---- (Aggregate model Results Page) --------------------------#
 # HDP MULTIX
+#TRANSFERED TO output_helper 7-13-2021
 
-FUN_PDF_Mediation_HDPI_Aggregate_forShiny  = function(filename, burnin, x_vars)
-  { nvarX = ncol(filename$alphadraw)
-  outputTable = NULL
-  for(j in 1:(nvarX)){  
-    tempa = hdi(filename$alphadraw[-1:-burnin,j,1], credMass = 0.95)
-    outputTable = rbind(outputTable,c(mean(filename$alphadraw[-1:-burnin,j,1]),tempa))
-  }
-  tempb = hdi(filename$betaMdraw[-1:-burnin,1], credMass = 0.95)
-  outputTable = rbind(outputTable,c(mean(filename$betaMdraw[-1:-burnin,1]),tempb))
-  for(j in 1:(nvarX)){  
-    tempg = hdi(filename$gammabetaSdraw[-1:-burnin,j], credMass = 0.95)
-    outputTable = rbind(outputTable,c(mean(filename$gammabetaSdraw[-1:-burnin,j]),tempg))
-  }
-  
-  #data.frame(outputTable)
-  
-  rownames_list = c(rep(0,nrow(outputTable)))
-  rownames_list[1] = "alpha_{0}"
-  rownames_list[nvarX+1] = "beta"
-  rownames_list[nvarX+2] = "gamma_{0}"
-  for(i in 2:(nvarX)) {
-    rownames_list[i]=paste0("alpha_{", i - 1, "}")
-    rownames_list[nvarX+1+i]=paste0("gamma_{", i - 1, "}")
-  }
-  #outputTable = cbind(rownames_list,outputTable)
-  
-  colnames(outputTable) <- c("Mean","Lower limit","Upper limit")
-  
-  # rownames(outputTable) <- rownames_list
-  # colnames(outputTable) <- c("Mean","Lower limit","Upper limit")
-  # rownames_list = c(rep(0,nrow(outputTable)))
-  # rownames_list[1] = bquote(alpha[0]) 
-  # rownames_list[nvarX+1] = paste(expression(beta))
-  # rownames_list[nvarX+2] = paste(expression(gamma[0]))
-  # for(i in 2:(nvarX)) {
-  #   rownames_list[i]=paste(expression(alpha[i-1]))
-  #   rownames_list[nvarX+1+i]=paste(expression(gamma[i-1]))
-  # }
-  rownames(outputTable) <- rownames_list
-  # return(list(Proportions = QuadrantsCounts/length(DrawsAnalysis)))
-  #return(grid.table(outputTable))
-  return(outputTable)
-  #return(htmlTable(outputTable))
-}
+# FUN_PDF_Mediation_HDPI_Aggregate_forShiny  = function(filename, burnin, x_vars)
+#   { nvarX = ncol(filename$alphadraw)
+#   outputTable = NULL
+#   for(j in 1:(nvarX)){  
+#     tempa = hdi(filename$alphadraw[-1:-burnin,j,1], credMass = 0.95)
+#     outputTable = rbind(outputTable,c(mean(filename$alphadraw[-1:-burnin,j,1]),tempa))
+#   }
+#   tempb = hdi(filename$betaMdraw[-1:-burnin,1], credMass = 0.95)
+#   outputTable = rbind(outputTable,c(mean(filename$betaMdraw[-1:-burnin,1]),tempb))
+#   for(j in 1:(nvarX)){  
+#     tempg = hdi(filename$gammabetaSdraw[-1:-burnin,j], credMass = 0.95)
+#     outputTable = rbind(outputTable,c(mean(filename$gammabetaSdraw[-1:-burnin,j]),tempg))
+#   }
+#   
+#   #data.frame(outputTable)
+#   
+#   rownames_list = c(rep(0,nrow(outputTable)))
+#   rownames_list[1] = "alpha_{0}"
+#   rownames_list[nvarX+1] = "beta"
+#   rownames_list[nvarX+2] = "gamma_{0}"
+#   for(i in 2:(nvarX)) {
+#     rownames_list[i]=paste0("alpha_{", i - 1, "}")
+#     rownames_list[nvarX+1+i]=paste0("gamma_{", i - 1, "}")
+#   }
+#   #outputTable = cbind(rownames_list,outputTable)
+#   
+#   colnames(outputTable) <- c("Mean","Lower limit","Upper limit")
+#   
+#   # rownames(outputTable) <- rownames_list
+#   # colnames(outputTable) <- c("Mean","Lower limit","Upper limit")
+#   # rownames_list = c(rep(0,nrow(outputTable)))
+#   # rownames_list[1] = bquote(alpha[0]) 
+#   # rownames_list[nvarX+1] = paste(expression(beta))
+#   # rownames_list[nvarX+2] = paste(expression(gamma[0]))
+#   # for(i in 2:(nvarX)) {
+#   #   rownames_list[i]=paste(expression(alpha[i-1]))
+#   #   rownames_list[nvarX+1+i]=paste(expression(gamma[i-1]))
+#   # }
+#   rownames(outputTable) <- rownames_list
+#   # return(list(Proportions = QuadrantsCounts/length(DrawsAnalysis)))
+#   #return(grid.table(outputTable))
+#   return(outputTable)
+#   #return(htmlTable(outputTable))
+# }
 
 
 #-----(Aggregate model)-----------------------#

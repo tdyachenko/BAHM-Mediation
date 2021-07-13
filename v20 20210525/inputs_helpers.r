@@ -77,11 +77,11 @@ get_inputs_agg <-function(df, x_vars, y_var, m_var, z_vars,
 
 get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
                              Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
-                             R_var, keep_var)
+                             R_var, keep_var, slambda1, slambda2)
 {
   df  = as.matrix(df)
   X   = df[,x_vars]
-  Z   = df[,z_vars]
+  Z   = df[,z_vars]  #### ERIC: If no Z is selected, we should have something here, right? 
   
   nhh = nrow(df)
   y   = df[,y_var]
@@ -105,7 +105,7 @@ get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
                qy  = c(qy_var, qy_var),
                qm  = c(qm_var, qm_var),
   )
-  Mcmc = list(Rep=R_var, keep=keep_var)
+  Mcmc = list(Rep=R_var, keep=keep_var, slambda1=slambda1, slambda2=slambda2)
   
   return(list(Data=Data, Prior=Prior, Mcmc=Mcmc))
 }
@@ -114,4 +114,14 @@ update_inputs_binary <- function(inputs_binary, seed_var) {
   inputs_binary$Mcmc$seed <- seed_var
   
   return(inputs_binary)
+}
+
+
+# --- Generate list of seeds ----------------------------------------------------
+FUN_Mediation_SeedList_ForShiny  = function(seednum_var, seed_var)
+{ set.seed(seed_var)
+  seed.list <- c(sort(round(runif(seednum_var, 0, 10000))))
+  #seed.index <- seq(1, seednum_var, 1)
+  #num_seeds <- length(seed.index)  # should be the same as input$seednum_varalize list
+  return(seed.list)
 }
