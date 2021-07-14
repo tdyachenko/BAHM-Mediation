@@ -84,10 +84,8 @@ shinyServer(function(input, output, session) {
   })
   
   output$checkGroup_x <- renderUI({
-    input$checkGroup_x  # ????
-    print("Selected X")
+    input$covariates_z  # ????
     isolate({
-      print(input$checkGroup_x)
       selectizeInput("checkGroup_x",
                      label    = h5(em("Independent Variables (X). Select all that apply. You must select at least one.")), 
                      choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$covariates_z)),
@@ -102,10 +100,8 @@ shinyServer(function(input, output, session) {
   # NEED to have some warning pop up to not proceed unless y,m, and at least one x is selected
   
   output$covariates_z <- renderUI({
-    input$covariates_z # ????
+    input$checkGroup_x # ????
     isolate({
-      print("Selected Covariates")
-      print(input$covariates_z)
       selectizeInput("covariates",
                      label    = h5(em("Covariates. Select all that apply. Leave 'None' if covariates are not inlcuded in the analysis")), 
                      choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$checkGroup_x)),
@@ -430,7 +426,7 @@ shinyServer(function(input, output, session) {
 
     inputs_binary <- get_inputs_binary(df(), x_vars, y_var, m_var, z_var,
                                        Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
-                                       R_var, keep_var)
+                                       R_var, keep_var, 1, 1)
     
     return(inputs_binary)
   })

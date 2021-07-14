@@ -103,7 +103,7 @@ get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
                Al = Al_var * diag(nvarZ+1), #"input Al parameter, default is 0.01"
                nu  = nu_var,
                qy  = c(qy_var, qy_var),
-               qm  = c(qm_var, qm_var),
+               qm  = c(qm_var, qm_var)
   )
   Mcmc = list(Rep=R_var, keep=keep_var, slambda1=slambda1, slambda2=slambda2)
   
