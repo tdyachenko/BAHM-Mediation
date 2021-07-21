@@ -100,7 +100,7 @@ dashboardPage(
                         solidHeader = FALSE,
                         title = "Table: Raw Data",
                         status = "primary",
-                        tableOutput("Raw_table")
+                        dataTableOutput("Raw_table")
                         )
             #)
                    #)

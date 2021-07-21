@@ -85,6 +85,7 @@ shinyServer(function(input, output, session) {
   
   output$checkGroup_x <- renderUI({
     input$covariates_z  # ????
+    df()
     isolate({
       selectizeInput("checkGroup_x",
                      label    = h5(em("Independent Variables (X). Select all that apply. You must select at least one.")), 
@@ -101,6 +102,7 @@ shinyServer(function(input, output, session) {
   
   output$covariates_z <- renderUI({
     input$checkGroup_x # ????
+    df()
     isolate({
       selectizeInput("covariates",
                      label    = h5(em("Covariates. Select all that apply. Leave 'None' if covariates are not inlcuded in the analysis")), 
@@ -194,9 +196,9 @@ shinyServer(function(input, output, session) {
 
   #------------------ show Raw data ----------------------------------#
   # 2. render Raw Data inFile_table "Input" table
-  output$Raw_table <- renderTable({
+  output$Raw_table <- renderDataTable({
     df()
-  })
+  }, options = list(scrollX = TRUE))
   
   output$keepAlive <- renderText({
       req(input$count)
