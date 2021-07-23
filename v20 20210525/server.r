@@ -184,6 +184,7 @@ shinyServer(function(input, output, session) {
   outputOptions(output, 'covariates_z', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_Aa', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_Abg', suspendWhenHidden=FALSE)
+  outputOptions(output, 'select_Al', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_nu', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_qy', suspendWhenHidden=FALSE)
   outputOptions(output, 'select_qm', suspendWhenHidden=FALSE)
@@ -259,16 +260,12 @@ shinyServer(function(input, output, session) {
     aggregate_outputs$checkGroup_x <- input$checkGroup_x
     aggregate_outputs$select_burnin <- input$select_burnin
     
-    x <- input_listA()
-    save(x, file = "x.RData")
-      
       output_listA <<- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
         Model = 1,
         Data  = input_listA()$Data,
         Prior = input_listA()$Prior,
         Mcmc  = input_listA()$Mcmc)
       
-      save(output_listA, file = "test.RData")
       print(aggregate_outputs$checkGroup_x)
       print(aggregate_outputs$covariates_z)
       print(aggregate_outputs$select_burnin)
@@ -346,7 +343,6 @@ shinyServer(function(input, output, session) {
   # generate scatterplots of posterior draws for each parameter
   output_scatterplots <- eventReactive(input$runA, {
       if(is.null(output_listA)) {return(NULL)}
-    save(output_listA, file = "aggTest.RData")
       return(FUN_PDF_Mediation_ScatterPlots_forShiny(model=1,
                                                      dataset  = "",
                                                      filename = output_listA,
@@ -450,7 +446,6 @@ shinyServer(function(input, output, session) {
     
     model_outputs$output_listBM <- foreach(j = 1:length(all_seeds)) %dopar% {
       tmp_input_list <- update_inputs_binary(my_inputs, seed_var = all_seeds[j])
-      
       model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
         Model = 2,
         Data = tmp_input_list$Data,
