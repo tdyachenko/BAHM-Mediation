@@ -129,9 +129,13 @@ shinyServer(function(input, output, session) {
     numericInput("select_nu", label = NULL, value = 5, step=1)
   })
   output$select_qy <- renderUI({
+    if (is.null(input$radio_y) || !(input$radio_y %in% names(df()))) return(NULL)
+    
     numericInput("select_qy", label = NULL, value = round(var(df()[,input$radio_y]), 3), step = 0.5)
   })
   output$select_qm <- renderUI({
+    if (is.null(input$radio_m) || !(input$radio_m %in% names(df()))) return(NULL)
+    
     numericInput("select_qm", label = NULL, value = round(var(df()[,input$radio_m]), 3), step = 0.5)
   })
  
