@@ -448,7 +448,7 @@ shinyServer(function(input, output, session) {
     all_seeds <- seed_list()
     my_inputs <- model_inputs$inputs
     
-    model_outputs$output_listBM <- foreach(j = 1:length(all_seeds)) %dopar% {
+    model_outputs$output_listBM <- foreach(j = 1:length(all_seeds), .export = ls(globalenv())) %dopar% {
       tmp_input_list <- update_inputs_binary(my_inputs, seed_var = all_seeds[j])
       model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
         Model = 2,
