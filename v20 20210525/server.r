@@ -201,7 +201,7 @@ shinyServer(function(input, output, session) {
 
   #------------------ show Raw data ----------------------------------#
   # 2. render Raw Data inFile_table "Input" table
-  output$Raw_table <- renderDataTable({
+  output$Raw_table <- DT::renderDataTable({
     df()
   }, options = list(scrollX = TRUE))
   

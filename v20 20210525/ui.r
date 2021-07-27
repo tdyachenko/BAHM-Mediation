@@ -12,6 +12,7 @@ library(shiny)
 library(shinyWidgets)
 library(shinydashboard)
 library(shinycssloaders)
+library(DT)
 
 ketex_js <- " 
 $(document).on('shiny:value', function(event) {
@@ -100,7 +101,7 @@ dashboardPage(
                         solidHeader = FALSE,
                         title = "Table: Raw Data",
                         status = "primary",
-                        dataTableOutput("Raw_table")
+                        DT::dataTableOutput("Raw_table")
                         )
             #)
                    #)
