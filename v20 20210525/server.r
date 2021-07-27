@@ -128,7 +128,7 @@ shinyServer(function(input, output, session) {
   output$select_nu <- renderUI({
     numericInput("select_nu", label = NULL, value = 5, step=1)
   })
-  output$select_qy <- renderUI({
+    output$select_qy <- renderUI({
     if (is.null(input$radio_y) || !(input$radio_y %in% names(df()))) return(NULL)
     
     numericInput("select_qy", label = NULL, value = round(var(df()[,input$radio_y]), 3), step = 0.5)
@@ -161,8 +161,10 @@ shinyServer(function(input, output, session) {
                  value = round(input$select_R/20,0), step=1)
   })
   output$select_seednum <- renderUI({
-    numericInput("select_seednum", label=NULL, 
-                 value = 10, step=1)
+    numericInput("select_seednum", label=NULL,   value = 10, step=1)
+  })
+  output$select_slambda <- renderUI({
+    numericInput("select_slambda", label = NULL, value = 0.5, step=0.01)
   })
 
   output$ySelection <- renderText({
@@ -197,6 +199,7 @@ shinyServer(function(input, output, session) {
   outputOptions(output, "select_keep", suspendWhenHidden=FALSE)
   outputOptions(output, "select_burnin", suspendWhenHidden=FALSE)
   outputOptions(output, "select_seednum", suspendWhenHidden=FALSE)
+  outputOptions(output, "select_slambda", suspendWhenHidden=FALSE)
 
 
   #------------------ show Raw data ----------------------------------#
@@ -240,6 +243,7 @@ shinyServer(function(input, output, session) {
     seed_var <- input$select_seed
     seednum_var <- input$select_seednum
     keep_var <- input$select_keep
+    slambda_var <- input$select_slambda
     
     numx_vars <<- length(input$checkGroup_x)
 
@@ -425,10 +429,11 @@ shinyServer(function(input, output, session) {
     qm_var  <- input$select_qm
     R_var    <- input$select_R
     keep_var <- input$select_keep
+    slambda_var <- input$select_slambda
 
     inputs_binary <- get_inputs_binary(df(), x_vars, y_var, m_var, z_var,
                                        Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
-                                       R_var, keep_var, 1, 1)
+                                       R_var, keep_var, slambda_var, slambda_var)
     
     return(inputs_binary)
   })
@@ -465,7 +470,7 @@ shinyServer(function(input, output, session) {
   model_mediation <- reactive({
     if (is.null(model_results())) return(NULL)
     
-    model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS(model_results(),
+    model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(model_results(),
                                                  seed.index = seed_index(),
                                                  burnin   = model_inputs$burnin,
                                                  RhatCutoff   = 1.05)
@@ -699,7 +704,7 @@ shinyServer(function(input, output, session) {
     output_MCMC_BM <- reactive({
       if (is.null(model_mediation())) return(NULL)
       
-      FUN_PDF_MCMC_Mediation_forShiny(dataset  = "",
+      FUN_PDF_MCMC_Mediation_forShiny(model = 2, dataset  = "",
                                       filenamelist = model_outputs$output_listBM,
                                       seed.list = seed_list(),
                                       seed.index = seed_index(),

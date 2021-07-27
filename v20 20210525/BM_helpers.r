@@ -39,39 +39,6 @@
 
 # TRANSFERRED TO output_helper (7-21-2021 TD)
 # FUN_PDF_MCMC_Mediation_forShiny = function(dataset,filenamelist,seed.index,seed.list,burnin)
-# {  #pdf(paste(dataset,"MCMC for BM model", ".pdf", sep = ""), width=20, height=10)
-#    #plot.new()
-#    par(oma=c(0,0,2,0));   par(mfcol=c(8,length(seed.index)),mai = c(0.5, 0.3, 0.4, 0.3))
-#    filename = filenamelist[[1]]
-#    ylimAm=ylimAs = c( min(filename$alphadraw[-1:-burnin,,])-0.1*min(filename$alphadraw[-1:-burnin,,]),
-#                       max(filename$alphadraw[-1:-burnin,,])+0.1*max(filename$alphadraw[-1:-burnin,,]))
-#    ylimGBs = c( min(filename$gammabetaSdraw[-1:-burnin,])-0.1*min(filename$gammabetaSdraw[-1:-burnin,]),
-#                 max(filename$gammabetaSdraw[-1:-burnin,])+0.1*max(filename$gammabetaSdraw[-1:-burnin,]))
-#    ylimBm =  c( min(filename$betaMdraw[-1:-burnin,])-0.1*min(filename$betaMdraw[-1:-burnin,]),
-#                 max(filename$betaMdraw[-1:-burnin,])+0.1*max(filename$betaMdraw[-1:-burnin,]))
-#    ysigma =  c( min(c(filename$sigma2mdraw[-1:-burnin,],filename$sigma2ydraw[-1:-burnin,]))-
-#                   0.1*min(c(filename$sigma2mdraw[-1:-burnin,],filename$sigma2ydraw[-1:-burnin,])),
-#                 max(c(filename$sigma2mdraw[-1:-burnin,],filename$sigma2ydraw[-1:-burnin,]))+
-#                   0.1*max(c(filename$sigma2mdraw[-1:-burnin,],filename$sigma2ydraw[-1:-burnin,])))
-#    ylimLL =  c( min(filename$LL_total[-1:-2])-0.1*min(filename$LL_total[-1:-2]),  # used burnin before
-#                 max(filename$LL_total[-1:-2])+0.1*max(filename$LL_total[-1:-2]))
-#    for( i in seed.index)
-#    { filename = filenamelist[[i]]
-#      matplot(filename$alphadraw[,,1],type='l',col=1:8,main=expression(alpha[M]),ylab=expression(alpha[M]),ylim=ylimAm);
-#      matplot(filename$alphadraw[,,2],type='l',col=1:8,main=expression(alpha[S]),ylab=expression(alpha[S]),ylim=ylimAs);
-#      matplot(filename$betaMdraw,type='l',col=1:3,main=expression(beta[M]),ylab=expression(beta[M]),ylim=ylimBm);
-#      matplot(filename$gammabetaSdraw,type='l',col=1:8,main=expression(gamma[S],beta[S]),ylab=expression(gamma[S],beta[S]),ylim=ylimGBs);
-#      matplot(filename$sigma2mdraw,type='l',col=1:4,main=expression(sigma[m]^2),ylab=expression(sigma[m]^2),ylim=ysigma);
-#      matplot(filename$sigma2ydraw,type='l',col=1:4,main=expression(sigma[y]^2),ylab=expression(sigma[y]^2),ylim=ysigma);
-#      matplot(filename$rhodraw,type='l',col=1:3,main=expression(rho),ylab=expression(rho),ylim=c(0,1));
-#      plot(filename$LL_total,type='l',col=1,main="LL",ylab="LL",ylim=ylimLL)
-#    }
-#    #title(main=paste(dataset),outer=T)
-#    #pdf(paste("plot", j, ".pdf", sep = ""),width=20, height=10)
-#   # dev.off()
-# }
-
-
 
 #---- (Mixture MS) Proportion of joint (alpha, beta) in each quadrant for both M and S segments MULTIX ---------------------------------------------------------------------------------
 # this ONLY runs for ONE BEST seed, which will be taken from the results of RHat function

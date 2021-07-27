@@ -17,14 +17,14 @@
 
 # TO DO (TD - 20200228): automatically find MCMC chains that did not converge to one mode and eliminate them from analysis
 
-FUN_Mediation_LMD_RHat_MS = function(datafile,seed.index,burnin,RhatCutoff)
+FUN_Mediation_LMD_RHat_MS_cov = function(datafile,seed.index,burnin,RhatCutoff)
 { 
   nseeds = length(seed.index)
   table01 = permutations(2,nseeds,c(1,0),repeats=TRUE)  # table of all possible combinations of the seeds as groups in two groups
   table01 = table01[-which(rowSums(table01)<2),]        # only select permutations with 2 or more members in each group
   table01 = table01[-which(rowSums(table01)==(nseeds-1)),]        # only select permutationa with 2 or more members in each group
   sumindex = as.numeric(apply(table01,1,paste,collapse=""))
-  R = length(datafile[[1]]$rhodraw)
+  R = length(datafile[[1]]$wdraw[1,])
   LMD= c(rep(0,nseeds))
   listfromdata = list()  # generate list for gelman.diag function
   r=1
