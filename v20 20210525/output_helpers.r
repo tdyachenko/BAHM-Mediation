@@ -211,7 +211,7 @@ FUN_PDF_MCMC_Mediation_forShiny = function(model,dataset,filenamelist,seed.index
      matplot(filename$gammabetaSdraw,type='l',col=1:8,main=expression(gamma[S],beta[S]),ylab=expression(gamma[S],beta[S]),ylim=ylimGBs);
      matplot(filename$sigma2mdraw,type='l',col=1:4,main=expression(sigma[m]^2),ylab=expression(sigma[m]^2),ylim=ysigma);
      matplot(filename$sigma2ydraw,type='l',col=1:4,main=expression(sigma[y]^2),ylab=expression(sigma[y]^2),ylim=ysigma);
-     matplot(filename$lambdadraw,type='l',col=1:3,main=expression(lambda),ylab=expression(lambda),ylim=ylimL);
+     matplot(filename$lambdadraw,type='l',col=1:3,main=expression(lambda),ylab=expression(lambda),ylim=ylimLL);
      plot(filename$LL_total,type='l',col=1,main="LL",ylab="LL",ylim=ylimLL)
    }
    #title(main=paste(dataset),outer=T)
