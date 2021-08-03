@@ -11,7 +11,6 @@
 library(shiny)
 library(shinyWidgets)
 library(shinydashboard)
-library(shinycssloaders)
 library(DT)
 
 ketex_js <- " 
@@ -210,7 +209,7 @@ dashboardPage(
                       solidHeader = TRUE,
                       title = "Results",
                       status = "primary",
-                      withSpinner(type = 8, uiOutput("aggregation_results"))
+                      uiOutput("aggregation_results")
                   ), 
                   box(width=NULL,
                       solidHeader = FALSE,
@@ -289,7 +288,7 @@ dashboardPage(
                           title = "Results (Estimation may take 5-10 minutes)",
                           status = "primary",
                           solidHeader = TRUE,
-                          withSpinner(type = 8, uiOutput("mediation_result"))
+                          uiOutput("mediation_result")
                       ),
                       box(width=NULL,
                           solidHeader = FALSE,

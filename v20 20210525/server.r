@@ -13,21 +13,19 @@ library('bayesm')
 library('HDInterval')
 library('coda')
 library('gtools')
-library(doFuture)
 library(dplyr)
 library(readr)
 library(DT)
+library(future)
+library(promises)
+library(ipc)
+library(future.callr)
+library(future.apply)
 
-#registerDoFuture()
-#plan(multiprocess, workers = min(1, parallel::detectCores() - 1))
-#plan(multicore, workers = min(20, parallel::detectCores() - 1))
-#options(future.fork.enable = TRUE)
-#plan(multisession)
-#nbrOfWorkers()
-
-library(foreach)
-library(doParallel)  
-registerDoParallel(min(20, parallel::detectCores() - 1))
+plan(list(
+  tweak(callr, workers = max(1, availableCores() %/% 4)),
+  tweak(multisession, workers = max(1, availableCores() %/% 2))
+))
 
 source('inputs_helpers.r')
 source('output_helpers.r')
@@ -40,11 +38,11 @@ source("FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R")
 sample_df <- read.csv("sample_data_Loyalty.csv")
 
 shinyServer(function(input, output, session) {
-
+  
   # load helper functions
   
-
-
+  
+  
   #------------------------- get data --------------------------------#
   # 1. define df - the reactive function is explained here: 
   # https://shiny.rstudio.com/tutorial/written-tutorial/lesson6/
@@ -128,7 +126,7 @@ shinyServer(function(input, output, session) {
   output$select_nu <- renderUI({
     numericInput("select_nu", label = NULL, value = 5, step=1)
   })
-    output$select_qy <- renderUI({
+  output$select_qy <- renderUI({
     if (is.null(input$radio_y) || !(input$radio_y %in% names(df()))) return(NULL)
     
     numericInput("select_qy", label = NULL, value = round(var(df()[,input$radio_y]), 3), step = 0.5)
@@ -138,7 +136,7 @@ shinyServer(function(input, output, session) {
     
     numericInput("select_qm", label = NULL, value = round(var(df()[,input$radio_m]), 3), step = 0.5)
   })
- 
+  
   # MCMC
   output$select_R <- renderUI({
     #numericInput("select_R", label=("R (# of draws)"), value = 10000, step=100)
@@ -147,7 +145,7 @@ shinyServer(function(input, output, session) {
   output$select_seed <- renderUI({
     #numericInput("select_seed", label=('Random seed/starting value'), value = 123, step=1)
     numericInput("select_seed", label=NULL, #value = round(runif(1,0,10^5)))
-                                             value = 12345                   )  # FOR TESTING ONLY
+                 value = 12345                   )  # FOR TESTING ONLY
   })
   
   output$select_keep <- renderUI({
@@ -166,7 +164,7 @@ shinyServer(function(input, output, session) {
   output$select_slambda <- renderUI({
     numericInput("select_slambda", label = NULL, value = 0.5, step=0.01)
   })
-
+  
   output$ySelection <- renderText({
     paste0('Dependent Variable: ', input$radio_y)
   })
@@ -200,8 +198,8 @@ shinyServer(function(input, output, session) {
   outputOptions(output, "select_burnin", suspendWhenHidden=FALSE)
   outputOptions(output, "select_seednum", suspendWhenHidden=FALSE)
   outputOptions(output, "select_slambda", suspendWhenHidden=FALSE)
-
-
+  
+  
   #------------------ show Raw data ----------------------------------#
   # 2. render Raw Data inFile_table "Input" table
   output$Raw_table <- DT::renderDataTable({
@@ -209,17 +207,17 @@ shinyServer(function(input, output, session) {
   }, options = list(scrollX = TRUE))
   
   output$keepAlive <- renderText({
-      req(input$count)
-      paste("keep alive ", input$count)
+    req(input$count)
+    paste("keep alive ", input$count)
   })
   
   #------------------ User Selected Inputs ----------------------------------#
   # 3. Define Model Inputs and Display in Inputs tab
-
+  
   # calculate inputs only when Run Model button is clicked.
   # ref: https://shiny.rstudio.com/articles/action-buttons.html
-  input_listA <- eventReactive(input$runA, {
-
+  input_listA <- reactive({
+    
     #req(input$select_R)
     #req(input$select_seed)
     #req(input$select_keep)
@@ -230,7 +228,7 @@ shinyServer(function(input, output, session) {
     y_var  <- input$radio_y
     m_var  <- input$radio_m
     z_var  <- input$covariates_z   # not used in aggregate model but might need it later
-
+    
     # Priors
     Aa_var  <- input$select_Aa
     Abg_var <- input$select_Abg
@@ -246,50 +244,73 @@ shinyServer(function(input, output, session) {
     slambda_var <- input$select_slambda
     
     numx_vars <<- length(input$checkGroup_x)
-
+    
     return(get_inputs_agg(df(), 
-                            x_vars, y_var, m_var, z_var, # Data
-                            Aa_var, Abg_var, nu_var, qy_var, qm_var, #Priors
-                            R_var, seed_var, keep_var)) # MCMC
-  
+                          x_vars, y_var, m_var, z_var, # Data
+                          Aa_var, Abg_var, nu_var, qy_var, qm_var, #Priors
+                          R_var, seed_var, keep_var)) # MCMC
+    
   })
   
   #-------------------- Aggregate: Run Model ---------------------------------------#
   #  Run Aggregate Model! 
-
-  # add progress bar https://shiny.rstudio.com/articles/progress.html
-
-  output_listA <- NULL
-  makeReactiveBinding("output_listA")
   
-  aggregate_outputs <- reactiveValues(checkGroup_x = NULL, select_burnin = NULL)
-
-  observeEvent(input$runA, {
-    aggregate_outputs$checkGroup_x <- input$checkGroup_x
-    aggregate_outputs$select_burnin <- input$select_burnin
+  # add progress bar https://shiny.rstudio.com/articles/progress.html
+  aggregate_outputs <- reactiveValues(checkGroup_x = NULL, select_burnin = NULL, output_listA = NULL)
+  
+  parallel_compute_A <- function(model_data, model_prior, model_mcmc, progress) {
+    progress$inc(amount = 1)
+    progress$set(message = paste0("Beginning model fitting."))
     
-      output_listA <<- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
-        Model = 1,
-        Data  = input_listA()$Data,
-        Prior = input_listA()$Prior,
-        Mcmc  = input_listA()$Mcmc)
-      
-      print(aggregate_outputs$checkGroup_x)
-      print(aggregate_outputs$covariates_z)
-      print(aggregate_outputs$select_burnin)
-      
+    model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
+      Model = 1,
+      Data  = model_data,
+      Prior = model_prior,
+      Mcmc  = model_mcmc)
+    
+    progress$inc(amount = 2)
+    progress$set(message = paste0("Beginning model post-processing..."))
+    
+    return(model_run)
+  }
+  
+  observeEvent(input$runA, {
+    aggregate_outputs$checkGroup_x <<- input$checkGroup_x
+    aggregate_outputs$select_burnin <<- input$select_burnin
+    
+    model_data <- input_listA()$Data
+    model_prior <- input_listA()$Prior
+    model_mcmc <- input_listA()$Mcmc
+    
+    progress <- AsyncProgress$new(session, min = 1, max = 4, message = "Beginning Model Estimation", detail = "This may take several minutes...")
+    
+    my_future <- future_promise({
+      parallel_compute_A(model_data, model_prior, model_mcmc, progress)
+    }, seed=TRUE)
+    
+    then(
+      my_future,
+      onFulfilled = function(value) {
+        progress$close()
+        
+        aggregate_outputs$output_listA <<- value
+      },
+      onRejected = NULL
+    )
+    
+    return(NULL)
   })
   
   agg_prop <- reactive({
-    if(is.null(output_listA)) {return(NULL)}
+    if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
     return(FUN_PDF_Mediation_AlphaBetaProportion_forShiny(model = 1,
-                                                          filename = output_listA,
+                                                          filename = aggregate_outputs$output_listA,
                                                           x_vars   = aggregate_outputs$checkGroup_x,
                                                           burnin   = aggregate_outputs$select_burnin))
   })
   
   output$aggregation_results <- renderUI({
-    if (is.null(output_listA)) {
+    if (is.null(aggregate_outputs$output_listA)) {
       return(HTML("Click Run Aggregate Model to Begin!"))
     }
     
@@ -318,27 +339,27 @@ shinyServer(function(input, output, session) {
   })
   
   # calculate proportion of posterior draws in each quadrant
-  output_proportions <- eventReactive(input$runA, {
-      return(agg_prop())
+  output_proportions <- reactive({
+    return(agg_prop())
   })
   
-
+  
   # calculate HPD intervals 95%
-  output_HDPI_A <- eventReactive(input$runA, { 
-    if(is.null(output_listA)) {return(NULL)}
+  output_HDPI_A <- reactive({ 
+    if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
     clean_table(FUN_PDF_Mediation_HDPI_forShiny(model=1,
-                                                filename = output_listA,
+                                                filename = aggregate_outputs$output_listA,
                                                 x_vars   = aggregate_outputs$checkGroup_x,
                                                 burnin   = aggregate_outputs$select_burnin,
                                                 CIband=0.95) # Need to change to a variable/input 7-13-2021
-                )
+    )
   })
-
+  
   # calculate model fit (LMD NR)
-  output_fitLMD <- eventReactive(input$runA, { 
-     if(is.null(output_listA)) {return(NULL)}
-     return(FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny(filename = output_listA,
-                                                        burnin   = aggregate_outputs$select_burnin))
+  output_fitLMD <- reactive({ 
+    if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
+    return(FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny(filename = aggregate_outputs$output_listA,
+                                                       burnin   = aggregate_outputs$select_burnin))
   })
   
   plotCountA <- reactive({
@@ -349,17 +370,17 @@ shinyServer(function(input, output, session) {
   plotHeightA <- reactive(350 * max(plotCountA(), 2))
   
   # generate scatterplots of posterior draws for each parameter
-  output_scatterplots <- eventReactive(input$runA, {
-      if(is.null(output_listA)) {return(NULL)}
-      return(FUN_PDF_Mediation_ScatterPlots_forShiny(model=1,
-                                                     dataset  = "",
-                                                     filename = output_listA,
-                                                     burnin   = aggregate_outputs$select_burnin,
-                                                     x_vars   = aggregate_outputs$checkGroup_x))
+  output_scatterplots <- reactive({
+    if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
+    return(FUN_PDF_Mediation_ScatterPlots_forShiny(model=1,
+                                                   dataset  = "",
+                                                   filename = aggregate_outputs$output_listA,
+                                                   burnin   = aggregate_outputs$select_burnin,
+                                                   x_vars   = aggregate_outputs$checkGroup_x))
   })
-
+  
   #--------------- Aggregate: Format Results Page -------------------------------------#  
-      
+  
   output$plotA <- renderPlot({
     if (is.null(output_scatterplots())) return(NULL)
     
@@ -380,15 +401,15 @@ shinyServer(function(input, output, session) {
                                         content= function(file){
                                           pdf(file=file)
                                           FUN_PDF_Mediation_ScatterPlots_forShiny(
-                                             model==1,
-                                             dataset="",
-                                             filename=output_listA,
-                                             burnin=input$select_burnin,
-                                             x_vars = aggregate_outputs$checkGroup_x
-                                           )
-                                           dev.off()
-                                         })
-      
+                                            model==1,
+                                            dataset="",
+                                            filename=aggregate_outputs$output_listA,
+                                            burnin=input$select_burnin,
+                                            x_vars = aggregate_outputs$checkGroup_x
+                                          )
+                                          dev.off()
+                                        })
+  
   
   # print model fit
   output$fitA <- renderTable(expr = output_fitLMD(), 
@@ -396,19 +417,19 @@ shinyServer(function(input, output, session) {
   
   # print HDPI of posterior draws
   output$hdpiA_tbl <- renderTable(expr=output_HDPI_A(), colnames=TRUE, bordered=TRUE) 
-
-
+  
+  
   ###############
   #  FIX the rownames
   ###############
-
+  
   # print proportions of posterior draws by quadrant
   output$proportionsA <- renderTable(expr = output_proportions(), 
-                                    rownames=TRUE, colnames=TRUE, bordered=TRUE)
-
- 
-      
-#-------------------- Binary: Run Model ---------------------------------------#
+                                     rownames=TRUE, colnames=TRUE, bordered=TRUE)
+  
+  
+  
+  #-------------------- Binary: Run Model ---------------------------------------#
   
   # Store outputs for the model as reactive values
   model_inputs <- reactiveValues(inputs = NULL, burnin = NULL, checkGroup_x = NULL)
@@ -430,7 +451,7 @@ shinyServer(function(input, output, session) {
     R_var    <- input$select_R
     keep_var <- input$select_keep
     slambda_var <- input$select_slambda
-
+    
     inputs_binary <- get_inputs_binary(df(), x_vars, y_var, m_var, z_var,
                                        Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
                                        R_var, keep_var, slambda_var, slambda_var)
@@ -439,8 +460,8 @@ shinyServer(function(input, output, session) {
   })
   
   seed_list <- reactive({
-       FUN_Mediation_SeedList_ForShiny(seednum_var = input$select_seednum,
-                                       seed_var = input$select_seed)
+    FUN_Mediation_SeedList_ForShiny(seednum_var = input$select_seednum,
+                                    seed_var = input$select_seed)
   })
   
   seed_index <- reactive({
@@ -448,21 +469,7 @@ shinyServer(function(input, output, session) {
   })
   
   model_results <- reactive({
-    if (is.null(model_inputs$inputs)) return(NULL)
-    
-    all_seeds <- seed_list()
-    my_inputs <- model_inputs$inputs
-    
-    model_outputs$output_listBM <- foreach(j = 1:length(all_seeds), .export = ls(globalenv())) %dopar% {
-      tmp_input_list <- update_inputs_binary(my_inputs, seed_var = all_seeds[j])
-      model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
-        Model = 2,
-        Data = tmp_input_list$Data,
-        Prior = tmp_input_list$Prior,
-        Mcmc  = tmp_input_list$Mcmc)
-      
-      return(model_run)
-    }
+    if (is.null(model_outputs$output_listBM)) return(NULL)
     
     return(model_outputs$output_listBM)
   })
@@ -471,19 +478,66 @@ shinyServer(function(input, output, session) {
     if (is.null(model_results())) return(NULL)
     
     model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(model_results(),
-                                                 seed.index = seed_index(),
-                                                 burnin   = model_inputs$burnin,
-                                                 RhatCutoff   = 1.05)
+                                                                     seed.index = seed_index(),
+                                                                     burnin   = model_inputs$burnin,
+                                                                     RhatCutoff   = 1.05)
     
     model_outputs$best.seed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
     
     return(model_outputs$output_RhatcalcBM)
   })
-   
+  
+  parallel_compute <- function(all_seeds, my_inputs, progress) {
+    progress$set(message = "Beginning parallel computation")
+    
+    x <- future_lapply(1:length(all_seeds), function(j) {
+      tmp_input_list <- update_inputs_binary(my_inputs, seed_var = all_seeds[j])
+      
+      progress$inc(amount = .25)
+      progress$set(message = paste0("Seed ", j, " Inputs Created."))
+      
+      model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
+        Model = 2,
+        Data = tmp_input_list$Data,
+        Prior = tmp_input_list$Prior,
+        Mcmc  = tmp_input_list$Mcmc)
+      
+      progress$inc(amount = .25)
+      progress$set(message = paste0("Seed ", j, " Model Complete."))
+      
+      return(model_run)
+    }, future.seed=TRUE)
+    
+    progress$set(message = paste0("Beginning model post-processing..."))
+    
+    return(x)
+  }
+  
   observeEvent(input$runBM, {
-      model_inputs$inputs <- my_inputs()
-      model_inputs$checkGroup_x <- input$checkGroup_x
-      model_inputs$burnin <- input$select_burnin
+    model_inputs$inputs <- my_inputs()
+    model_inputs$checkGroup_x <- input$checkGroup_x
+    model_inputs$burnin <- input$select_burnin
+    
+    all_seeds <- seed_list()
+    my_inputs <- model_inputs$inputs
+    
+    progress <- AsyncProgress$new(session, min = 1, max = length(all_seeds), message = "Beginning Model Estimation", detail = "This may take several minutes...")
+    
+    my_future <- future_promise({
+      parallel_compute(all_seeds, my_inputs, progress)
+    }, seed=TRUE)
+    
+    then(
+      my_future,
+      onFulfilled = function(value) {
+        model_outputs$output_listBM <<- value
+        
+        progress$close()
+      },
+      onRejected = NULL
+    )
+    
+    return(NULL)
   })
   
   # download button for csv
@@ -507,6 +561,8 @@ shinyServer(function(input, output, session) {
   output$mediation_result <- renderUI({
     if (is.null(model_inputs$inputs)) {
       return(HTML("Click Run Heterogeneous (BM) Model to Begin!"))
+    } else if (is.null(output_proportionsBM())) {
+      return(HTML("Model is now executing, please wait..."))
     }
     
     prop_bm <- output_proportionsBM()[,-1] %>% as_tibble() %>% mutate_all(parse_number) %>% as.matrix()
@@ -514,7 +570,7 @@ shinyServer(function(input, output, session) {
     maxloc <- which.max(prop_bm)
     colnum <- maxloc %/% 4 + 1
     max_quad <- rownames(prop_bm)[maxloc %% 4]
-
+    
     if (any(prop_bm >= .95)) {
       ## Mediation
       
@@ -543,66 +599,66 @@ shinyServer(function(input, output, session) {
     }
   })
   
-   # print Rhat metrics
-   output$test  <- renderTable({
-     model_outputs$output_RhatcalcBM$table_forShiny
-   }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
-   output$RhatEst  <- renderTable({
-     model_outputs$output_RhatcalcBM$RhatEst
-   }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
-     
+  # print Rhat metrics
+  output$test  <- renderTable({
+    model_outputs$output_RhatcalcBM$table_forShiny
+  }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
+  output$RhatEst  <- renderTable({
+    model_outputs$output_RhatcalcBM$RhatEst
+  }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
+  
   
   # select the solution to display
   
   #----------------------------------------------------  
   # calculate HPD intervals 95% for the BEST seed
-   
-   clean_table <- function(tbl) {
-     if (!is.list(tbl)) tbl <- list(tbl)
-     
-     lapply(tbl, function(x) {
-       mystr <- gsub("(alpha|beta|gamma|alpha|rho)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
-       y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr) %>% select(Parameter, everything())
-       
-       return(y)
-     })
-   }
-
+  
+  clean_table <- function(tbl) {
+    if (!is.list(tbl)) tbl <- list(tbl)
+    
+    lapply(tbl, function(x) {
+      mystr <- gsub("(alpha|beta|gamma|alpha|rho)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
+      y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr) %>% select(Parameter, everything())
+      
+      return(y)
+    })
+  }
+  
   output_HDPI <- reactive({
     if (is.null(model_mediation())) return(list(NULL, NULL, NULL))
     
     clean_table(FUN_PDF_Mediation_Parameters_MSmixture_forShiny(model_outputs$output_listBM,
-                                                   seed.list=model_outputs$best.seed,  
-                                                   burnin   = model_inputs$burnin))
+                                                                seed.list=model_outputs$best.seed,  
+                                                                burnin   = model_inputs$burnin))
   })
-
+  
   output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   # display ON SCREEN all non-rho HDPIs
   output$hdpiBM_M_tbl <- renderTable(expr = output_HDPI()[[1]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   output$hdpiBM_S_tbl <- renderTable(expr = output_HDPI()[[2]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-
+  
   #----------------------------------------------------  
   # calculate proportion of posterior draws in each quadrant for selected seeds
   output_proportionsBM <- reactive({
     if (is.null(model_mediation())) return(NULL)
     
-        test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
-                                                                 seed.list=model_outputs$best.seed,  # hard coded for now, need an input function here later
-                                                                 x_vars   = model_inputs$checkGroup_x,
-                                                                 burnin   = model_inputs$burnin)
-
-        test2 <- test %>%
-          as.data.frame() %>%
-          mutate(Var = rownames(test)) %>%
-          select(Var, everything()) %>%
-          as.matrix
-        
-        colnames(test2) <- c("", gsub(" Segment M \\(mediating\\)| Segment G \\(general\\)", "", colnames(test)))
-        
-        return(test2)
+    test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
+                                                                     seed.list=model_outputs$best.seed,  # hard coded for now, need an input function here later
+                                                                     x_vars   = model_inputs$checkGroup_x,
+                                                                     burnin   = model_inputs$burnin)
+    
+    test2 <- test %>%
+      as.data.frame() %>%
+      mutate(Var = rownames(test)) %>%
+      select(Var, everything()) %>%
+      as.matrix
+    
+    colnames(test2) <- c("", gsub(" Segment M \\(mediating\\)| Segment G \\(general\\)", "", colnames(test)))
+    
+    return(test2)
   })
   # display ON SCREEN proportions of posterior draws by quadrant
-
+  
   container_dt <- reactive({
     tags$table(
       class = 'table table-bordered',
@@ -624,43 +680,43 @@ shinyServer(function(input, output, session) {
                                  columnDefs = list(list(className = "dt-center", targets = "_all"),
                                                    list(target = "_all"))))
   })
-    
+  
   #----------------------------------------------------  
   # generate plots of posterior draws for each parameter for selected seeds
-    output_scatterplotsBM_effects <- reactive({
-      if (is.null(model_mediation())) return(NULL)
-      
-        FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects(dataset  = "",  
-                                                                    filenamelist = model_outputs$output_listBM,
-                                                                      seed.list = seed_list(),
-                                                                      seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
-                                                                      burnin   = model_inputs$burnin,
-                                                                      x_var   = model_inputs$checkGroup_x)
-                                                                                                                                
-    })    
-    output_scatterplotsBM_rho <- reactive({
-      if (is.null(model_mediation())) return(NULL)
-      
-      FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Rho(dataset  = "",  
+  output_scatterplotsBM_effects <- reactive({
+    if (is.null(model_mediation())) return(NULL)
+    
+    FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects(dataset  = "",  
+                                                                filenamelist = model_outputs$output_listBM,
+                                                                seed.list = seed_list(),
+                                                                seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
+                                                                burnin   = model_inputs$burnin,
+                                                                x_var   = model_inputs$checkGroup_x)
+    
+  })    
+  output_scatterplotsBM_rho <- reactive({
+    if (is.null(model_mediation())) return(NULL)
+    
+    FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Rho(dataset  = "",  
+                                                            filenamelist = model_outputs$output_listBM,
+                                                            seed.list = seed_list(),
+                                                            seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
+                                                            burnin   = model_inputs$burnin
+                                                            #x_var   = model_inputs$checkGroup_x 
+    )                                 
+  })
+  
+  output_scatterplotsBM_w <- reactive({
+    if (is.null(model_mediation())) return(NULL)
+    
+    FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW(dataset  = "",  
                                                               filenamelist = model_outputs$output_listBM,
                                                               seed.list = seed_list(),
                                                               seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
                                                               burnin   = model_inputs$burnin
                                                               #x_var   = model_inputs$checkGroup_x 
-      )                                 
-    })
-   
-    output_scatterplotsBM_w <- reactive({
-      if (is.null(model_mediation())) return(NULL)
-      
-      FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW(dataset  = "",  
-                                                                filenamelist = model_outputs$output_listBM,
-                                                                seed.list = seed_list(),
-                                                                seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
-                                                                burnin   = model_inputs$burnin
-                                                                #x_var   = model_inputs$checkGroup_x 
-      )
-    })    
+    )
+  })    
   # display ON SCREEN scatterplots of posterior draws for each parameter for selected seeds
   output$plotsBM_effects <- renderPlot({
     req(plotCountBM())
@@ -687,61 +743,61 @@ shinyServer(function(input, output, session) {
   })
   #withProgress(expr = output_scatterplots(), message='Running scatterplots...')
   
-    
-    #output$plotsBM_effects <- renderPlot({
-    #  withProgress(expr = output_scatterplotsBM_effects(), message='Running scatterplots...')
-    #})
-    output$plotBM_rho <- renderPlot({
-      output_scatterplotsBM_rho()
-    })
-    output$plotBM_w <- renderPlot({
-      output_scatterplotsBM_w()
-    })
-
-    
+  
+  #output$plotsBM_effects <- renderPlot({
+  #  withProgress(expr = output_scatterplotsBM_effects(), message='Running scatterplots...')
+  #})
+  output$plotBM_rho <- renderPlot({
+    output_scatterplotsBM_rho()
+  })
+  output$plotBM_w <- renderPlot({
+    output_scatterplotsBM_w()
+  })
+  
+  
   #----------------------------------------------------  
   # MCMC plots
-    output_MCMC_BM <- reactive({
-      if (is.null(model_mediation())) return(NULL)
-      
-      FUN_PDF_MCMC_Mediation_forShiny(model = 2, dataset  = "",
-                                      filenamelist = model_outputs$output_listBM,
+  output_MCMC_BM <- reactive({
+    if (is.null(model_mediation())) return(NULL)
+    
+    FUN_PDF_MCMC_Mediation_forShiny(model = 2, dataset  = "",
+                                    filenamelist = model_outputs$output_listBM,
+                                    seed.list = seed_list(),
+                                    seed.index = seed_index(),
+                                    burnin   = model_inputs$burnin)
+  })
+  # display ON SCREEN scatterplots of posterior draws for each parameter for selected seeds
+  output$plot_MCMC_BM <- renderPlot({
+    withProgress(expr = output_MCMC_BM(), message='Running MCMC traceplots...')
+  })
+  
+  # download button for pdf
+  # This works well only in Browser not in RStudio
+  
+  output$downloadMCMC_BM <- downloadHandler(
+    filename = function() { paste("MCMC for BM model.pdf") },
+    content = function(file) {
+      pdf(file=file,width=50, height=20)
+      FUN_PDF_MCMC_Mediation_forShiny(dataset  = "",
+                                      filenamelist = model_results(),
                                       seed.list = seed_list(),
                                       seed.index = seed_index(),
                                       burnin   = model_inputs$burnin)
-    })
-   # display ON SCREEN scatterplots of posterior draws for each parameter for selected seeds
-    output$plot_MCMC_BM <- renderPlot({
-      withProgress(expr = output_MCMC_BM(), message='Running MCMC traceplots...')
-    })
-    
-    # download button for pdf
-    # This works well only in Browser not in RStudio
-    
-    output$downloadMCMC_BM <- downloadHandler(
-        filename = function() { paste("MCMC for BM model.pdf") },
-        content = function(file) {
-          pdf(file=file,width=50, height=20)
-          FUN_PDF_MCMC_Mediation_forShiny(dataset  = "",
-                                          filenamelist = model_results(),
-                                          seed.list = seed_list(),
-                                          seed.index = seed_index(),
-                                          burnin   = model_inputs$burnin)
-          dev.off()
-        } 
-    )
-    
-    
-    
+      dev.off()
+    } 
+  )
+  
+  
+  
   #--------------- Binary: Format Results Page -------------------------------------#  
-
+  
   # need to calcualte and print on the page
   # LMD_agg = logMargDenNR(output_list()$LLtotal[-1:-burnin])
   
   ###############
   #  FIX the LMD calculation
   ###############
-      
+  
   #output$fitLMD <- renderPrint({
   #   logMargDenNR(output_list()$LLtotal[-1:-100])[[1]]
   #})
@@ -750,79 +806,79 @@ shinyServer(function(input, output, session) {
   # output$Results <- renderPrint({
   #   output_list()
   # })
-      
+  
   
   ###############
   #  FIX the rownames
   ###############
-
+  
   # print proportions of posterior draws by quadrant
   #output$proportionsM <- renderTable(expr = output_proportionsBM()[[1]]$ProportionsM,
   #                                   rownames=TRUE, colnames=TRUE, bordered=TRUE)
   #output$proportionsS <- renderTable(expr = output_proportionsBM()[[2]]$ProportionsS,
   #                                   rownames=TRUE, colnames=TRUE, bordered=TRUE)
-
-
+  
+  
   
   # download button for pdf
-#  output$downloadPDF_BM <- downloadHandler(filename='posterior_draws.pdf',
-#                                        content= function(file){
-#                                          pdf(file=file)
-#                                          FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot(
-#                                             dataset="",
-#                                             filenamelist = outputBM(),
-#                                             seed.list = seed.list,
-#                                             seed.selected = c(1,2),
-#                                             burnin   = model_inputs$burnin,
-#                                             x_vars   = model_inputs$checkGroup_x
-#                                           )
-#                                           dev.off()
-#                                         })
-
-    
-    
-
-    # Run Binary Model with Parallelization and 4 loops - NOT DONE
-    
-   #  # setup for loop
-   #  num_seeds = 2
-   #  seed.list = sort(round(runif(num_seeds, 0, 10000)))
-   #  seed.index = seq(1, num_seeds, 1)
-   #  
-   #  avail_cores <- detectCores()
-   #  num_workers <- avail_cores - 1
-   #  registerDoParallel(cores=num_workers)
-   #  
-   #  # get outputBM  (PARALLEL VERSION - NOT DONE)
-   #  outputBM <- eventReactive(input$run, {
-   #   if(input$model_button == "Heterogeneous (Binary Mixture)"){
-   #     
-   #     # define inputs outside loop (since these will be the same)
-   #     x_vars <- model_inputs$checkGroup_x
-   #     y_var  <- input$radio_y
-   #     m_var  <- input$radio_m
-   #     Aa_var  <- input$select_Aa
-   #     Abg_var <- input$select_Abg
-   #     nu_var  <- input$select_nu
-   #     qy_var  <- input$select_qy
-   #     qm_var  <- input$select_qm
-   #     R_var    <- input$select_R
-   #     keep_var <- input$select_keep
-   #     g_var <- input$select_g # only BM
-   #     
-   #     foreach(i=1:length(seed.list)) %dopar% { 
-   #       # different seed each loop
-   #       input_list <- get_inputs_binary(df(), x_vars, y_var, m_var,
-   #                                       Aa_var, Abg_var, nu_var, qy_var, qm_var, #Priors
-   #                                       R_var, seed_var=seed.list[i], keep_var, g_var)
-   #       #cat("i=", i, fill=T)
-   #       
-   #       # run model
-   #       return(FUN_Mediation_LCRM_2class_MS_Gibbs_forShinyApp(Data  = input_list()$Data,
-   #                                                             Prior = input_list()$Prior,
-   #                                                             Mcmc  = input_list()$Mcmc))
-   #     }
-   #   }
+  #  output$downloadPDF_BM <- downloadHandler(filename='posterior_draws.pdf',
+  #                                        content= function(file){
+  #                                          pdf(file=file)
+  #                                          FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot(
+  #                                             dataset="",
+  #                                             filenamelist = outputBM(),
+  #                                             seed.list = seed.list,
+  #                                             seed.selected = c(1,2),
+  #                                             burnin   = model_inputs$burnin,
+  #                                             x_vars   = model_inputs$checkGroup_x
+  #                                           )
+  #                                           dev.off()
+  #                                         })
+  
+  
+  
+  
+  # Run Binary Model with Parallelization and 4 loops - NOT DONE
+  
+  #  # setup for loop
+  #  num_seeds = 2
+  #  seed.list = sort(round(runif(num_seeds, 0, 10000)))
+  #  seed.index = seq(1, num_seeds, 1)
+  #  
+  #  avail_cores <- detectCores()
+  #  num_workers <- avail_cores - 1
+  #  registerDoParallel(cores=num_workers)
+  #  
+  #  # get outputBM  (PARALLEL VERSION - NOT DONE)
+  #  outputBM <- eventReactive(input$run, {
+  #   if(input$model_button == "Heterogeneous (Binary Mixture)"){
+  #     
+  #     # define inputs outside loop (since these will be the same)
+  #     x_vars <- model_inputs$checkGroup_x
+  #     y_var  <- input$radio_y
+  #     m_var  <- input$radio_m
+  #     Aa_var  <- input$select_Aa
+  #     Abg_var <- input$select_Abg
+  #     nu_var  <- input$select_nu
+  #     qy_var  <- input$select_qy
+  #     qm_var  <- input$select_qm
+  #     R_var    <- input$select_R
+  #     keep_var <- input$select_keep
+  #     g_var <- input$select_g # only BM
+  #     
+  #     foreach(i=1:length(seed.list)) %dopar% { 
+  #       # different seed each loop
+  #       input_list <- get_inputs_binary(df(), x_vars, y_var, m_var,
+  #                                       Aa_var, Abg_var, nu_var, qy_var, qm_var, #Priors
+  #                                       R_var, seed_var=seed.list[i], keep_var, g_var)
+  #       #cat("i=", i, fill=T)
+  #       
+  #       # run model
+  #       return(FUN_Mediation_LCRM_2class_MS_Gibbs_forShinyApp(Data  = input_list()$Data,
+  #                                                             Prior = input_list()$Prior,
+  #                                                             Mcmc  = input_list()$Mcmc))
+  #     }
+  #   }
 })
 
 
