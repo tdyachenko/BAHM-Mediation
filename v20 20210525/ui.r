@@ -278,26 +278,67 @@ dashboardPage(
        # Results Tab - Binary Mixture - this only appears when 'model_button' is selected
        tabsetPanel(type = 'tabs', id = 'BM_tabs',
                    
-           # Heterogenity Parameters
-           tabPanel(title="Heterogeneity Parameters (BM)", value='BMpar_het', 
+        # Summary
+        tabPanel(title="Summary: Binary Mixture Model estimation", value='BMpar_het', 
+                
+                br(),      
+                fluidRow(
+                  column(width = 8, 
+                         box(width=NULL,
+                             title = "Results (Estimation may take 5-10 minutes)",
+                             status = "primary",
+                             solidHeader = TRUE,
+                             uiOutput("mediation_result")
+                         )
+                  ),
+                         
+           # Parameters (Step 1)
+           tabPanel(title="Step 1. Parameters (BM)", value='BMpar_het', 
               
               br(),      
               fluidRow(
-                  column(width = 4, 
-                      box(width=NULL,
-                          title = "Results (Estimation may take 5-10 minutes)",
-                          status = "primary",
-                          solidHeader = TRUE,
-                          uiOutput("mediation_result")
-                      ),
+                  column(width = 8,
+                          box(width = NULL,solidHeader = FALSE,
+                              title = "Proportions of posterior distribution by Quadrant",  #table
+                              status = "primary",
+                              DT::dataTableOutput("proportionsBM")
+                          ),
+                          box(width = NULL,solidHeader = FALSE,
+                              title = "Plots of the Posterior Draws of Parameters",  #Figure
+                              "Numbers in the corners are proportions of the posterior distribution in that quadrant",
+                              status = "primary",
+                              uiOutput("plotsBM_effects.ui")  # TO DO: size to make a function of number of parameters
+                          )
+                         ),
+                  column(width = 8,
+                         box(width = NULL,
+                             solidHeader = FALSE,
+                             title = "Parameter 95% HPDIs for the Mediating Segment (M)", #table
+                             status = "primary",
+                             tableOutput("hdpiBM_M_tbl")
+                         ),
+                         box(width = NULL,
+                             solidHeader = FALSE,
+                             title = "Parameter 95% HPDIs for the General Segment (S)", #table
+                             status = "primary",
+                             tableOutput("hdpiBM_S_tbl")
+                         )
+                  )
+                )
+              ),
+                  
+          # Heterogeneity Parameters (Steps 2a and 2b)
+          tabPanel(title="Steps 2a and 2b. Heterogeneity in Mediation", value='BMpar',   
+                 
+            br(),
+            fluidRow(    
+                column(width = 4,
                       box(width=NULL,
                           solidHeader = FALSE,
-                          title = "Posterior distribution parameter RHO (95% HPD)",  #table
+                          title = "Distribution of the individual probabilities to mediate",  #Figure
                           status = "primary",
-                          tableOutput("hdpiRho_tbl")
-                      )
-                  ),
-                  column(width = 8,
+                          plotOutput("plotBM_w", height = "400px")  # TO DO make it a function of number of variables (Maybe)
+                      ),
                       box(width=NULL,
                           solidHeader = FALSE,
                           title = "Histogram of the posterior distribution of parameter rho",  #Figure
@@ -306,49 +347,28 @@ dashboardPage(
                       ),
                       box(width=NULL,
                           solidHeader = FALSE,
-                          title = "Distribution of the individual posterior means of the probability to mediate",  #Figure
+                          title = "Histogram of the posterior distributions(s) of parameter(s) Lambda",  #Figure (THIS MIGHT BE MORE THAN ONE!)
                           status = "primary",
-                          plotOutput("plotBM_w", height = "400px")  # TO DO make it a function of number of variables
+                          plotOutput("plotBM_rho", height = "400px")
+                      )
+                ),
+                column(width = 4,
+                      box(width=NULL,
+                          solidHeader = FALSE,
+                          title = "Posterior distribution of parameter RHO (95% HPDI)",  #table
+                          status = "primary",
+                          tableOutput("hdpiRho_tbl")
+                      ),
+                      box(width=NULL,
+                          solidHeader = FALSE,
+                          title = "Posterior distribution(s) of parameter(s) Lambda (95% HPDI)",  #table with multiple rows - # of covariates in Z + intercept
+                          status = "primary",
+                          tableOutput("hdpiLambda_tbl")
                       )
                   )
               )      
            ),
-           
-           # Effects Parameters
-           tabPanel(title="Parameters (BM)", value='BMpar',   
-
-              br(),
-              fluidRow(
-                column(width = 4,
-                       box(width = NULL,
-                           solidHeader = FALSE,
-                           title = "Parameter 95% HPDIs for the Mediating Segment", #table
-                           status = "primary",
-                           tableOutput("hdpiBM_M_tbl")
-                       ),
-                       box(width = NULL,
-                           solidHeader = FALSE,
-                           title = "Parameter 95% HPDIs for the General Segment", #table
-                           status = "primary",
-                           tableOutput("hdpiBM_S_tbl")
-                       )
-                ),
-                column(width = 8,
-                  box(width = NULL,solidHeader = FALSE,
-                      title = "Proportions of posterior distribution by Quadrant",  #table
-                      status = "primary",
-                      DT::dataTableOutput("proportionsBM")
-                  ),
-                  box(width = NULL,solidHeader = FALSE,
-                      title = "Plots of the Posterior Draws of Parameters",  #Figure
-                      "Numbers in the corners are proportions of the posterior distribution in that quadrant",
-                      status = "primary",
-                      uiOutput("plotsBM_effects.ui")  # TO DO: size to make a function of number of parameters
-                  )
-                )
-              )
-           ),
-           
+        
            # Fit and diagnostics for BM
            tabPanel(title="Fit (BM)", value='BMfit', 
             

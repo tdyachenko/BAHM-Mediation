@@ -206,7 +206,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
          labels = c(paste("IV (",round(ProportionsM[3,p-1],4),")")), pos=4, font=2,cex=1)
     }
     plot(filename$alphadraw[-1:-burnin,p,2], filename$gammabetaSdraw[-1:-burnin,nvarX+1],
-         main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment G"),
+         main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
          xlab=bquote(alpha[S][.(p-1)]),ylab=expression(beta[S]), xlim=ylimA,ylim=ylimB)
     abline(h=0,v=0,col="gray")
     if(ylimA[2]>0 & ylimB[2]>0){
@@ -226,8 +226,8 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
          labels = c(paste("IV (",round(ProportionsS[3,p-1],4),")")), pos=4, font=2,cex=1)
     }
     hist(filename$gammabetaSdraw[-1:-burnin,p],
-         main=bquote("Histogram of " ~ gamma[.(p-1)] ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment G"),
-         #main=paste(x_var[p-1],"\n Segment G"),
+         main=bquote("Histogram of " ~ gamma[.(p-1)] ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
+         #main=paste(x_var[p-1],"\n Segment S"),
          xlab=bquote(gamma[S][.(p-1)]), xlim=ylimG,
          breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,p]),(max(filename$gammabetaSdraw[-1:-burnin,p])+breaksCalc),breaksCalc )))
     abline(v=0,col="darkred",lwd=2)
@@ -260,6 +260,15 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW = function(dataset,fil
   #dev.off()
 }
 
+FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,filenamelist,seed.list,seed.selected,burnin){
+  #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
+  filename = filenamelist[[seed.selected]]
+  numCharts = lenght(filename$lambdadraw[1,])
+  for(i in 1:numCharts)
+  {  hist(filename$lambdadraw[-1:-burnin,i+1], main="", xlab=bquote(lambda[i]), xlim=c(0,1),col = "#75AADB",
+       breaks=50)
+  }
+}
 
 # # NOT DONE
 # FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_PlotMCMC = function(dataset,filenamelist,seed.list,seed.selected,burnin,x_var){
@@ -329,7 +338,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW = function(dataset,fil
 
 #---- (MS mixture model)  Parameters OUT MULTIX ---------------------------------------------------------------------------------
 # this is based on the best seed
-# outputs HDP intervals
+# outputs HPD intervals
 
 FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.list, burnin)
   { filename = filenamelist[[seed.list]]
@@ -352,9 +361,13 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
     )
     tempCIs_Rho =  matrix(c(mean(filename$rhodraw[-1:-burnin]),
                      t(hdi(filename$rhodraw[-1:-burnin], credMass = 0.95))),ncol=3,nrow=1)
+    templambda = t(apply(filename$lambdadraw[-1:-burnin,],2,hdi,credMass = CIband))
+    tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin,])),templambda)
+    
     colnames(tempCIs_M)   <- c("Mean","HPDI lower limit","HPDI upper limit")
     colnames(tempCIs_S)   <- c("Mean","HPDI lower limit","HPDI upper limit")
     colnames(tempCIs_Rho) <- c("Mean","HPDI lower limit","HPDI upper limit")
+    colnames(tempCIs_lambda) <- c("Mean","HPDI lower limit","HPDI upper limit")
     
     rownames_list_M = c(rep(0,nrow(tempCIs_M)))
     rownames_list_M[nvarX+1] = "beta_{M_1}"
@@ -364,11 +377,11 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
       rownames_list_M[nvarX+2+i]=paste0("alphabeta_{M_", i - 1, "}")
     }
     rownames_list_S = c(rep(0,nrow(tempCIs_S)))
-    rownames_list_S[nvarX+nvarX+1] = "beta_{G}"
+    rownames_list_S[nvarX+nvarX+1] = "beta_{S}"
     for(i in 1:nvarX) {
-      rownames_list_S[i]=paste0("alpha_{G_", i - 1, "}")
-      rownames_list_S[nvarX+i]=paste0("gamma_{G_", i - 1, "}")
-      rownames_list_S[nvarX+nvarX+1+i]=paste0("alphabeta_{G_", i - 1, "}")
+      rownames_list_S[i]=paste0("alpha_{S_", i - 1, "}")
+      rownames_list_S[nvarX+i]=paste0("gamma_{S_", i - 1, "}")
+      rownames_list_S[nvarX+nvarX+1+i]=paste0("alphabeta_{S_", i - 1, "}")
     }
     rownames_list_Rho = expression(rho)
     rownames(tempCIs_M) <- rownames_list_M
@@ -376,6 +389,12 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
     rownames(tempCIs_S) <- rownames_list_S
     rownames(tempCIs_Rho) <- rownames_list_Rho
    
+    rownames_list_Lambda = c(rep(0,nrow(tempCIs_lambda)))
+    rownames_list_Lambda[nvarX+2] = "beta_{M_2}"
+    for(i in 1:nvarX) {
+      rownames_list_M[i]=paste0("alpha_{M_", i - 1, "}")
+      rownames_list_M[nvarX+2+i]=paste0("alphabeta_{M_", i - 1, "}")
+    }
     return(list(tempCIs_M,tempCIs_S,tempCIs_Rho))
 }
 

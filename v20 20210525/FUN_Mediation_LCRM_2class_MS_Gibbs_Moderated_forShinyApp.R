@@ -179,7 +179,20 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
     LLikD = exp(-0.5*(log(c(2*pi*sigma2yD))+log(c(2*pi*sigma2mD))) - 0.5*(m-X%*%(alphaD))^2/ c(sigma2mD) - 0.5*(y-cbind(X,m)%*%gammabetaD)^2 / c(sigma2yD))
     if(ModelFlag==2)
     { LLikM = exp(-0.5*(log(c(2*pi*sigma2yM))+log(c(2*pi*sigma2mM))) - 0.5*(m-X%*%(alphaM))^2/ c(sigma2mM) - 0.5*(y-cbind(X[,1],m)%*%betaM)^2 / c(sigma2yM)) 
-      temp = rho*LLikM/ (rho*LLikM+(1-rho)*LLikD)   #  pi in documents
+    }  
+    if (r%%keep == 0) {
+      mkeep = r/keep
+      if(ModelFlag==2)
+      { LL_total[mkeep]= sum(log(LLikM[indexM])) + sum(log(LLikD[indexD]))
+        LL[1:2,,mkeep] = cbind(LLikM,LLikD)
+      }
+      if(ModelFlag==1)
+      { LL_total[mkeep]=  sum(log(LLikD[indexD]))
+        LL[2,,mkeep] = LLikD
+      }
+    }
+    if(ModelFlag==2)
+    { temp = rho*LLikM/ (rho*LLikM+(1-rho)*LLikD)   #  pi in documents
       for(hh in 1:nobs)
        { w[hh] = rbinom(1,1,temp[hh]) 
        }

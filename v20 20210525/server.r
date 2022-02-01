@@ -113,6 +113,13 @@ shinyServer(function(input, output, session) {
     })
   })
   
+  
+  # Insert a check mark.
+  # "Would you like to create an interaction term for the aggregate model?"
+  # for the AGGREGATE model only:
+  # Z variables become additional X variables regardless of the response
+  # If checked interaction box, in the input file, generate new variables for each X and Z and add to other X variable
+  
   # Priors
   output$select_Aa <- renderUI({
     numericInput("select_Aa", label = NULL, value = 0.01, step = 0.1)
@@ -361,6 +368,16 @@ shinyServer(function(input, output, session) {
     return(FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny(filename = aggregate_outputs$output_listA,
                                                        burnin   = aggregate_outputs$select_burnin))
   })
+  # calculate model fit (DIC)
+  output_fitLMD <- reactive({ 
+    if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
+    return(FUN_DIC_mediation(Data,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
+                             McmcOutput = aggregate_outputs$output_listA,
+                             burnin   = aggregate_outputs$select_burnin,
+                             ModelFlag = 1))
+  })
+  # calculate model fit (LOO) later
+  
   
   plotCountA <- reactive({
     if (is.null(aggregate_outputs$checkGroup_x)) return(2)
@@ -577,7 +594,8 @@ shinyServer(function(input, output, session) {
       tagList(
         strong("Mediation is present in the sample."),
         paste0(scales::percent(max(prop_bm)), " of the joint posterior distirbution of parameters α and ß for at least one of the segments is in quadrant ", max_quad, ". 
-                          The model estimates that that ", scales::percent(prop_bm[maxloc %% 4, colnum - length(model_inputs$checkGroup_x)]), " of the sample mediates through the proposed mediator"),
+                          The model estimates that that ", scales::percent(prop_bm[maxloc %% 4, colnum - length(model_inputs$checkGroup_x)]), 
+                          " of the sample mediates through the proposed mediator"),
         br(),br(),
         "The dependent variables are: ", paste0(model_inputs$checkGroup_x, collapse = ", "), ".",
         br(),br(),
@@ -601,7 +619,7 @@ shinyServer(function(input, output, session) {
   
   # print Rhat metrics
   output$test  <- renderTable({
-    model_outputs$output_RhatcalcBM$table_forShiny
+    model_outputs$output_RhatcalcBM$table_forShiny  #  Should include DIC now
   }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
   output$RhatEst  <- renderTable({
     model_outputs$output_RhatcalcBM$RhatEst
@@ -633,6 +651,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   # display ON SCREEN all non-rho HDPIs
   output$hdpiBM_M_tbl <- renderTable(expr = output_HDPI()[[1]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   output$hdpiBM_S_tbl <- renderTable(expr = output_HDPI()[[2]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
