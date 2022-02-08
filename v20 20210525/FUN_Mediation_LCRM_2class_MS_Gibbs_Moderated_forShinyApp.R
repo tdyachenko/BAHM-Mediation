@@ -28,7 +28,7 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
   ModelFlag = Model  # 1 = aggregate, 2 = BM
   nvarX=ncol(Data$X) # including intercept
   nvarM=ncol(Data$m) # no intercept
-  nvarZ=ncol(Data$Z) # includes intercept if needed
+  nvarZ=ncol(Data$Z) # includes intercept, it is just intercept in the absence of covariates
   m=Data$m
   X=Data$X
   y=Data$y
@@ -43,6 +43,23 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
   slambda1=Mcmc$slambda1
 	slambda2=Mcmc$slambda2
 
+	#Generating X's for the cases with covariates for the aggregate model
+	#DOES NOT WORK NOW
+	# Make user generate the interaction variables for the aggregate model is needed before uploading the file
+	
+	#if(ModelFlag==1 | nvarZ>1)
+	#{
+	#  for(i in 2:nvarX){
+	#    for (j in 2:nvarZ){
+	#      X = cbind(X, X[,i]*Z[,j]) # two-way interactions only!
+	#    }
+	#  }
+	#  nvarX = ncol(X) #new number of X variables including the intercept
+	#  dima = ncol(X)   # dim of alpha
+	#  dimg = ncol(X)   # dim of gamma
+	#  dimgb = dimg +1
+	#}
+	
   if (missing(Prior)) {
     ma = c(rep(0, dima))     # mean of alpha
     Aa = 0.01 * diag(dima)
@@ -55,10 +72,19 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
     qm= c(var(m),var(m))
     #g=3          # this is nu and q for the prior distribution for rho in (52)
   } else {
-    ma = Prior$ma
-    Aa = Prior$Aa
-    mgb = Prior$mgb
-    Agb = Prior$Agb
+    #if(ModelFlag==1 | nvarZ>1)
+    #{
+    #  ma  = c(rep(Prior$ma[1], nvarX))
+    #  Aa  = Prior$Aa[1,1] * diag(nvarX) 
+    #  mgb = c(rep(Prior$mgb[1], nvarX+nvarM))
+    #  Agb = Prior$Agb * diag(nvarX+nvarM) 
+    #}
+    #else{
+      ma = Prior$ma
+      Aa = Prior$Aa
+      mgb = Prior$mgb
+      Agb = Prior$Agb
+    #}
     nu = Prior$nu
     qy = Prior$qy   # vector (M,G)
     qm = Prior$qm   # vector (M,G)
@@ -66,6 +92,7 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
 	  Al = Prior$Al
     #g=Prior$g      # this is nu and q for the prior distribution for rho in (52)
   }
+	
   
   if (is.null(qy)==T) {  
       qy= c(var(y),var(y))  
@@ -106,17 +133,19 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
 	                   w = c(rbinom(nobs,1,rho))
   }
 	lambda = matrix(0,ncol=1,nrow=nvarZ)
-  #  Mediating
+  
+	#  Mediating
   alphaM = matrix(0,ncol=1,nrow=nvarX)
   betaM = matrix(0,ncol=1,nrow=nvarM+1)  
   sigma2yM = 1
   sigma2mM = 1
+  
   #  Standard
+ 
   alphaD = matrix(0,ncol=1,nrow=nvarX)
   gammabetaD = matrix(0,ncol=1,nrow=nvarM+nvarX)
   sigma2yD = 1
   sigma2mD = 1
-  
   
   itime = proc.time()[3]
   cat("MCMC Iteration (est time to end - min)", fill = TRUE)
@@ -156,7 +185,7 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
 	if(ModelFlag==2)
 	{ 
     slambda = ifelse(r>1000,slambda2,slambda1)
-	  lambdanew = lambda + slambda * rnorm(nvarZ)
+	  lambdanew = c(lambda + slambda * rnorm(nvarZ))
 	    #while(abs(lambdanew)>2)
 	   #  { lambdanew = lambda + slambda * rnorm(nvarZ)}
 	  	# lambdanew = rnorm(nvarZ,mean=0,sd=1)

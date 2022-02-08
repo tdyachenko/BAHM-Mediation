@@ -86,7 +86,9 @@ shinyServer(function(input, output, session) {
     df()
     isolate({
       selectizeInput("checkGroup_x",
-                     label    = h5(em("Independent Variables (X). Select all that apply. You must select at least one.")), 
+                     label    = h5(em("Independent Variables (X). Select all that apply. You must select at least one.
+                       For the aggregate model, generate the interactions variables BEFORE uploding the file. 
+                       Then, select those variables as X variables.")), 
                      choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$covariates_z)),
                      selected = if (!is.null(input$checkGroup_x)[1]) input$checkGroup_x else NA,
                      options = list(
@@ -103,7 +105,8 @@ shinyServer(function(input, output, session) {
     df()
     isolate({
       selectizeInput("covariates",
-                     label    = h5(em("Covariates. Select all that apply. Leave 'None' if covariates are not inlcuded in the analysis")), 
+                     label    = h5(em("Covariates for the Heterogeneous Model ONLY. Select all that apply. Leave BLANK if covariates are not inlcuded in the analysis. 
+                                      ")), 
                      choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$checkGroup_x)),
                      selected = if (!is.null(input$covariates_z)[1]) input$covariates_z else NA,
                      options = list(
@@ -234,7 +237,7 @@ shinyServer(function(input, output, session) {
     x_vars <- input$checkGroup_x
     y_var  <- input$radio_y
     m_var  <- input$radio_m
-    z_var  <- input$covariates_z   # not used in aggregate model but might need it later
+    z_var  <- input$covariates_z   # need for both models now
     
     # Priors
     Aa_var  <- input$select_Aa

@@ -4,84 +4,7 @@
 library(bayesm);   library(coda); library(gtools)
 FUN_Mediation_LMD_RHat_MS_cov = function(datafile,seed.index,burnin,RhatCutoff)
 { 
-  # This is the finction without parallel computing
-  
-  mcmc.list =   function (...)  # function copied from coda package, otherwise doparallel does not see it
-  {
-    x <- list(...)
-    if (length(x) == 1 && is.list(x[[1]])) 
-      x <- x[[1]]
-    if (!all(unlist(lapply(x, is.mcmc)))) 
-      stop("Arguments must be mcmc objects")
-    nargs <- length(x)
-    if (nargs >= 2) {
-      xmcpar <- lapply(x, mcpar)
-      if (!all(unlist(lapply(xmcpar, "==", xmcpar[[1]])))) 
-        stop("Different start, end or thin values in each chain")
-      xnvar <- lapply(x, nvar)
-      if (!all(unlist(lapply(xnvar, "==", xnvar[[1]])))) 
-        stop("Different number of variables in each chain")
-      xvarnames <- lapply(x, varnames, allow.null = FALSE)
-      if (!all(unlist(lapply(xvarnames, "==", xvarnames[[1]])))) 
-        stop("Different variable names in each chain")
-    }
-    if (is.R()) 
-      class(x) <- "mcmc.list"
-    else oldClass(x) <- "mcmc.list"
-    return(x)
-  }
-  
-  is.mcmc =   function (x)  # function copied from coda package, otherwise doparallel does not see it
-  {
-    if (inherits(x, "mcmc")) 
-      if (length(dim(x)) == 3) 
-        stop("Obsolete mcmc object\nUpdate with a command like\nx <- mcmcUpgrade(x)")
-    else TRUE
-    else FALSE
-  }
-  
-  mcmc=function (data = NA, start = 1, end = numeric(0), thin = 1) 
-  # function copied from coda package, otherwise doparallel does not see it 
-  {
-    if (is.matrix(data)) {
-        niter <- nrow(data)
-        nvar <- ncol(data)
-    }
-    else if (is.data.frame(data)) {
-        if (!all(sapply(data, is.numeric))) {
-            stop("Data frame contains non-numeric values")
-        }
-        data <- as.matrix(data)
-        niter <- nrow(data)
-        nvar <- ncol(data)
-    }
-    else {
-        niter <- length(data)
-        nvar <- 1
-    }
-    thin <- round(thin)
-    if (length(start) > 1) 
-        stop("Invalid start")
-    if (length(end) > 1) 
-        stop("Invalid end")
-    if (length(thin) != 1) 
-        stop("Invalid thin")
-    if (missing(end)) 
-        end <- start + (niter - 1) * thin
-    else if (missing(start)) 
-        start <- end - (niter - 1) * thin
-    nobs <- floor((end - start)/thin + 1)
-    if (niter < nobs) 
-        stop("Start, end and thin incompatible with data")
-    else {
-        end <- start + thin * (nobs - 1)
-        if (nobs < niter) 
-            data <- data[1:nobs, , drop = FALSE]
-    }
-    attr(data, "mcpar") <- c(start, end, thin)
-    attr(data, "class") <- "mcmc"
-    data
-  }
+  # This is the function without parallel computing
   
   nseeds = length(seed.index)
   table01 = permutations(2,nseeds,c(1,0),repeats=TRUE)
@@ -90,41 +13,41 @@ FUN_Mediation_LMD_RHat_MS_cov = function(datafile,seed.index,burnin,RhatCutoff)
   R = length(datafile[[1]]$LL_total)
   LMD= c(rep(0,nseeds))
   listfromdata = list()
-  #r=1
-  listfromdata = (
-    foreach(i=seed.index) %dopar%  # parallel, no .combine as I want a list, not a table or vector
-     { out  =  mcmc (data = cbind(
-          #datafile[[i]]$paramdraw[,1:5], 
-          datafile[[i]]$alphadraw[-1:-burnin,,1], datafile[[i]]$betaMdraw[-1:-burnin,],
-          datafile[[i]]$alphadraw[-1:-burnin,,2], datafile[[i]]$gammabetaSdraw[-1:-burnin,],  # these lines are for Gibbs sampler
-          datafile[[i]]$lambdadraw[-1:-burnin,] , datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
-          #datafile[[i]]$rhodraw[-1:-burnin] ,        datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
-          ), start = burnin+1, end = R, thin = 1 )
-       out
-     }
-  )
+  r=1
   for(i in seed.index)
-  { LMD[i] = logMargDenNR(datafile[[i]]$LL_total[-1:-burnin]) }
-  #for(i in seed.index)
-  #{  listfromdata[[r]] = mcmc (data = cbind(
-  #      #datafile[[i]]$paramdraw[,1:5], 
-  #      datafile[[i]]$alphadraw[-1:-burnin,,1], datafile[[i]]$betaMdraw[-1:-burnin,],
-  #      datafile[[i]]$alphadraw[-1:-burnin,,2], datafile[[i]]$gammabetaSdraw[-1:-burnin,],  # these lines are for Gibbs sampler
-  #      datafile[[i]]$lambdadraw[-1:-burnin,] , datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
-  #      #datafile[[i]]$rhodraw[-1:-burnin] ,        datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
-  #      ), start = burnin+1, end = R, thin = 1 )
-  #   LMD[r] = logMargDenNR(datafile[[i]]$LL_total[-1:-burnin])
-  #   r=r+1
-  #}
+  {  listfromdata[[r]] = mcmc (data = cbind(
+       #datafile[[i]]$paramdraw[,1:5], 
+       datafile[[i]]$alphadraw[-1:-burnin,,1],datafile[[i]]$betaMdraw[-1:-burnin,],
+       datafile[[i]]$alphadraw[-1:-burnin,,2], datafile[[i]]$gammabetaSdraw[-1:-burnin,],  # these lines are for Gibbs sampler
+       datafile[[i]]$lambdadraw[-1:-burnin,] , datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
+       #datafile[[i]]$rhodraw[-1:-burnin] ,        datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
+     ), start = burnin+1, end = R, thin = 1 )
+     LMD[r] = logMargDenNR(datafile[[i]]$LL_total[-1:-burnin])
+     r=r+1
+  }
+  #listfromdata = (
+  #  foreach(i=seed.index) %dopar%  # parallel, no .combine as I want a list, not a table or vector
+  #   { out  =  mcmc (data = cbind(
+  #        #datafile[[i]]$paramdraw[,1:5], 
+  #        datafile[[i]]$alphadraw[-1:-burnin,,1], datafile[[i]]$betaMdraw[-1:-burnin,],
+  #        datafile[[i]]$alphadraw[-1:-burnin,,2], datafile[[i]]$gammabetaSdraw[-1:-burnin,],  # these lines are for Gibbs sampler
+  #        datafile[[i]]$lambdadraw[-1:-burnin,] , datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
+  #        #datafile[[i]]$rhodraw[-1:-burnin] ,        datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
+  #        ), start = burnin+1, end = R, thin = 1 )
+  #     out
+  #   }
+  #)
   listfromdata=listfromdata[!sapply(listfromdata, is.null)] 
   
   Psrf = matrix(0,nrow=nrow(table01),ncol=ncol(listfromdata[[1]]))
+  # nrow=number of possible combinations of seeds into two groups from table01 (possible groupings)
+  # ncol= nvar, including Rho and sigmas
   Mpsrf = matrix(0,nrow=nrow(table01),ncol=1)
   for(j in 1:nrow(table01)) 
-      { index1 = c(which(table01[j,]==1))
+      { index1 = c(which(table01[j,]==1))   # select seeds that qre groups together, indexed 1 in table01
         j_listfromdata = listfromdata[index1]
         list_forRhat = mcmc.list(j_listfromdata)
-        Psrf[j,] = gelman.diag(list_forRhat,autoburnin=FALSE)[[1]][,1]
+        Psrf[j,] = gelman.diag(list_forRhat,autoburnin=FALSE)[[1]][,1]  # point estimate only
         Mpsrf[j,1] = gelman.diag(list_forRhat,autoburnin=FALSE)[[2]]
       }
  
