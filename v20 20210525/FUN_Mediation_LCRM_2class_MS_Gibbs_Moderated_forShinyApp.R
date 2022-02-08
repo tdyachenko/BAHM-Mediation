@@ -162,16 +162,16 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
 	  	# lambdanew = rnorm(nvarZ,mean=0,sd=1)
 	  
 	  rhonew = exp(Z %*% (lambdanew))/(1+exp(Z %*% (lambdanew)))
-  	lognew_lambda = sum(w * log(rhonew) + (1-w)* log(1-rhonew))
+  	lognew_lambda = sum(w * log(c(rhonew)) + (1-w)* log(1-c(rhonew)))
 	  logold_lambda = sum(w * log(rho) + (1-w)* log(1-rho))
-    logknew = -0.5 * (t(lambdanew - ml) %*% Al %*% (lambdanew - ml))
-    logkold = -0.5 * (t(lambda - ml) %*% Al %*% (lambda - ml))
+    logknew = -0.5 * (t(c(lambdanew) - ml) %*% Al %*% (c(lambdanew) - ml))
+    logkold = -0.5 * (t(c(lambda) - ml) %*% Al %*% (c(lambda) - ml))
   	   alpha = exp(lognew_lambda + logknew - logold_lambda - logkold )
 	     #alpha = exp(lognew_lambda - logold_lambda )
        alpha=ifelse(is.finite(alpha)==T,alpha,-1)
        u = runif(n = 1, min = 0, max = 1)
        if (u < alpha) {  lambda = lambdanew
-	                       rho=rhonew               }
+	                       rho=c(rhonew)               }
        else           {  rej = rej + 1            }			
 	}			
     
@@ -208,8 +208,8 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
       lambdadraw[mkeep,] = lambda
       sigma2mdraw[mkeep,] = c(sigma2mM,sigma2mD)
       sigma2ydraw[mkeep,] = c(sigma2yM,sigma2yD)
-      rhodraw[mkeep,] = rho        # used to be phi
-      wdraw[,mkeep] = w
+      #rhodraw[mkeep,] = rho        # used to be phi
+      #wdraw[,mkeep] = w
       reject[mkeep] = rej
       
       if(ModelFlag==2)
