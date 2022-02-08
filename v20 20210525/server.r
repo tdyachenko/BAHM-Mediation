@@ -104,6 +104,7 @@ shinyServer(function(input, output, session) {
     input$checkGroup_x # ????
     df()
     isolate({
+      tagList(
       selectizeInput("covariates",
                      label    = h5(em("Covariates for the Heterogeneous Model ONLY. Select all that apply. Leave BLANK if covariates are not inlcuded in the analysis. 
                                       ")), 
@@ -112,7 +113,10 @@ shinyServer(function(input, output, session) {
                      options = list(
                        placeholder = "None"
                      ),
-                     multiple = TRUE)
+                     multiple = TRUE),
+        
+      checkboxInput("interactions", "Would you like to create (an) interaction term(s) for the aggregate model?")
+      )
     })
   })
   
