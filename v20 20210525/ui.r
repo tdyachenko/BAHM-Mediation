@@ -349,7 +349,7 @@ dashboardPage(
                           solidHeader = FALSE,
                           title = "Histogram of the posterior distributions(s) of parameter(s) Lambda",  #Figure (THIS MIGHT BE MORE THAN ONE!)
                           status = "primary",
-                          plotOutput("plotBM_rho", height = "400px")
+                          plotOutput("plotBM_lambda", height = "400px")
                       )
                 ),
                 column(width = 4,
@@ -431,4 +431,4 @@ dashboardPage(
  
   
  
-) # end of dashboardPage
+))) # end of dashboardPage

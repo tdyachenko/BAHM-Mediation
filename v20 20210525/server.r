@@ -188,7 +188,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$ZSelection <- renderText({
-    paste0('Covariates: ', paste(input$covariates_z, collapse = ", "))
+    paste0('Covariates: ', paste(input$covariates, collapse = ", "))
   })
   
   # Forces output elements to initialize without tab being click
