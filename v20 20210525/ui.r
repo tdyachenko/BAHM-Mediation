@@ -365,7 +365,9 @@ dashboardPage(
                           status = "primary",
                           tableOutput("hdpiLambda_tbl")
                       )
-                  )
+                  ),
+                h5('Downloads:', align='left'),
+                downloadButton('downloadPDF_BM', 'PDF of Plots' ),
               )      
            ),
         

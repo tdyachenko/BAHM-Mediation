@@ -376,7 +376,7 @@ shinyServer(function(input, output, session) {
                                                        burnin   = aggregate_outputs$select_burnin))
   })
   # calculate model fit (DIC)
-  output_fitLMD <- reactive({ 
+  output_fitLMD_DIC <- reactive({ 
     if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
     return(FUN_DIC_mediation(Data,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
                              McmcOutput = aggregate_outputs$output_listA,
@@ -425,7 +425,7 @@ shinyServer(function(input, output, session) {
                                         content= function(file){
                                           pdf(file=file)
                                           FUN_PDF_Mediation_ScatterPlots_forShiny(
-                                            model==1,
+                                            model=1,
                                             dataset="",
                                             filename=aggregate_outputs$output_listA,
                                             burnin=input$select_burnin,
@@ -501,7 +501,8 @@ shinyServer(function(input, output, session) {
   model_mediation <- reactive({
     if (is.null(model_results())) return(NULL)
     
-    model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(model_results(),
+    model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=df(),
+                                                                     datafile=model_results(),
                                                                      seed.index = seed_index(),
                                                                      burnin   = model_inputs$burnin,
                                                                      RhatCutoff   = 1.05)
@@ -847,19 +848,19 @@ shinyServer(function(input, output, session) {
   
   
   # download button for pdf
-  #  output$downloadPDF_BM <- downloadHandler(filename='posterior_draws.pdf',
-  #                                        content= function(file){
-  #                                          pdf(file=file)
-  #                                          FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot(
-  #                                             dataset="",
-  #                                             filenamelist = outputBM(),
-  #                                             seed.list = seed.list,
-  #                                             seed.selected = c(1,2),
-  #                                             burnin   = model_inputs$burnin,
-  #                                             x_vars   = model_inputs$checkGroup_x
-  #                                           )
-  #                                           dev.off()
-  #                                         })
+   output$downloadPDF_BM <- downloadHandler(filename='posterior_draws.pdf',
+                                         content= function(file){
+                                           pdf(file=file)
+                                           FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot(
+                                              dataset="",
+                                              filenamelist = outputBM(),
+                                              seed.list = seed.list,
+                                              seed.selected = c(1,2),
+                                              burnin   = model_inputs$burnin,
+                                              x_vars   = model_inputs$checkGroup_x
+                                            )
+                                            dev.off()
+                                          })
   
   
   
