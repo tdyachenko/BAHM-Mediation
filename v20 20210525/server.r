@@ -853,11 +853,11 @@ shinyServer(function(input, output, session) {
                                            pdf(file=file)
                                            FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot(
                                               dataset="",
-                                              filenamelist = outputBM(),
-                                              seed.list = seed.list,
+                                              filenamelist = model_results(),
+                                              seed.list = seed_list(),
                                               seed.selected = c(1,2),
-                                              burnin   = model_inputs$burnin,
-                                              x_vars   = model_inputs$checkGroup_x
+                                              burnin   = model_inputs$burnin
+                                              #x_vars   = model_inputs$checkGroup_x
                                             )
                                             dev.off()
                                           })

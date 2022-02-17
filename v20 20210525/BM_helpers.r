@@ -342,6 +342,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,fi
 
 FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.list, burnin)
   { filename = filenamelist[[seed.list]]
+  save(filename, file = "test2.RData")
     nvarX = ncol(filename$alphadraw[-1:-burnin,,1])
     tempCIs_M = rbind(
        cbind(colMeans(filename$alphadraw[-1:-burnin,,1]), 
@@ -361,8 +362,8 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
     )
     tempCIs_Rho =  matrix(c(mean(filename$rhodraw[-1:-burnin]),
                      t(hdi(filename$rhodraw[-1:-burnin], credMass = 0.95))),ncol=3,nrow=1)
-    templambda = t(apply(filename$lambdadraw[-1:-burnin,],2,hdi,credMass = CIband))
-    tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin,])),templambda)
+    templambda = t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = .95))
+    tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE])),templambda)
     
     colnames(tempCIs_M)   <- c("Mean","HPDI lower limit","HPDI upper limit")
     colnames(tempCIs_S)   <- c("Mean","HPDI lower limit","HPDI upper limit")

@@ -291,6 +291,8 @@ dashboardPage(
                              uiOutput("mediation_result")
                          )
                   ),
+                )
+        ),
                          
            # Parameters (Step 1)
            tabPanel(title="Step 1. Parameters (BM)", value='BMpar_het', 
@@ -433,4 +435,4 @@ dashboardPage(
  
   
  
-))) # end of dashboardPage
+) # end of dashboardPage
