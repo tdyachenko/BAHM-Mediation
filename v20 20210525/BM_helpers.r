@@ -263,9 +263,11 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW = function(dataset,fil
 FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,filenamelist,seed.list,seed.selected,burnin){
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   filename = filenamelist[[seed.selected]]
-  numCharts = lenght(filename$lambdadraw[1,])
+  numCharts = ncol(filename$lambdadraw)
+  
+  save(filename, file = "file.RData")
   for(i in 1:numCharts)
-  {  hist(filename$lambdadraw[-1:-burnin,i+1], main="", xlab=bquote(lambda[i]), xlim=c(0,1),col = "#75AADB",
+  {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i]), xlim=c(0,1),col = "#75AADB",
        breaks=50)
   }
 }

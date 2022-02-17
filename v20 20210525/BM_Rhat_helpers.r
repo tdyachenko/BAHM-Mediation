@@ -54,8 +54,6 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
      Mpsrf[j,1] = temp[[2]]
   }
   
-  save(inputdata, file = "inputdata.RData")
-  
   DIC = FUN_DIC_mediation(inputdata, datafile,burnin,ModelFlag=2)  #### ADDED, needs to be tested
 
   temp = which(Mpsrf<RhatCutoff)

@@ -740,6 +740,18 @@ shinyServer(function(input, output, session) {
     )                                 
   })
   
+  output_scatterplotsBM_lambda <- reactive({
+      if (is.null(model_mediation())) return(NULL)
+      
+      FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda(dataset  = "",  
+                                                                 filenamelist = model_outputs$output_listBM,
+                                                                 seed.list = seed_list(),
+                                                                 seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
+                                                                 burnin   = model_inputs$burnin
+                                                                 #x_var   = model_inputs$checkGroup_x 
+      )                                 
+  })
+  
   output_scatterplotsBM_w <- reactive({
     if (is.null(model_mediation())) return(NULL)
     
@@ -783,6 +795,9 @@ shinyServer(function(input, output, session) {
   #})
   output$plotBM_rho <- renderPlot({
     output_scatterplotsBM_rho()
+  })
+  output$plotBM_lambda <- renderPlot({
+      output_scatterplotsBM_lambda()
   })
   output$plotBM_w <- renderPlot({
     output_scatterplotsBM_w()
