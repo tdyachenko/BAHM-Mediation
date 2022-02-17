@@ -214,12 +214,15 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
       if(ModelFlag==2)
       { LL_total[mkeep]= sum(log(LLikM[indexM])) + sum(log(LLikD[indexD]))
         LL[1:2,,mkeep] = cbind(LLikM,LLikD)
+        rhodraw[mkeep,] = rho        # used to be phi
+        wdraw[,mkeep] = w
       }
       if(ModelFlag==1)
       { LL_total[mkeep]=  sum(log(LLikD[indexD]))
         LL[2,,mkeep] = LLikD
       }
     }
+    
     if(ModelFlag==2)
     { temp = rho*LLikM/ (rho*LLikM+(1-rho)*LLikD)   #  pi in documents
       for(hh in 1:nobs)
@@ -241,14 +244,14 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
       #wdraw[,mkeep] = w
       reject[mkeep] = rej
       
-      if(ModelFlag==2)
-      { LL_total[mkeep]= sum(log(LLikM[indexM])) + sum(log(LLikD[indexD]))
-        LL[1:2,,mkeep] = cbind(LLikM,LLikD)
-      }
-      if(ModelFlag==1)
-      { LL_total[mkeep]=  sum(log(LLikD[indexD]))
-        LL[2,,mkeep] = LLikD
-      }
+      #if(ModelFlag==2)
+      #{ LL_total[mkeep]= sum(log(LLikM[indexM])) + sum(log(LLikD[indexD]))
+      #  LL[1:2,,mkeep] = cbind(LLikM,LLikD)
+      #}
+      #if(ModelFlag==1)
+      #{ LL_total[mkeep]=  sum(log(LLikD[indexD]))
+      #  LL[2,,mkeep] = LLikD
+      #}
     }
     mkeep = r/keep
     #if ((r%%100) == 0) {
