@@ -54,9 +54,10 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
      Mpsrf[j,1] = temp[[2]]
   }
   
-  #DIC = FUN_DIC_mediation(inputdata, datafile,burnin,ModelFlag=2)  #### ADDED, needs to be tested
-  DIC = 1
+  save(inputdata, file = "inputdata.RData")
   
+  DIC = FUN_DIC_mediation(inputdata, datafile,burnin,ModelFlag=2)  #### ADDED, needs to be tested
+
   temp = which(Mpsrf<RhatCutoff)
   Rhat_sol1 = temp[which.max(rowSums(table01[temp,]))]   # solution 1, gives the row number in table01 to pick the seeds with solution 1
   index_sol1 = which(table01[Rhat_sol1,]==1)             # gives index of seeds with solution 1

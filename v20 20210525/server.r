@@ -378,7 +378,14 @@ shinyServer(function(input, output, session) {
   # calculate model fit (DIC)
   output_fitLMD_DIC <- reactive({ 
     if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
-    return(FUN_DIC_mediation(Data,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
+      
+    mydat <- list(
+        y = input_listA()[,input$radio_y],
+        X = input_listA()[,input$checkGroup_x],
+        m = input_listA()[,input$radio_m]
+    )
+      
+    return(FUN_DIC_mediation(mydat,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
                              McmcOutput = aggregate_outputs$output_listA,
                              burnin   = aggregate_outputs$select_burnin,
                              ModelFlag = 1))
