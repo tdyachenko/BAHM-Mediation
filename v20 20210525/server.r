@@ -384,6 +384,8 @@ shinyServer(function(input, output, session) {
         X = input_listA()[,input$checkGroup_x],
         m = input_listA()[,input$radio_m]
     )
+    
+    save(mydat, file="mydat.RData")
       
     return(FUN_DIC_mediation(mydat,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
                              McmcOutput = aggregate_outputs$output_listA,
@@ -507,8 +509,14 @@ shinyServer(function(input, output, session) {
   
   model_mediation <- reactive({
     if (is.null(model_results())) return(NULL)
+      
+      mydat <- list(
+          y = input_listA()$Data$y,
+          X = input_listA()$Data$X,
+          m = input_listA()$Data$m
+      )
     
-    model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=df(),
+    model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=mydat,
                                                                      datafile=model_results(),
                                                                      seed.index = seed_index(),
                                                                      burnin   = model_inputs$burnin,

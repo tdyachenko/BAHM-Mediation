@@ -16,9 +16,9 @@ FUN_DIC_mediation = function(Data, McmcOutput,burnin,ModelFlag)
 {
   save(Data, file = "Data.RData")
   #load("inputdata.RData")
-  Data <- list(y = Data$y1, 
-               X = as.matrix(Data[,c("x1", "x2")]), 
-               m = Data$m1)
+  Data <- list(y = Data$y, 
+               X = as.matrix(Data$X), 
+               m = Data$m)
   save(McmcOutput, file = "mcmc.RData")
     
   y = Data$y
