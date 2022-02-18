@@ -385,8 +385,6 @@ shinyServer(function(input, output, session) {
         m = input_listA()[,input$radio_m]
     )
     
-    save(mydat, file="mydat.RData")
-      
     return(FUN_DIC_mediation(mydat,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
                              McmcOutput = aggregate_outputs$output_listA,
                              burnin   = aggregate_outputs$select_burnin,
@@ -534,7 +532,7 @@ shinyServer(function(input, output, session) {
       tmp_input_list <- update_inputs_binary(my_inputs, seed_var = all_seeds[j])
       
       progress$inc(amount = .25)
-      progress$set(message = paste0("Seed ", j, " Inputs Created."))
+      progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Inputs Created."))
       
       model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
         Model = 2,
@@ -543,7 +541,7 @@ shinyServer(function(input, output, session) {
         Mcmc  = tmp_input_list$Mcmc)
       
       progress$inc(amount = .25)
-      progress$set(message = paste0("Seed ", j, " Model Complete."))
+      progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Model Complete."))
       
       return(model_run)
     }, future.seed=TRUE)
