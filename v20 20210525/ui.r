@@ -41,7 +41,8 @@ dashboardPage(
     ),
     
     sidebarMenu(id = "mysidebar",
-      menuItem("Input", tabName = "input", icon = icon("th",lib = "font-awesome"),selected = TRUE),
+      menuItem("How to use", tabName = "How to use", icon = icon("question",lib = "font-awesome"),selected = TRUE),
+      menuItem("Input", tabName = "input", icon = icon("th",lib = "font-awesome")),
       menuItem("Models", tabName = "input", icon = icon("bar-chart-o",lib = "font-awesome"),
           menuSubItem("Heterogeneous (BM)", tabName = "BM",icon = icon("angle-double-right")),
           menuSubItem("Aggregate", tabName = "aggregate",icon = icon("angle-double-right"))
@@ -84,6 +85,9 @@ dashboardPage(
                               ),
                               column(width = 8,
                                      uiOutput("checkGroup_x"),
+                                     conditionalPanel(condition = "input.checkGroup_x.length > 1",
+                                        helpText("WARNING: Selecting more than one independent variable will change the interpretation of the results and will assume simultaneous mediation using both variables.")
+                                     ),
                                      uiOutput("covariates_z")
                               )
                             ),
@@ -94,8 +98,8 @@ dashboardPage(
                   
                    # NEED TO HAVE THIS CODED
                    #helpText("Your file has " " observations and " "variables."),
-                   helpText("Your file has *** observations and *** variables."),  # placeholder
-                  
+                   textOutput("obs"),
+
                    box(width = NULL,
                         solidHeader = FALSE,
                         title = "Table: Raw Data",
@@ -273,7 +277,7 @@ dashboardPage(
           "
         )
       ),
-      textOutput("keepAlive"),
+      # textOutput("keepAlive"),
        
        # Results Tab - Binary Mixture - this only appears when 'model_button' is selected
        tabsetPanel(type = 'tabs', id = 'BM_tabs',

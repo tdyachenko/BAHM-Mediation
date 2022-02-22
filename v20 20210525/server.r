@@ -63,6 +63,10 @@ shinyServer(function(input, output, session) {
     }
   })
   
+  output$obs <- renderText({
+      return(paste0("Your file has ", nrow(df()), " observations and ", ncol(df()), " variables."))
+  })
+  
   df_column_list <- reactive({
     return(names(df()))
   })
@@ -655,6 +659,8 @@ shinyServer(function(input, output, session) {
   
   clean_table <- function(tbl) {
     if (!is.list(tbl)) tbl <- list(tbl)
+    
+    save(tbl, file = "mytbl.RData")
     
     lapply(tbl, function(x) {
       mystr <- gsub("(alpha|beta|gamma|alpha|rho)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
