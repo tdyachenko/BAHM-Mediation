@@ -247,7 +247,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
 FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Rho = function(dataset,filenamelist,seed.list,seed.selected,burnin){
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   filename = filenamelist[[seed.selected]]
-  hist(filename$rhodraw[-1:-burnin], main="", xlab=bquote(rho), xlim=c(0,1),col = "#75AADB",
+  hist(colMeans(filename$rhodraw[-1:-burnin,]), main="", xlab=bquote(rho), xlim=c(0,1),col = "#75AADB",
        breaks=50)
 }
   
@@ -267,7 +267,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,fi
   
   save(filename, file = "file.RData")
   for(i in 1:numCharts)
-  {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i]), xlim=c(0,1),col = "#75AADB",
+  {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i]), xlim=c(min(filename$lambdadraw[-1:-burnin,i]),max(filename$lambdadraw[-1:-burnin,i])),col = "#75AADB",
        breaks=50)
   }
 }
@@ -393,12 +393,11 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
     rownames(tempCIs_Rho) <- rownames_list_Rho
    
     rownames_list_Lambda = c(rep(0,nrow(tempCIs_lambda)))
-    rownames_list_Lambda[nvarX+2] = "beta_{M_2}"
-    for(i in 1:nvarX) {
-      rownames_list_M[i]=paste0("alpha_{M_", i - 1, "}")
-      rownames_list_M[nvarX+2+i]=paste0("alphabeta_{M_", i - 1, "}")
+    rownames_list_Lambda[nvarZ] = "lambda"
+    for(i in 1:nvarZ) {
+      rownames_list_Lambda[i]=paste0("lambda_{", i - 1, "}")
     }
-    return(list(tempCIs_M,tempCIs_S,tempCIs_Rho))
+    return(list(tempCIs_M,tempCIs_S,tempCIs_Rho,tempCIs_lambda))
 }
 
 # testing

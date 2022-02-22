@@ -259,6 +259,8 @@ FUN_PDF_MCMC_Mediation_forShiny = function(model,dataset,filenamelist,seed.index
   }
   if(model==2)
   {
+   ylimLL =  c( min(filename$lambdadraw[-1:-burnin,])-0.1*min(filename$lambdadraw[-1:-burnin,]),  # used burnin before
+                max(filename$lambdadraw[-1:-burnin,])+0.1*max(filename$lambdadraw[-1:-burnin,]))
    #pdf(paste(dataset,"_MCMC_MSmixture", ".pdf", sep = ""), width=pdfW, height=pdfH)
    par(oma=c(0,0,2,0));   par(mfcol=c(8,length(seed.index)),mai = c(0.5, 0.3, 0.4, 0.3))
    for( i in seed.index)
