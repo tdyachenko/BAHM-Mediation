@@ -384,14 +384,14 @@ shinyServer(function(input, output, session) {
   output_fitLMD_DIC <- reactive({ 
     if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
       
-    mydat <- list(
-        y = input_listA()[,input$radio_y],
-        X = input_listA()[,input$checkGroup_x],
-        m = input_listA()[,input$radio_m]
-    )
+      mydat <- list(
+          y = input_listA()$Data$y,
+          X = input_listA()$Data$X,
+          m = input_listA()$Data$m
+      )
     
     return(FUN_DIC_mediation(mydat,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
-                             McmcOutput = aggregate_outputs$output_listA,
+                             McmcOutput = list(aggregate_outputs$output_listA),
                              burnin   = aggregate_outputs$select_burnin,
                              ModelFlag = 1))
   })
@@ -450,6 +450,9 @@ shinyServer(function(input, output, session) {
   # print model fit
   output$fitA <- renderTable(expr = output_fitLMD(), 
                              rownames=TRUE, colnames=FALSE, bordered=TRUE)
+  
+  output$fitA_DIC <- renderTable(expr = {x <- as.matrix(output_fitLMD_DIC()); rownames(x) <- "DIC"; return(x)},
+                                 rownames = TRUE, colnames = FALSE, bordered = TRUE)
   
   # print HDPI of posterior draws
   output$hdpiA_tbl <- renderTable(expr=output_HDPI_A(), colnames=TRUE, bordered=TRUE) 
@@ -883,7 +886,7 @@ shinyServer(function(input, output, session) {
   
   
   # download button for pdf
-   output$downloadPDF_BM <- downloadHandler(filename='posterior_draws.pdf',
+   output$downloadPDF_b <- downloadHandler(filename='posterior_draws.pdf',
                                          content= function(file){
                                            pdf(file=file)
                                            FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot(

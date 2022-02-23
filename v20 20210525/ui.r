@@ -231,7 +231,8 @@ dashboardPage(
                       solidHeader = FALSE,
                       title = "Model fit",   #table
                       status = "primary",
-                      tableOutput("fitA")
+                      tableOutput("fitA"),
+                      tableOutput("fitA_DIC")
                   )
             ),
            column(width = 8, 
@@ -313,7 +314,9 @@ dashboardPage(
                               title = "Plots of the Posterior Draws of Parameters",  #Figure
                               "Numbers in the corners are proportions of the posterior distribution in that quadrant",
                               status = "primary",
-                              uiOutput("plotsBM_effects.ui")  # TO DO: size to make a function of number of parameters
+                              uiOutput("plotsBM_effects.ui"),
+                              h5('Downloads:', align='left'),
+                              downloadButton('downloadPDF_b', 'PDF of Plots' ),# TO DO: size to make a function of number of parameters
                           )
                          ),
                   column(width = 8,
