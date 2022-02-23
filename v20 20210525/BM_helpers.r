@@ -393,10 +393,13 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
     rownames(tempCIs_Rho) <- rownames_list_Rho
    
     rownames_list_Lambda = c(rep(0,nrow(tempCIs_lambda)))
+    
+    nvarZ = ncol(filename$lambdadraw)
     rownames_list_Lambda[nvarZ] = "lambda"
     for(i in 1:nvarZ) {
       rownames_list_Lambda[i]=paste0("lambda_{", i - 1, "}")
     }
+    rownames(tempCIs_lambda) <- rownames_list_Lambda
     return(list(tempCIs_M,tempCIs_S,tempCIs_Rho,tempCIs_lambda))
 }
 
