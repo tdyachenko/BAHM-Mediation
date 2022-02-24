@@ -247,7 +247,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
 FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Rho = function(dataset,filenamelist,seed.list,seed.selected,burnin){
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   filename = filenamelist[[seed.selected]]
-  hist(colMeans(filename$rhodraw[-1:-burnin,]), main="", xlab=bquote(rho), xlim=c(0,1),col = "#75AADB",
+  hist((filename$rhodraw[-1:-burnin,]), main="", xlab=bquote(rho), xlim=c(0,1),col = "#75AADB",
        breaks=50)
 }
   
