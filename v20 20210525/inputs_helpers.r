@@ -25,7 +25,7 @@ get_inputs_agg <-function(df, x_vars, y_var, m_var, z_vars,
                           Aa_var, Abg_var, nu_var, qm_var, qy_var,
                           R_var, seed_var, keep_var){
   
-  df = as.matrix(df)
+  df = as.matrix(df[, sapply(df, class) %in% c("numeric", "integer")])
   
   X   = df[,x_vars]
   nhh = nrow(df)
@@ -79,7 +79,8 @@ get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
                              Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
                              R_var, keep_var, slambda1, slambda2)
 {
-  df  = as.matrix(df)
+  df = as.matrix(df[, sapply(df, class) %in% c("numeric", "integer")])
+    
   X   = df[,x_vars]
   Z   = df[,z_vars]  #### ERIC: If no Z is selected, we should have something here, right? 
   
