@@ -14,10 +14,10 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
     done=0
     while (done==0)
     { sigma2 = ((nu * q + s)/rchisq(1, nu + n))
-    print(nu)
-    print(q)
-    print(s)
-    print(n)
+    #print(nu)
+    #print(q)
+    #print(s)
+    #print(n)
       done = c(ifelse(sigma2>0.01,1,0))
     }
     beta = btilde + as.vector(sqrt(sigma2)) * IR %*% rnorm(nvar)

@@ -160,8 +160,8 @@ if(model==1){
   #pdf(paste(dataset, "Posterior Draws.pdf", sep = " "), width=pdfW, height=pdfH)
   par(oma=c(0,0,2,0));
   QuadrantsCounts = array(0, dim=c(4, (nvarX-1)))
-  print(burnin)
-  print(length(filename$LL_total))
+  #print(burnin)
+  #print(length(filename$LL_total))
   DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LL_total), by = 1))
   pp=pn=np=nn=0
   for(j in 2:(nvarX)){  

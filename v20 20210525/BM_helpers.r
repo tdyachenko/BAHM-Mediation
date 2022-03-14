@@ -388,7 +388,7 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
     }
     rownames_list_Rho = expression(rho)
     rownames(tempCIs_M) <- rownames_list_M
-    print(rownames_list_M)
+    # print(rownames_list_M)
     rownames(tempCIs_S) <- rownames_list_S
     rownames(tempCIs_Rho) <- rownames_list_Rho
    

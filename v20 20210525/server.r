@@ -403,7 +403,7 @@ shinyServer(function(input, output, session) {
     
     length(aggregate_outputs$checkGroup_x)
   })
-  plotHeightA <- reactive(350 * max(plotCountA(), 2))
+  plotHeightA <- reactive(350 * max(plotCountA(), 1))
   
   # generate scatterplots of posterior draws for each parameter
   output_scatterplots <- reactive({
@@ -427,7 +427,7 @@ shinyServer(function(input, output, session) {
   #renderUI
   # display plots
   output$plotA.ui <- renderUI({  # the height function only works with renderUI, not renderPlot
-    plotOutput("plotA",  height = plotHeightA()
+      plotOutput("plotA",  height = plotHeightA()
     )
   })
   #withProgress(expr = output_scatterplots(), message='Running scatterplots...')
@@ -448,11 +448,14 @@ shinyServer(function(input, output, session) {
   
   
   # print model fit
-  output$fitA <- renderTable(expr = output_fitLMD(), 
-                             rownames=TRUE, colnames=FALSE, bordered=TRUE)
-  
-  output$fitA_DIC <- renderTable(expr = {x <- as.matrix(output_fitLMD_DIC()); rownames(x) <- "DIC"; return(x)},
-                                 rownames = TRUE, colnames = FALSE, bordered = TRUE)
+  output$fitA <- renderTable(expr = {
+      y <- output_fitLMD()
+      x <- rbind(y, as.matrix(output_fitLMD_DIC()))
+      
+      rownames(x) <- c("LMD NR", "DIC")
+      
+      return(x)
+  }, rownames=TRUE, colnames=FALSE, bordered=TRUE)
   
   # print HDPI of posterior draws
   output$hdpiA_tbl <- renderTable(expr=output_HDPI_A(), colnames=TRUE, bordered=TRUE) 
