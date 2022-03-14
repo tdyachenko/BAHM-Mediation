@@ -41,7 +41,7 @@ dashboardPage(
     ),
     
     sidebarMenu(id = "mysidebar",
-      menuItem("How to use", tabName = "How to use", icon = icon("question",lib = "font-awesome"),selected = TRUE),
+      menuItem("How to use", tabName = "how", icon = icon("question",lib = "font-awesome"),selected = TRUE),
       menuItem("Input", tabName = "input", icon = icon("th",lib = "font-awesome")),
       menuItem("Models", tabName = "input", icon = icon("bar-chart-o",lib = "font-awesome"),
           menuSubItem("Heterogeneous (BM)", tabName = "BM",icon = icon("angle-double-right")),
@@ -54,6 +54,12 @@ dashboardPage(
   dashboardBody(
     
     tabItems(
+        
+        tabItem(tabName = "how",
+                h4(strong("Disclaimer:")),
+                helpText("This application is currently under continuous development. While most functionality works, you may encounter unexpected behavior, please contact <email>, and we will do our best to look into it and correct it if needed. Thank you!"),
+        ),
+                
       
       # First tab content
       tabItem(tabName = "input",
