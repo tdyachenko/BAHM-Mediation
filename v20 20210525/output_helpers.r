@@ -237,8 +237,8 @@ FUN_PDF_MCMC_Mediation_forShiny = function(model,dataset,filenamelist,seed.index
                   0.1*min(c(filename$sigma2mdraw[-1:-burnin,],filename$sigma2ydraw[-1:-burnin,])),
                 max(c(filename$sigma2mdraw[-1:-burnin,],filename$sigma2ydraw[-1:-burnin,]))+
                   0.1*max(c(filename$sigma2mdraw[-1:-burnin,],filename$sigma2ydraw[-1:-burnin,])))
-   ylimLL =  c( min(filename$LL_total[-1:-2])-0.1*min(filename$LL_total[-1:-2]),  # used burnin before
-                max(filename$LL_total[-1:-2])+0.1*max(filename$LL_total[-1:-2]))
+   ylimLL =  c( min(filename$LL_total[-1:-2])-0.01*min(filename$LL_total[-1:-2]),  # used burnin before
+                max(filename$LL_total[-1:-2])+0.01*max(filename$LL_total[-1:-2]))
    
   if(model==1)
   {
@@ -259,7 +259,7 @@ FUN_PDF_MCMC_Mediation_forShiny = function(model,dataset,filenamelist,seed.index
   }
   if(model==2)
   {
-   ylimLL =  c( min(filename$lambdadraw[-1:-burnin,])-0.1*min(filename$lambdadraw[-1:-burnin,]),  # used burnin before
+   ylimL =  c( min(filename$lambdadraw[-1:-burnin,])-0.1*min(filename$lambdadraw[-1:-burnin,]),  # used burnin before
                 max(filename$lambdadraw[-1:-burnin,])+0.1*max(filename$lambdadraw[-1:-burnin,]))
    #pdf(paste(dataset,"_MCMC_MSmixture", ".pdf", sep = ""), width=pdfW, height=pdfH)
    par(oma=c(0,0,2,0));   par(mfcol=c(8,length(seed.index)),mai = c(0.5, 0.3, 0.4, 0.3))
@@ -271,7 +271,7 @@ FUN_PDF_MCMC_Mediation_forShiny = function(model,dataset,filenamelist,seed.index
      matplot(filename$gammabetaSdraw,type='l',col=1:8,main=expression(gamma[S],beta[S]),ylab=expression(gamma[S],beta[S]),ylim=ylimGBs);
      matplot(filename$sigma2mdraw,type='l',col=1:4,main=expression(sigma[m]^2),ylab=expression(sigma[m]^2),ylim=ysigma);
      matplot(filename$sigma2ydraw,type='l',col=1:4,main=expression(sigma[y]^2),ylab=expression(sigma[y]^2),ylim=ysigma);
-     matplot(filename$lambdadraw,type='l',col=1:3,main=expression(lambda),ylab=expression(lambda),ylim=ylimLL);
+     matplot(filename$lambdadraw,type='l',col=1:3,main=expression(lambda),ylab=expression(lambda),ylim=ylimL);
      plot(filename$LL_total,type='l',col=1,main="LL",ylab="LL",ylim=ylimLL)
    }
    #title(main=paste(dataset),outer=T)
