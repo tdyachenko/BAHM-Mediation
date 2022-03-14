@@ -157,7 +157,7 @@ dashboardPage(
              br(),
              hr(),
              
-             h5(em("Priors:")),
+             h5(em("Priors: (any changes in the settings might impact impact the results of the estimation)")),
              fluidRow(
                column(6, HTML("<i>A<sub>&alpha;</sub> </i> (precision parameter for <i>&alpha;</i> parameters)")),
                column(3, uiOutput("select_Aa"))

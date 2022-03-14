@@ -119,8 +119,8 @@ shinyServer(function(input, output, session) {
                      ),
                      multiple = TRUE),
         
-      checkboxInput("interactions", "Would you like to create (an) interaction term(s) for the aggregate model?
-                    If the interactions for the aggregate model have been generated, select them as independent variables above and do not check this box.")
+      # checkboxInput("interactions", "Would you like to create (an) interaction term(s) for the aggregate model?
+       #             If the interactions for the aggregate model have been generated, select them as independent variables above and do not check this box.")
       )
     })
   })
@@ -164,7 +164,7 @@ shinyServer(function(input, output, session) {
   output$select_seed <- renderUI({
     #numericInput("select_seed", label=('Random seed/starting value'), value = 123, step=1)
     numericInput("select_seed", label=NULL, #value = round(runif(1,0,10^5)))
-                 value = 12345                   )  # FOR TESTING ONLY
+                 value = 1234                   )  # FOR TESTING ONLY
   })
   
   output$select_keep <- renderUI({
