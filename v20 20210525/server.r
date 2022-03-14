@@ -627,7 +627,7 @@ shinyServer(function(input, output, session) {
         strong("Mediation is present in the sample."),
         paste0(scales::percent(max(prop_bm)), " of the joint posterior distirbution of parameters α and ß for at least one of the segments is in quadrant ", max_quad, ". 
                           The model estimates that the average probability to mediate in the sample is ", scales::percent(prop_bm[maxloc %% 4, colnum - length(model_inputs$checkGroup_x)]), 
-                          ", which can be also interpreted as a percent of the sample mediates through the proposed mediator."),
+                          ", which can be also interpreted as a percent of the sample mediating through the proposed mediator."),
         br(),br(),
         "The dependent variables are: ", paste0(model_inputs$checkGroup_x, collapse = ", "), ".",
         br(),br(),
