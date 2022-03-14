@@ -350,9 +350,9 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
        cbind(colMeans(filename$alphadraw[-1:-burnin,,1]), 
          t( apply(filename$alphadraw[-1:-burnin,,1],2,hdi,credMass = 0.95))),  # aM
        cbind(colMeans(filename$betaMdraw[-1:-burnin,]),
-         t( apply(filename$betaMdraw[-1:-burnin,],2,hdi,credMass = 0.95))),     # bM
-       cbind(colMeans(filename$alphadraw[-1:-burnin,,1]*filename$betaMdraw[-1:-burnin,2]),
-         t(apply((filename$alphadraw[-1:-burnin,,1]*filename$betaMdraw[-1:-burnin,2]),2, hdi,credMass = 0.95)))  # abM
+         t( apply(filename$betaMdraw[-1:-burnin,],2,hdi,credMass = 0.95)))     # bM
+       #cbind(colMeans(filename$alphadraw[-1:-burnin,,1]*filename$betaMdraw[-1:-burnin,2]),
+         #t(apply((filename$alphadraw[-1:-burnin,,1]*filename$betaMdraw[-1:-burnin,2]),2, hdi,credMass = 0.95)))  # abM
     )
     tempCIs_S = rbind(
        cbind(colMeans(filename$alphadraw[-1:-burnin,,2]), 
@@ -377,7 +377,7 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
     rownames_list_M[nvarX+2] = "beta_{M_2}"
     for(i in 1:nvarX) {
       rownames_list_M[i]=paste0("alpha_{M_", i - 1, "}")
-      rownames_list_M[nvarX+2+i]=paste0("alphabeta_{M_", i - 1, "}")
+      #rownames_list_M[nvarX+2+i]=paste0("alphabeta_{M_", i - 1, "}")
     }
     rownames_list_S = c(rep(0,nrow(tempCIs_S)))
     rownames_list_S[nvarX+nvarX+1] = "beta_{S}"
