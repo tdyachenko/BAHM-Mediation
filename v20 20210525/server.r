@@ -731,7 +731,7 @@ shinyServer(function(input, output, session) {
                                  info = FALSE,
                                  ordering = FALSE,
                                  columnDefs = list(list(className = "dt-center", targets = "_all"),
-                                                   list(target = "_all"))))
+                                                   list(targets = "_all"))))
   })
   
   #----------------------------------------------------  
