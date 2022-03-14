@@ -797,7 +797,7 @@ shinyServer(function(input, output, session) {
     
     length(model_inputs$checkGroup_x)
   })
-  plotHeightBM <- reactive(350 * max(plotCountBM(), 2))
+  plotHeightBM <- reactive(350 * max(plotCountBM(), 1))
   
   #renderPlot
   #renderUI
