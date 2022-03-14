@@ -30,7 +30,7 @@ $(document).on('shiny:value', function(event) {
 # define UI
 dashboardPage(
   
-  dashboardHeader(title = "Bayesian Analysis of Heterogeneous Mediation",titleWidth=450),
+  dashboardHeader(title = "Bayesian Analysis of Heterogeneous Mediation (BAHM)",titleWidth=550),
   
   dashboardSidebar(
     
@@ -57,7 +57,9 @@ dashboardPage(
         
         tabItem(tabName = "how",
                 h4(strong("Disclaimer:")),
-                helpText("This application is currently under continuous development. While most functionality works, you may encounter unexpected behavior, please contact <email>, and we will do our best to look into it and correct it if needed. Thank you!"),
+                helpText("This application is currently under continuous development. While most functionality works, you may encounter unexpected behavior, please contact <email>,
+                         and we will do our best to look into it and correct it if needed. Thank you!"),
+                helpText("More information will be provided shortly. Please go to Input Tab to perform the analysis."),
         ),
                 
       
@@ -429,8 +431,8 @@ dashboardPage(
              "  Authors' names are temporarily hidden to adhere to the blind review process.",
              br(),
              br(),
-             p("This link will be removed when submitting for review:"),
-             a(href="https://ssrn.com/abstract=2600140", "link to the paper"),
+             #p("This link will be removed when submitting for review:"),
+             #a(href="https://ssrn.com/abstract=2600140", "link to the paper"),
              br(),
              br(),
              a(href="https://www.rdocumentation.org/packages/coda/versions/0.19-2/topics/gelman.diag", "References for function gelman.diag"),

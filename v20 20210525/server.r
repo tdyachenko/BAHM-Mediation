@@ -159,17 +159,17 @@ shinyServer(function(input, output, session) {
   # MCMC
   output$select_R <- renderUI({
     #numericInput("select_R", label=("R (# of draws)"), value = 10000, step=100)
-    numericInput("select_R", label=NULL, value = 1000, step=100)
+    numericInput("select_R", label=NULL, value = 10000, step=100)
   })
   output$select_seed <- renderUI({
     #numericInput("select_seed", label=('Random seed/starting value'), value = 123, step=1)
     numericInput("select_seed", label=NULL, #value = round(runif(1,0,10^5)))
-                 value = 1234                   )  # FOR TESTING ONLY
+                 value = 125                   )  # FOR TESTING ONLY
   })
   
   output$select_keep <- renderUI({
     #numericInput("select_keep", label=('Keep (thinning parameter to minimize autocorrelation in draws (default is R/1000))'), 
-    numericInput("select_keep", label=NULL, value = 1, step=1)
+    numericInput("select_keep", label=NULL, value = 10, step=10)
   })
   
   output$select_burnin <- renderUI({
@@ -626,12 +626,12 @@ shinyServer(function(input, output, session) {
       tagList(
         strong("Mediation is present in the sample."),
         paste0(scales::percent(max(prop_bm)), " of the joint posterior distirbution of parameters α and ß for at least one of the segments is in quadrant ", max_quad, ". 
-                          The model estimates that the average probability to mediate in the sample is ", scales::percent(prop_bm[maxloc %% 4, colnum - length(model_inputs$checkGroup_x)]), 
+                          The model estimates that the average probability to mediate in the sample is ", scales::percent(round(output_HDPI()[[3]]$Mean, digits = 4)), 
                           ", which can be also interpreted as a percent of the sample mediating through the proposed mediator."),
         br(),br(),
         "The dependent variables are: ", paste0(model_inputs$checkGroup_x, collapse = ", "), ".",
-        br(),br(),
-        "The mean of ρ is ", round(output_HDPI()[[3]]$Mean, digits = 4),
+        #br(),br(),
+        #"The mean of ρ is ", round(output_HDPI()[[3]]$Mean, digits = 4),
         br(),br(),
         "You can download individual specific proabilities to mediate by clicking the button below.
                           The probabilities are calculated as posterior means of individual parameters w.",
