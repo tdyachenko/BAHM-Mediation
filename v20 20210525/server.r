@@ -672,7 +672,12 @@ shinyServer(function(input, output, session) {
     
     lapply(tbl, function(x) {
       mystr <- gsub("(alpha|beta|gamma|alpha|rho)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
-      y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr) %>% select(Variable, Parameter, everything())
+      y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr)
+      if ("Variable" %in% names(y)) {
+          y <- y %>% select(Variable, Parameter, everything())
+      } else {
+          y <- y %>% select(Parameter, everything())
+      }
       
       return(y)
     })
@@ -681,9 +686,7 @@ shinyServer(function(input, output, session) {
   output_HDPI <- reactive({
     if (is.null(model_mediation())) return(list(NULL, NULL, NULL))
     
-    clean_table(FUN_PDF_Mediation_Parameters_MSmixture_forShiny(model_outputs$output_listBM,
-                                                                seed.list=model_outputs$best.seed,  
-                                                                burnin   = model_inputs$burnin))
+    clean_table(FUN_PDF_Mediation_Parameters_MSmixture_forShiny(model_outputs$output_listBM, x_vars = input$checkGroup_x, seed.list=model_outputs$best.seed, burnin = model_inputs$burnin))
   })
   
   output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)

@@ -342,7 +342,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,fi
 # this is based on the best seed
 # outputs HPD intervals
 
-FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.list, burnin)
+FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars, seed.list, burnin)
   { filename = filenamelist[[seed.list]]
   save(filename, file = "test2.RData")
     nvarX = ncol(filename$alphadraw[-1:-burnin,,1])
@@ -400,6 +400,10 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, seed.l
       rownames_list_Lambda[i]=paste0("lambda_{", i - 1, "}")
     }
     rownames(tempCIs_lambda) <- rownames_list_Lambda
+    
+    tempCIs_M <- cbind("Variable" = c("Intercept", x_vars), tempCIs_M)
+    tempCIs_S <- cbind("Variable" = c("Intercept", x_vars), tempCIs_S)
+    
     return(list(tempCIs_M,tempCIs_S,tempCIs_Rho,tempCIs_lambda))
 }
 
