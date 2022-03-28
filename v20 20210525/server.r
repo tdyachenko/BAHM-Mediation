@@ -672,7 +672,7 @@ shinyServer(function(input, output, session) {
     
     lapply(tbl, function(x) {
       mystr <- gsub("(alpha|beta|gamma|alpha|rho)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
-      y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr) %>% select(Parameter, everything())
+      y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr) %>% select(Variable, Parameter, everything())
       
       return(y)
     })

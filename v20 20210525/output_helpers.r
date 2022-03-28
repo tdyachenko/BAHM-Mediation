@@ -139,6 +139,9 @@ FUN_PDF_Mediation_HDPI_forShiny  = function(model,filename, burnin, x_vars, CIba
     
     colnames(outputTable) <- c("Mean","Lower limit","Upper limit")
     rownames(outputTable) <- rownames_list
+    
+    outputTable <- cbind("Variable" = c("Intercept", x_vars), outputTable)
+    
     # return(list(Proportions = QuadrantsCounts/length(DrawsAnalysis)))
     #return(grid.table(outputTable))
     return(outputTable)
