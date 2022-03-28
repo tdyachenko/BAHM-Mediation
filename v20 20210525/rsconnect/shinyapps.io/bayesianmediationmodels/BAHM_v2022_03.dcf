@@ -1,0 +1,14 @@
+name: BAHM_v2022_03
+title:
+username:
+account: bayesianmediationmodels
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 5852336
+bundleId: 5735403
+url: https://bayesianmediationanalysis.shinyapps.io/BAHM_v2022_03/
+when: 1648477466.79995
+lastSyncTime: 1648477466.79995
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: aggTest.RData|file.RData|mytbl.RData|test.RData|test2.RData|x.RData

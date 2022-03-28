@@ -27,6 +27,9 @@ plan(list(
   tweak(multisession, workers = max(1, availableCores() %/% 2))
 ))
 
+# load sample data to use as default # moved to see if this helps on the server
+sample_df <- read.csv("sample_data_Loyalty.csv")
+
 source('inputs_helpers.r')
 source('output_helpers.r')
 source('agg_helpers.r')
@@ -34,8 +37,7 @@ source('BM_helpers.r')
 source('BM_Rhat_helpers.r')
 source("FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R")
 
-# load sample data to use as default 
-sample_df <- read.csv("sample_data_Loyalty.csv")
+
 
 shinyServer(function(input, output, session) {
   

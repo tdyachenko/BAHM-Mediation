@@ -13,6 +13,7 @@ library(shinyWidgets)
 library(shinydashboard)
 library(DT)
 
+# ??? what does this do?
 ketex_js <- " 
 $(document).on('shiny:value', function(event) {
   if(event.name.endsWith('_tbl')) {
@@ -32,6 +33,7 @@ dashboardPage(
   
   dashboardHeader(title = "Bayesian Analysis of Heterogeneous Mediation (BAHM)",titleWidth=550),
   
+  # item on the side bar
   dashboardSidebar(
     
     tags$head(
@@ -63,7 +65,7 @@ dashboardPage(
         ),
                 
       
-      # First tab content
+      # SIDE tab content - # TAB Input
       tabItem(tabName = "input",
         
         tabsetPanel(type = 'tabs', id = 'input_tabs',
@@ -208,7 +210,7 @@ dashboardPage(
         ) # end of tabsetPanel "Data"
       ),  # end of tabItem "input"
       
-      # Second tab content
+      # SIDE tab content - # TAB Models (aggregate)
       tabItem(tabName = "aggregate",
  
        # button which will re-run model
@@ -260,7 +262,7 @@ dashboardPage(
         )
      ),
  #
-      # Third tab content
+      # SIDE tab content - # TAB Models (BM)
       tabItem(tabName = "BM",         
         
        # button which will re-run model
@@ -423,6 +425,7 @@ dashboardPage(
        )  # end of tabsetPanel for BM
      ), # end of tabItem "BM"
  #                  
+     # SIDE tab content - # TAB Models (aggregate) 
      tabItem(tabName = "ref",
              h3("Resources"),
              "This app is based on the working paper:",
