@@ -145,7 +145,7 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
                                "Mean DIC",
                                "Max DIC")
   
-  if(LMD_mean_Sol1>LMD_mean_Sol2){
+ # if(LMD_Max_Sol1>LMD_Max_Sol2){
     colnames(Rhat) = c("Solution 1","Solution 2")
     output = list(table_forShiny = table_forShiny,
                   RhatEstAll = Psrf,
@@ -165,31 +165,31 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
                   DIC_seedMax = which.max(DIC),
                   seed.index=seed.index,
                   burnin=burnin)
-  }
-  else{
-    table_forShiny = cbind(table_forShiny[,2],table_forShiny[,1])
-    colnames(table_forShiny) = c("Solution 1","Solution 2")
-    Rhat = cbind(Rhat[,2],Rhat[,1])
-    colnames(Rhat) = c("Solution 1","Solution 2")
-    output = list(table_forShiny = table_forShiny,
-                  RhatEstAll = Psrf,
-                  RhatEst = Rhat,
-                  MVRhatEstAll = Mpsrf,
-                  index_sol1=index_sol2,
-                  index_sol2=index_sol1,
-                  RhatEstSol1 = RhatEstSol2,
-                  RhatEstSol2 = RhatEstSol1, 
-                  MpsrfAllSeeds =  Mpsrf[nrow(table01)],
-                  LMD=LMD,
-                  LMD_mean = mean(LMD),
-                  LMD_Max = max(LMD),
-                  LMD_seedMax = which.max(LMD), 
-                  DIC_mean = mean(DIC),
-                  DIC_Max = max(DIC),
-                  DIC_seedMax = which.max(DIC),
-                  seed.index=seed.index,
-                  burnin=burnin)
-  }
+ # }
+ # else{
+ #   table_forShiny = cbind(table_forShiny[,2],table_forShiny[,1])
+ #   colnames(table_forShiny) = c("Solution 1","Solution 2")
+ #   Rhat = cbind(Rhat[,2],Rhat[,1])
+ #   colnames(Rhat) = c("Solution 1","Solution 2")
+ #   output = list(table_forShiny = table_forShiny,
+ #                 RhatEstAll = Psrf,
+ #                 RhatEst = Rhat,
+ #                 MVRhatEstAll = Mpsrf,
+ #                 index_sol1=index_sol2,
+ #                 index_sol2=index_sol1,
+ #                 RhatEstSol1 = RhatEstSol2,
+ #                 RhatEstSol2 = RhatEstSol1, 
+ #                 MpsrfAllSeeds =  Mpsrf[nrow(table01)],
+ #                 LMD=LMD,
+ #                 LMD_mean = mean(LMD),
+ #                 LMD_Max = max(LMD),
+ #                 LMD_seedMax = which.max(LMD), 
+ #                 DIC_mean = mean(DIC),
+ #                 DIC_Max = max(DIC),
+ #                 DIC_seedMax = which.max(DIC),
+ #                 seed.index=seed.index,
+ #                 burnin=burnin)
+ # }
   return( output  )
 }
 

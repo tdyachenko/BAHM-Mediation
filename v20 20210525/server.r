@@ -690,7 +690,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   # display ON SCREEN all non-rho HDPIs
   output$hdpiBM_M_tbl <- renderTable(expr = output_HDPI()[[1]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   output$hdpiBM_S_tbl <- renderTable(expr = output_HDPI()[[2]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
