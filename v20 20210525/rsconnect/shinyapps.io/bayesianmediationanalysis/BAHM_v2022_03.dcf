@@ -5,9 +5,10 @@ account: bayesianmediationanalysis
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5852336
-bundleId: 5683623
+bundleId: 5740693
 url: https://bayesianmediationanalysis.shinyapps.io/BAHM_v2022_03/
-when: 1647289282.60761
-lastSyncTime: 1647289282.60761
+when: 1648565667.96985
+lastSyncTime: 1648565667.96985
 asMultiple: FALSE
 asStatic: FALSE
+ignoredFiles: aggTest.RData|file.RData|mytbl.RData|test.RData|test2.RData|x.RData

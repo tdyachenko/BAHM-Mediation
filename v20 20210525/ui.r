@@ -78,7 +78,7 @@ dashboardPage(
                   hr(),
                             # add widgets for user to select variables
                             # this is dynamically done based on the file they upload using the RenderUI function in the server
-                  h4(strong("Upload Data:")),
+                  h4(strong("Upload Data: (may take several minutes in this BETA version)")),
                   fileInput('file1', 
                            em('Upload CSV file or use default data'),
                            accept = c("text/csv",
@@ -106,8 +106,7 @@ dashboardPage(
                    #),
                    #column(width = 8,
                   
-                   # NEED TO HAVE THIS CODED
-                   #helpText("Your file has " " observations and " "variables."),
+                   #show number of observations and variables in the uploaded file
                    textOutput("obs"),
 
                    box(width = NULL,

@@ -297,6 +297,7 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$runA, {
     aggregate_outputs$checkGroup_x <<- input$checkGroup_x
+    aggregate_outputs$radio_m <<- input$radio_m
     aggregate_outputs$select_burnin <<- input$select_burnin
     
     model_data <- input_listA()$Data
@@ -343,16 +344,17 @@ shinyServer(function(input, output, session) {
     if (any(prop_agg >= .95)) {
       ## Mediation
       tagList(
-        strong("According to the aggregate model, mediation is present in the sample."),
-        paste0(scales::percent(max(prop_agg)), " of the joint posterior distirbution of parameters is in quadrant ", max_quad, "."),
+        strong("According to the aggregate model, mediation is present in the sample for variable(s)", paste0(aggregate_outputs$checkGroup_x[colnum]),". "),
+        paste0(scales::percent(max(prop_agg)), " of the joint posterior distirbution of parameters is in quadrant ", max_quad, " for variable(s) ",
+               paste0(aggregate_outputs$checkGroup_x[colnum]),". "),
         br(),br(),
-        "The dependent variables are: ", paste0(aggregate_outputs$checkGroup_x, collapse = ", "), ".",
+        "The independent variables are: ", paste0(aggregate_outputs$checkGroup_x, collapse = ", "), ".",
         br(),br(),
         "You can download the chart on the right as PDF by clicking on the button below."
       )
     } else {
       tagList(
-        strong("According to the aggregate model, mediation is not present in the sample as proposed."),
+        strong("According to the aggregate model, mediation is not present in the sample as proposed for variable(s)."),
         paste0("This is based on the analysis of the joint posterior of parameters
                           where the largest propotion of the distribution is ", scales::percent(max(prop_agg)), ".")
       )
@@ -371,6 +373,7 @@ shinyServer(function(input, output, session) {
     clean_table(FUN_PDF_Mediation_HDPI_forShiny(model=1,
                                                 filename = aggregate_outputs$output_listA,
                                                 x_vars   = aggregate_outputs$checkGroup_x,
+                                                m_var   = aggregate_outputs$radio_m,
                                                 burnin   = aggregate_outputs$select_burnin,
                                                 CIband=0.95) # Need to change to a variable/input 7-13-2021
     )
@@ -631,7 +634,7 @@ shinyServer(function(input, output, session) {
                           The model estimates that the average probability to mediate in the sample is ", scales::percent(round(output_HDPI()[[3]]$Mean, digits = 4)), 
                           ", which can be also interpreted as a percent of the sample mediating through the proposed mediator."),
         br(),br(),
-        "The dependent variables are: ", paste0(model_inputs$checkGroup_x, collapse = ", "), ".",
+        "The independent variables are: ", paste0(model_inputs$checkGroup_x, collapse = ", "), ".",
         #br(),br(),
         #"The mean of ρ is ", round(output_HDPI()[[3]]$Mean, digits = 4),
         br(),br(),
@@ -671,7 +674,7 @@ shinyServer(function(input, output, session) {
     save(tbl, file = "mytbl.RData")
     
     lapply(tbl, function(x) {
-      mystr <- gsub("(alpha|beta|gamma|alpha|rho)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
+      mystr <- gsub("(alpha|beta|gamma|alpha|rho|lambda)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
       y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr)
       if ("Variable" %in% names(y)) {
           y <- y %>% select(Variable, Parameter, everything())
@@ -686,14 +689,20 @@ shinyServer(function(input, output, session) {
   output_HDPI <- reactive({
     if (is.null(model_mediation())) return(list(NULL, NULL, NULL))
     
-    clean_table(FUN_PDF_Mediation_Parameters_MSmixture_forShiny(model_outputs$output_listBM, x_vars = input$checkGroup_x, seed.list=model_outputs$best.seed, burnin = model_inputs$burnin))
+    clean_table(FUN_PDF_Mediation_Parameters_MSmixture_forShiny(model_outputs$output_listBM,
+                                                                x_vars = input$checkGroup_x,
+                                                                m_var = input$radio_m,
+                                                                z_var = input$covariates_z,
+                                                                seed.list=model_outputs$best.seed, burnin = model_inputs$burnin))
   })
   
-  output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   # display ON SCREEN all non-rho HDPIs
   output$hdpiBM_M_tbl <- renderTable(expr = output_HDPI()[[1]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   output$hdpiBM_S_tbl <- renderTable(expr = output_HDPI()[[2]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  
+  # display ON SCREEN HDPIs for rho and lambda
+  output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   
   #----------------------------------------------------  
   # calculate proportion of posterior draws in each quadrant for selected seeds

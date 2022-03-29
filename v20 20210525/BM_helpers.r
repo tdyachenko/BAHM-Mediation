@@ -342,7 +342,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,fi
 # this is based on the best seed
 # outputs HPD intervals
 
-FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars, seed.list, burnin)
+FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars, m_var, z_vars, seed.list, burnin)
   { filename = filenamelist[[seed.list]]
   save(filename, file = "test2.RData")
     nvarX = ncol(filename$alphadraw[-1:-burnin,,1])
@@ -364,8 +364,10 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars
     )
     tempCIs_Rho =  matrix(c(mean(filename$rhodraw[-1:-burnin]),
                      t(hdi(filename$rhodraw[-1:-burnin], credMass = 0.95))),ncol=3,nrow=1)
-    templambda = t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = .95))
-    tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE])),templambda)
+    tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE])),
+         t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = .95)))
+    #templambda = t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = .95))
+    #tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE])),templambda)
     
     colnames(tempCIs_M)   <- c("Mean","HPDI lower limit","HPDI upper limit")
     colnames(tempCIs_S)   <- c("Mean","HPDI lower limit","HPDI upper limit")
@@ -373,8 +375,8 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars
     colnames(tempCIs_lambda) <- c("Mean","HPDI lower limit","HPDI upper limit")
     
     rownames_list_M = c(rep(0,nrow(tempCIs_M)))
-    rownames_list_M[nvarX+1] = "beta_{M_1}"
-    rownames_list_M[nvarX+2] = "beta_{M_2}"
+    rownames_list_M[nvarX+1] = "beta_{M_0}"
+    rownames_list_M[nvarX+2] = "beta_{M_1}"
     for(i in 1:nvarX) {
       rownames_list_M[i]=paste0("alpha_{M_", i - 1, "}")
       #rownames_list_M[nvarX+2+i]=paste0("alphabeta_{M_", i - 1, "}")
@@ -391,18 +393,17 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars
     # print(rownames_list_M)
     rownames(tempCIs_S) <- rownames_list_S
     rownames(tempCIs_Rho) <- rownames_list_Rho
-   
-    rownames_list_Lambda = c(rep(0,nrow(tempCIs_lambda)))
     
-    nvarZ = ncol(filename$lambdadraw)
-    rownames_list_Lambda[nvarZ] = "lambda"
+    nvarZ = nrow(tempCIs_lambda)
+    rownames_list_Lambda = c(rep(0,nvarZ))
     for(i in 1:nvarZ) {
       rownames_list_Lambda[i]=paste0("lambda_{", i - 1, "}")
     }
     rownames(tempCIs_lambda) <- rownames_list_Lambda
     
-    tempCIs_M <- cbind("Variable" = c("Intercept", x_vars), tempCIs_M)
-    tempCIs_S <- cbind("Variable" = c("Intercept", x_vars), tempCIs_S)
+    tempCIs_M <- cbind("Variable" = c("Intercept", x_vars,"Intercept", m_var), tempCIs_M)
+    tempCIs_S <- cbind("Variable" = c("Intercept", x_vars,"Intercept", x_vars, m_var), tempCIs_S)
+    tempCIs_lambda <- cbind("Variable" = c("Intercept", z_vars), tempCIs_lambda)
     
     return(list(tempCIs_M,tempCIs_S,tempCIs_Rho,tempCIs_lambda))
 }

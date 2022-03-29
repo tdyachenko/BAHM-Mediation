@@ -117,7 +117,7 @@ FUN_PDF_Mediation_AlphaBetaProportion_forShiny  = function(model,filename, burni
 # updated 7-13-2021 for aggregate only
 # -------------------------------------------------------------------------------
 
-FUN_PDF_Mediation_HDPI_forShiny  = function(model,filename, burnin, x_vars, CIband)
+FUN_PDF_Mediation_HDPI_forShiny  = function(model,filename, burnin, x_vars,  m_var, CIband)
 { if(model==1)
   { nvarX = ncol(filename$alphadraw)
     tempa = t(apply(filename$alphadraw[-1:-burnin,,2],2,hdi,credMass = CIband))
@@ -140,7 +140,7 @@ FUN_PDF_Mediation_HDPI_forShiny  = function(model,filename, burnin, x_vars, CIba
     colnames(outputTable) <- c("Mean","Lower limit","Upper limit")
     rownames(outputTable) <- rownames_list
     
-    outputTable <- cbind("Variable" = c("Intercept", x_vars), outputTable)
+    outputTable <- cbind("Variable" = c("Intercept", x_vars,"Intercept", x_vars, m_var), outputTable)
     
     # return(list(Proportions = QuadrantsCounts/length(DrawsAnalysis)))
     #return(grid.table(outputTable))
