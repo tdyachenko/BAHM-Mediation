@@ -671,8 +671,6 @@ shinyServer(function(input, output, session) {
   clean_table <- function(tbl) {
     if (!is.list(tbl)) tbl <- list(tbl)
     
-    save(tbl, file = "mytbl.RData")
-    
     lapply(tbl, function(x) {
       mystr <- gsub("(alpha|beta|gamma|alpha|rho|lambda)(_\\{[a-zA-Z0-9_]+})?", "%%\\1\\2%%", rownames(x))
       y <- x %>% as_tibble %>% mutate_all(as.character) %>% mutate_all(parse_guess) %>% mutate(Parameter = mystr)
@@ -713,12 +711,10 @@ shinyServer(function(input, output, session) {
                                                                      seed.list=model_outputs$best.seed,  # hard coded for now, need an input function here later
                                                                      x_vars   = model_inputs$checkGroup_x,
                                                                      burnin   = model_inputs$burnin)
-    
-    test2 <- test %>%
-      as.data.frame() %>%
-      mutate(Var = rownames(test)) %>%
-      select(Var, everything()) %>%
-      as.matrix
+    test2 <- as.data.frame(test)
+    test2$Var <- rownames(test)
+    test2 <- test2[,c("Var", setdiff(colnames(test2), "Var"))]
+    test2 <- as.matrix(test2)
     
     colnames(test2) <- c("", gsub(" Segment M \\(mediating\\)| Segment G \\(general\\)", "", colnames(test)))
     

@@ -265,7 +265,6 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,fi
   filename = filenamelist[[seed.selected]]
   numCharts = ncol(filename$lambdadraw)
   
-  save(filename, file = "file.RData")
   for(i in 1:numCharts)
   {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i]), xlim=c(min(filename$lambdadraw[-1:-burnin,i]),max(filename$lambdadraw[-1:-burnin,i])),col = "#75AADB",
        breaks=50)
@@ -344,7 +343,6 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,fi
 
 FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars, m_var, z_vars, seed.list, burnin)
   { filename = filenamelist[[seed.list]]
-  save(filename, file = "test2.RData")
     nvarX = ncol(filename$alphadraw[-1:-burnin,,1])
     tempCIs_M = rbind(
        cbind(colMeans(filename$alphadraw[-1:-burnin,,1]), 
@@ -403,6 +401,12 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars
     
     tempCIs_M <- cbind("Variable" = c("Intercept", x_vars,"Intercept", m_var), tempCIs_M)
     tempCIs_S <- cbind("Variable" = c("Intercept", x_vars,"Intercept", x_vars, m_var), tempCIs_S)
+    
+    print("=====")
+    print(z_vars)
+    print(tempCIs_lambda)
+    print("=====")
+    
     tempCIs_lambda <- cbind("Variable" = c("Intercept", z_vars), tempCIs_lambda)
     
     return(list(tempCIs_M,tempCIs_S,tempCIs_Rho,tempCIs_lambda))
