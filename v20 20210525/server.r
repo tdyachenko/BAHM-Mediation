@@ -527,7 +527,8 @@ shinyServer(function(input, output, session) {
       mydat <- list(
           y = input_listA()$Data$y,
           X = input_listA()$Data$X,
-          m = input_listA()$Data$m
+          m = input_listA()$Data$m,
+          Z = input_listA()$Data$Z
       )
     
     model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=mydat,
@@ -570,6 +571,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$runBM, {
     model_inputs$inputs <- my_inputs()
     model_inputs$checkGroup_x <- input$checkGroup_x
+    model_inputs$covariates_z <- input$covariates_z
     model_inputs$burnin <- input$select_burnin
     
     all_seeds <- seed_list()

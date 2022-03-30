@@ -362,7 +362,7 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars
     )
     tempCIs_Rho =  matrix(c(mean(filename$rhodraw[-1:-burnin]),
                      t(hdi(filename$rhodraw[-1:-burnin], credMass = 0.95))),ncol=3,nrow=1)
-    tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE])),
+    tempCIs_lambda = cbind(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE]),
          t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = .95)))
     #templambda = t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = .95))
     #tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE])),templambda)
@@ -405,6 +405,7 @@ FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars
     print("=====")
     print(z_vars)
     print(tempCIs_lambda)
+    print(filename$lambdadraw[100:110, ])
     print("=====")
     
     tempCIs_lambda <- cbind("Variable" = c("Intercept", z_vars), tempCIs_lambda)
