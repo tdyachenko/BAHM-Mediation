@@ -100,8 +100,8 @@ get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
                Aa  = Aa_var * diag(nvarX),
                mgb = c(rep(0, nvarX+1)), 
                Agb = Abg_var * diag(nvarX+1),
-               ml = c(rep(0, nvarZ+1)),
-               Al = Al_var * diag(nvarZ+1), #"input Al parameter, default is 0.01"
+               ml = c(rep(0, nvarZ)),
+               Al = Al_var * diag(nvarZ), #"input Al parameter, default is 0.01"
                nu  = nu_var,
                qy  = c(qy_var, qy_var),
                qm  = c(qm_var, qm_var)
@@ -110,13 +110,6 @@ get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
   
   return(list(Data=Data, Prior=Prior, Mcmc=Mcmc))
 }
-
-update_inputs_binary <- function(inputs_binary, seed_var) {
-  inputs_binary$Mcmc$seed <- seed_var
-  
-  return(inputs_binary)
-}
-
 
 # --- Generate list of seeds ----------------------------------------------------
 FUN_Mediation_SeedList_ForShiny  = function(seednum_var, seed_var)

@@ -111,7 +111,7 @@ shinyServer(function(input, output, session) {
     df()
     isolate({
       tagList(
-      selectizeInput("covariates",
+      selectizeInput("covariates_z",
                      label    = h5(em("Covariates. Leave BLANK if no covariates. 
                                       ")), 
                      choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$checkGroup_x)),
@@ -479,10 +479,12 @@ shinyServer(function(input, output, session) {
   #-------------------- Binary: Run Model ---------------------------------------#
   
   # Store outputs for the model as reactive values
-  model_inputs <- reactiveValues(inputs = NULL, burnin = NULL, checkGroup_x = NULL)
+  model_inputs <- reactiveValues(inputs = NULL, burnin = 500, checkGroup_x = NULL)
   model_outputs <- reactiveValues(output_listBM = NULL, output_RhatcalcBM = NULL, best.seed = NULL)
   
   my_inputs <- reactive({
+      
+    model_inputs$inputs <- "SET"
     
     # define inputs outside loop (since these will be the same)
     x_vars <- input$checkGroup_x
@@ -535,7 +537,7 @@ shinyServer(function(input, output, session) {
                                                                      datafile=model_results(),
                                                                      seed.index = seed_index(),
                                                                      burnin   = model_inputs$burnin,
-                                                                     RhatCutoff   = 1.05)
+                                                                     RhatCutoff   = 1.25)
     
     model_outputs$best.seed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
     
@@ -544,18 +546,20 @@ shinyServer(function(input, output, session) {
   
   parallel_compute <- function(all_seeds, my_inputs, progress) {
     progress$set(message = "Beginning parallel computation")
-    
+     
+    in_list <- my_inputs
+
     x <- future_lapply(1:length(all_seeds), function(j) {
-      tmp_input_list <- update_inputs_binary(my_inputs, seed_var = all_seeds[j])
-      
+      my_inputs$Mcmc$seed <- all_seeds[j]
+
       progress$inc(amount = .25)
       progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Inputs Created."))
       
       model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
         Model = 2,
-        Data = tmp_input_list$Data,
-        Prior = tmp_input_list$Prior,
-        Mcmc  = tmp_input_list$Mcmc)
+        Data = my_inputs$Data,
+        Prior = my_inputs$Prior,
+        Mcmc  = my_inputs$Mcmc)
       
       progress$inc(amount = .25)
       progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Model Complete."))
@@ -569,13 +573,8 @@ shinyServer(function(input, output, session) {
   }
   
   observeEvent(input$runBM, {
-    model_inputs$inputs <- my_inputs()
-    model_inputs$checkGroup_x <- input$checkGroup_x
-    model_inputs$covariates_z <- input$covariates_z
-    model_inputs$burnin <- input$select_burnin
-    
     all_seeds <- seed_list()
-    my_inputs <- model_inputs$inputs
+    my_inputs <- my_inputs()
     
     progress <- AsyncProgress$new(session, min = 1, max = length(all_seeds), message = "Beginning Model Estimation", detail = "This may take several minutes...")
     
@@ -718,12 +717,11 @@ shinyServer(function(input, output, session) {
                                                                      seed.list=model_outputs$best.seed,  # hard coded for now, need an input function here later
                                                                      x_vars   = model_inputs$checkGroup_x,
                                                                      burnin   = model_inputs$burnin)
+    
     test2 <- as.data.frame(test)
     test2$Var <- rownames(test)
     test2 <- test2[,c("Var", setdiff(colnames(test2), "Var"))]
     test2 <- as.matrix(test2)
-    
-    colnames(test2) <- c("", gsub(" Segment M \\(mediating\\)| Segment G \\(general\\)", "", colnames(test)))
     
     return(test2)
   })
