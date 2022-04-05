@@ -180,10 +180,10 @@ shinyServer(function(input, output, session) {
                  value = round(input$select_R/20,0), step=1)
   })
   output$select_seednum <- renderUI({
-    numericInput("select_seednum", label=NULL,   value = 10, step=1)
+    numericInput("select_seednum", label=NULL,   value = 12, step=1)
   })
   output$select_slambda <- renderUI({
-    numericInput("select_slambda", label = NULL, value = 0.5, step=0.01)
+    numericInput("select_slambda", label = NULL, value = 0.05, step=0.01)
   })
   
   output$ySelection <- renderText({
@@ -199,7 +199,7 @@ shinyServer(function(input, output, session) {
   })
   
   output$ZSelection <- renderText({
-    paste0('Covariates: ', paste(input$covariates, collapse = ", "))
+    paste0('Covariates: ', paste(input$covariates_z, collapse = ", "))
   })
   
   # Forces output elements to initialize without tab being click
@@ -263,6 +263,7 @@ shinyServer(function(input, output, session) {
     seednum_var <- input$select_seednum
     keep_var <- input$select_keep
     slambda_var <- input$select_slambda
+    burnin <- input$select_burnin
     
     numx_vars <<- length(input$checkGroup_x)
     
@@ -479,7 +480,7 @@ shinyServer(function(input, output, session) {
   #-------------------- Binary: Run Model ---------------------------------------#
   
   # Store outputs for the model as reactive values
-  model_inputs <- reactiveValues(inputs = NULL, burnin = 500, checkGroup_x = NULL)
+  model_inputs <- reactiveValues(inputs = NULL, burnin = NULL, checkGroup_x = NULL)
   model_outputs <- reactiveValues(output_listBM = NULL, output_RhatcalcBM = NULL, best.seed = NULL)
   
   my_inputs <- reactive({
@@ -500,6 +501,7 @@ shinyServer(function(input, output, session) {
     R_var    <- input$select_R
     keep_var <- input$select_keep
     slambda_var <- input$select_slambda
+    burnin <- input$select_burnin
     
     inputs_binary <- get_inputs_binary(df(), x_vars, y_var, m_var, z_var,
                                        Aa_var, Abg_var, Al_var, nu_var, qy_var, qm_var,
@@ -536,7 +538,7 @@ shinyServer(function(input, output, session) {
     model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=mydat,
                                                                      datafile=model_results(),
                                                                      seed.index = seed_index(),
-                                                                     burnin   = model_inputs$burnin,
+                                                                     burnin   = 500,
                                                                      RhatCutoff   = 1.25)
     
     model_outputs$best.seed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
@@ -662,9 +664,14 @@ shinyServer(function(input, output, session) {
   output$RhatEst  <- renderTable({
     model_outputs$output_RhatcalcBM$RhatEst
   }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
-  
+  output$rejectRate  <- renderTable({
+     mean(model_outputs$output_listBM[[model_outputs$best.seed]]$reject[input$select_R])/input$select_R
+  }, rownames=FALSE, colnames=FALSE, bordered=TRUE)
   
   # select the solution to display
+  
+  
+  
   
   #----------------------------------------------------  
   # calculate HPD intervals 95% for the BEST seed

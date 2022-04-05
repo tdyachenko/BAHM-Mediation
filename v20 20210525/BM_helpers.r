@@ -264,10 +264,11 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,fi
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   filename = filenamelist[[seed.selected]]
   numCharts = ncol(filename$lambdadraw)
-  
+  par(oma=c(0,0,2,0));   par(mfrow=c(numCharts,1))
   for(i in 1:numCharts)
-  {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i]), xlim=c(min(filename$lambdadraw[-1:-burnin,i]),max(filename$lambdadraw[-1:-burnin,i])),col = "#75AADB",
-       breaks=50)
+  {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i-1]),
+          xlim=c(min(filename$lambdadraw[-1:-burnin,i]),max(filename$lambdadraw[-1:-burnin,i])),col = "#75AADB",
+       breaks=30)
   }
 }
 

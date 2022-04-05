@@ -156,11 +156,11 @@ dashboardPage(
              ),
              #uiOutput("select_burnin"),
              fluidRow(
-               column(6, "Number of MCMC chains for the Binary Mixture model (default is 10)"),
+               column(6, "Number of MCMC chains for the Binary Mixture model (default is 12)"),
                column(3, uiOutput("select_seednum"))
              ),
              fluidRow(
-               column(6, "Initial MH step size for lambda (default is 0.5)"),
+               column(6, "Initial MH step size for lambda (default is 0.05)"),
                column(3, uiOutput("select_slambda"))
              ),
              br(),
@@ -371,6 +371,8 @@ dashboardPage(
                       )
                 ),
                 column(width = 4,
+                      h5('Downloads:', align='left'),
+                      downloadButton('downloadPDF_BM', 'PDF of Plots' ),
                       box(width=NULL,
                           solidHeader = FALSE,
                           title = "Posterior distribution of parameter RHO (95% HPDI)",  #table
@@ -384,8 +386,6 @@ dashboardPage(
                           tableOutput("hdpiLambda_tbl")
                       )
                   ),
-                h5('Downloads:', align='left'),
-                downloadButton('downloadPDF_BM', 'PDF of Plots' ),
               )      
            ),
         
@@ -400,6 +400,10 @@ dashboardPage(
               br(),
               h5(strong('Rhat for each variable (point est.)', align='left')),  #table
               tableOutput("RhatEst"),
+              
+              br(),
+              h5(strong('Lambda Rejection rate (shoud be around 65-75%', align='left')),  #table
+              tableOutput("rejectRate"),
               
               #h4('Table: Convergence Diagnostics', align='left'),
               #textOutput("BestSeed"),
