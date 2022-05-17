@@ -183,7 +183,7 @@ shinyServer(function(input, output, session) {
     numericInput("select_seednum", label=NULL,   value = 12, step=1)
   })
   output$select_slambda <- renderUI({
-    numericInput("select_slambda", label = NULL, value = 0.05, step=0.01)
+    numericInput("select_slambda", label = NULL, value = 0.5, step=0.01)
   })
   
   output$ySelection <- renderText({
@@ -704,7 +704,8 @@ shinyServer(function(input, output, session) {
                                                                 x_vars = input$checkGroup_x,
                                                                 m_var = input$radio_m,
                                                                 z_var = input$covariates_z,
-                                                                seed.list=model_outputs$best.seed, burnin = my_inputs()$burnin))
+                                                                seed.list=model_outputs$best.seed, 
+                                                                burnin = my_inputs()$burnin))
   })
   
   # display ON SCREEN all non-rho HDPIs
@@ -721,7 +722,7 @@ shinyServer(function(input, output, session) {
     if (is.null(model_mediation())) return(NULL)
     
     test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
-                                                                     seed.list=model_outputs$best.seed,  # hard coded for now, need an input function here later
+                                                                     seed.list=model_outputs$best.seed,  
                                                                      x_vars   = my_inputs()$checkGroup_x,
                                                                      burnin   = my_inputs()$burnin)
     
@@ -764,7 +765,7 @@ shinyServer(function(input, output, session) {
     FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects(dataset  = "",  
                                                                 filenamelist = model_outputs$output_listBM,
                                                                 seed.list = seed_list(),
-                                                                seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
+                                                                seed.selected = model_outputs$best.seed, 
                                                                 burnin   = my_inputs()$burnin,
                                                                 x_var   = my_inputs()$checkGroup_x)
     
@@ -775,7 +776,7 @@ shinyServer(function(input, output, session) {
     FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Rho(dataset  = "",  
                                                             filenamelist = model_outputs$output_listBM,
                                                             seed.list = seed_list(),
-                                                            seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
+                                                            seed.selected = model_outputs$best.seed, 
                                                             burnin   = my_inputs()$burnin
                                                             #x_var   = my_inputs()$checkGroup_x 
     )                                 
@@ -787,7 +788,7 @@ shinyServer(function(input, output, session) {
       FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda(dataset  = "",  
                                                                  filenamelist = model_outputs$output_listBM,
                                                                  seed.list = seed_list(),
-                                                                 seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
+                                                                 seed.selected = model_outputs$best.seed, 
                                                                  burnin   = my_inputs()$burnin
                                                                  #x_var   = my_inputs()$checkGroup_x 
       )                                 
@@ -799,7 +800,7 @@ shinyServer(function(input, output, session) {
     FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW(dataset  = "",  
                                                               filenamelist = model_outputs$output_listBM,
                                                               seed.list = seed_list(),
-                                                              seed.selected = model_outputs$best.seed, # hard coded for now, need an input function here later
+                                                              seed.selected = model_outputs$best.seed, 
                                                               burnin   = my_inputs()$burnin
                                                               #x_var   = my_inputs()$checkGroup_x 
     )
