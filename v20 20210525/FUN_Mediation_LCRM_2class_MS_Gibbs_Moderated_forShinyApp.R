@@ -150,6 +150,82 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
   itime = proc.time()[3]
   cat("MCMC Iteration (est time to end - min)", fill = TRUE)
  
+  #-- adding MH step auto-adjustment for lambda block
+  
+  if(ModelFlag==2)  {
+  done=0 
+  while (done==0)
+  {
+     for(r in 1:100)
+     {
+       ###  Segment 1 (called M here)
+       indexM = c(which(w==1))
+       yM = y[indexM]
+       mM = m[indexM]
+       XM = matrix(X[indexM,],ncol=nvarX)
+       if(1){  out_Xtom = myunireg(y=mM,X=XM,betabar=ma,A=Aa,nu=nu,q=qm[1])
+              alphaM = out_Xtom$beta
+              sigma2mM = out_Xtom$sigma2
+       }
+       if(1) { out_mtoyM = myunireg(y=yM,X=cbind(rep(1,length(mM)),mM),betabar=mgb[1:2],A=Agb[1,1]*diag(2),nu=nu,q=qy[1])   # one mediator
+              betaM = out_mtoyM$beta
+              sigma2yM = out_mtoyM$sigma2
+       }
+       ###  Segment 2 (called D here, but is S=standard segment)
+       indexD = c(which(w==0))
+       yD = y[indexD]
+       mD = m[indexD]
+       XD = matrix(X[indexD,],ncol=nvarX)
+       if(1){  out_Xtom = myunireg(y=mD,X=XD,betabar=ma,A=Aa,nu=nu,q=qm[2])
+               alphaD = out_Xtom$beta
+               sigma2mD = out_Xtom$sigma2
+       }
+       if(1) { out_mtoyD = myunireg(y=yD,X=cbind(XD,mD),betabar=mgb,A=Agb,nu=nu,q=qy[2])
+               gammabetaD=out_mtoyD$beta
+               sigma2yD = out_mtoyD$sigma2
+       }
+   
+       ####  Updating segment probability / Lambda
+       slambda = slambda1
+	     lambdanew = c(lambda + slambda * rnorm(nvarZ))
+	     
+	     rhonew = exp(Z %*% (lambdanew))/(1+exp(Z %*% (lambdanew)))
+     	 lognew_lambda = sum(w * log(c(rhonew)) + (1-w)* log(1-c(rhonew)))
+	     logold_lambda = sum(w * log(rho) + (1-w)* log(1-rho))
+       logknew = -0.5 * (t(c(lambdanew) - ml) %*% Al %*% (c(lambdanew) - ml))
+       logkold = -0.5 * (t(c(lambda) - ml) %*% Al %*% (c(lambda) - ml))
+     	   alpha = exp(lognew_lambda + logknew - logold_lambda - logkold )
+          alpha=ifelse(is.finite(alpha)==T,alpha,-1)
+          u = runif(n = 1, min = 0, max = 1)
+          if (u < alpha) {  lambda = lambdanew
+	                          rho=c(rhonew)               }
+          else           {  rej = rej + 1            }			
+       
+       ####  Updating segment indicators (working with likelihood, not log-lik here)
+       LLikD = exp(-0.5*(log(c(2*pi*sigma2yD))+log(c(2*pi*sigma2mD))) - 0.5*(m-X%*%(alphaD))^2/ c(sigma2mD) - 0.5*(y-cbind(X,m)%*%gammabetaD)^2 / c(sigma2yD))
+       if(ModelFlag==2)
+       { LLikM = exp(-0.5*(log(c(2*pi*sigma2yM))+log(c(2*pi*sigma2mM))) - 0.5*(m-X%*%(alphaM))^2/ c(sigma2mM) - 0.5*(y-cbind(X[,1],m)%*%betaM)^2 / c(sigma2yM)) 
+       }  
+       temp = rho*LLikM/ (rho*LLikM+(1-rho)*LLikD)   #  pi in documents
+       for(hh in 1:nobs)
+          { w[hh] = rbinom(1,1,temp[hh]) 
+       }
+     }
+     
+     if( rej/100 < 0.6 ) {  
+       slambda1 = slambda * 1.1
+       done = 0 }
+     if( rej/100 > 0.75 ) {  
+       slambda1 = slambda * 0.9
+       done = 0 }
+     else {  
+       slambda1 = slambda
+       done = 1 }
+     rej=0
+   }
+  }
+  #-- end of MH step auto-adjustment
+  
   for(r in 1:R)
   {
     ###  Segment 1 (called M here)
@@ -184,7 +260,7 @@ FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp= function(Model,Data,Pr
   ####  Updating segment probability / Lambda
 	if(ModelFlag==2)
 	{ 
-    slambda = ifelse(r>1000,slambda2,slambda1)
+    slambda = slambda1
 	  lambdanew = c(lambda + slambda * rnorm(nvarZ))
 	    #while(abs(lambdanew)>2)
 	   #  { lambdanew = lambda + slambda * rnorm(nvarZ)}
