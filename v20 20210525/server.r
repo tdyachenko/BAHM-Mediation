@@ -238,6 +238,8 @@ shinyServer(function(input, output, session) {
   # calculate inputs only when Run Model button is clicked.
   # ref: https://shiny.rstudio.com/articles/action-buttons.html
   input_listA <- reactive({
+      
+      aggregate_outputs$output_listA <<- NULL
     
     #req(input$select_R)
     #req(input$select_seed)
@@ -484,6 +486,8 @@ shinyServer(function(input, output, session) {
   
   my_inputs <- reactive({
       
+    model_outputs$output_listBM <<- NULL
+
     # define inputs outside loop (since these will be the same)
     x_vars <- input$checkGroup_x
     y_var  <- input$radio_y
@@ -526,12 +530,12 @@ shinyServer(function(input, output, session) {
   
   model_mediation <- reactive({
     if (is.null(model_results())) return(NULL)
-      
+
       mydat <- list(
-          y = input_listA()$Data$y,
-          X = input_listA()$Data$X,
-          m = input_listA()$Data$m,
-          Z = input_listA()$Data$Z
+          y = my_inputs()$Data$y,
+          X = my_inputs()$Data$X,
+          m = my_inputs()$Data$m,
+          Z = my_inputs()$Data$Z
       )
     
     model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=mydat,
@@ -574,6 +578,7 @@ shinyServer(function(input, output, session) {
   }
   
   observeEvent(input$runBM, {
+    shinyjs::disable("runBM")
     model_outputs$started <- TRUE
     all_seeds <- seed_list()
     my_inputs <- my_inputs()
@@ -590,6 +595,8 @@ shinyServer(function(input, output, session) {
         model_outputs$output_listBM <<- value
         
         progress$close()
+        shinyjs::enable("runBM")
+        model_outputs$started <- FALSE
       },
       onRejected = NULL
     )
@@ -616,7 +623,7 @@ shinyServer(function(input, output, session) {
   outputOptions(output, "download_csv", suspendWhenHidden=FALSE)
   
   output$mediation_result <- renderUI({
-    if (!model_outputs$started) {
+    if (!model_outputs$started && is.null(output_proportionsBM())) {
       return(HTML("Click Run Heterogeneous (BM) Model to Begin!"))
     } else if (is.null(output_proportionsBM())) {
       return(HTML("Model is now executing, please wait..."))
