@@ -509,6 +509,7 @@ shinyServer(function(input, output, session) {
                                        R_var, keep_var, slambda_var, slambda_var)
     
     inputs_binary$burnin <- burnin
+    inputs_binary$x_vars <- x_vars
     
     return(inputs_binary)
   })
@@ -734,10 +735,12 @@ shinyServer(function(input, output, session) {
   # calculate proportion of posterior draws in each quadrant for selected seeds
   output_proportionsBM <- reactive({
     if (is.null(model_mediation())) return(NULL)
+      
+      print(model_outputs$my_inputs)
     
     test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
                                                                      seed.list=model_outputs$best.seed,  
-                                                                     x_vars   = model_outputs$my_inputs$checkGroup_x,
+                                                                     x_vars   = model_outputs$my_inputs$x_vars,
                                                                      burnin   = model_outputs$my_inputs$burnin)
     
     test2 <- as.data.frame(test)
@@ -755,8 +758,8 @@ shinyServer(function(input, output, session) {
       tags$thead(
         tags$tr(
           tags$th(''),
-          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$checkGroup_x), 'Segment M (mediating)'), ##colspan=length(my_inputs()$checkGroup_x)
-          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$checkGroup_x), 'Segment G (general)')),
+          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), 'Segment M (mediating)'), ##colspan=length(my_inputs()$checkGroup_x)
+          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), 'Segment G (general)')),
         tags$tr(lapply(colnames(output_proportionsBM()), tags$th))
       ))
   })

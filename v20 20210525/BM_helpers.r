@@ -45,7 +45,8 @@
 
 FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny = function(filenamelist,seed.list,x_vars,burnin)
   # seed.list is the list of selected seeds for analysis, not all seeds
-{  nvarX = ncol(filenamelist[[1]]$alphadraw)
+{  
+   nvarX = ncol(filenamelist[[1]]$alphadraw)
    QuadrantsCountsM = matrix(0,nrow=4, ncol=nvarX-1)
    QuadrantsCountsS = matrix(0,nrow=4, ncol=nvarX-1)
    DrawsAnalysis = c(seq(burnin+1,length(filenamelist[[seed.list]]$LL_total),1))
