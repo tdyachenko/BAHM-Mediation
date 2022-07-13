@@ -228,12 +228,6 @@ dashboardPage(
                   ), 
                   box(width=NULL,
                       solidHeader = FALSE,
-                      title = "Aggregate Model. Parameter 95% HPDIs",   #table
-                      status = "primary",
-                      tableOutput("hdpiA_tbl")
-                  ),
-                  box(width=NULL,
-                      solidHeader = FALSE,
                       title = "Aggregate Model. Proportions of Posterior Draws by Quadrant",  #table
                       status = "primary",
                       tableOutput("proportionsA")
@@ -258,6 +252,12 @@ dashboardPage(
                       h5('Downloads:', align='left'),
                       downloadButton('downloadPDF', 'PDF of Plots' ),
                       br()
+                  ),
+                  box(width=NULL,
+                      solidHeader = FALSE,
+                      title = "Aggregate Model. Parameter 95% HPDIs",   #table
+                      status = "primary",
+                      tableOutput("hdpiA_tbl")
                   )
            )
         )

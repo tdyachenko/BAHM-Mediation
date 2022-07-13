@@ -482,12 +482,12 @@ shinyServer(function(input, output, session) {
   #-------------------- Binary: Run Model ---------------------------------------#
   
   # Store outputs for the model as reactive values
-  model_outputs <- reactiveValues(started = FALSE, output_listBM = NULL, output_RhatcalcBM = NULL, best.seed = NULL)
+  model_outputs <- reactiveValues(my_inputs = NULL, started = FALSE, output_listBM = NULL, output_RhatcalcBM = NULL, best.seed = NULL)
   
   my_inputs <- reactive({
       
-    model_outputs$output_listBM <<- NULL
-
+    model_outputs$my_inputs <- NULL
+      
     # define inputs outside loop (since these will be the same)
     x_vars <- input$checkGroup_x
     y_var  <- input$radio_y
@@ -532,10 +532,10 @@ shinyServer(function(input, output, session) {
     if (is.null(model_results())) return(NULL)
 
       mydat <- list(
-          y = my_inputs()$Data$y,
-          X = my_inputs()$Data$X,
-          m = my_inputs()$Data$m,
-          Z = my_inputs()$Data$Z
+          y = model_outputs$my_inputs$Data$y,
+          X = model_outputs$my_inputs$Data$X,
+          m = model_outputs$my_inputs$Data$m,
+          Z = model_outputs$my_inputs$Data$Z
       )
     
     model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=mydat,
@@ -580,13 +580,20 @@ shinyServer(function(input, output, session) {
   observeEvent(input$runBM, {
     shinyjs::disable("runBM")
     model_outputs$started <- TRUE
+    model_outputs$ output_listBM = NULL
+    model_outputs$output_RhatcalcBM = NULL
+    model_outputs$best.seed = NULL
     all_seeds <- seed_list()
-    my_inputs <- my_inputs()
+    model_outputs$my_inputs <- my_inputs()
+    inp <- my_inputs()
     
     progress <- AsyncProgress$new(session, min = 1, max = length(all_seeds), message = "Beginning Model Estimation", detail = "This may take several minutes...")
     
     my_future <- future_promise({
-      parallel_compute(all_seeds, my_inputs, progress)
+      # Your new code here?
+      # slambda <- get_jump_size()
+      # my_inputs["slambda"] <- slambda
+      parallel_compute(all_seeds, inp, progress)
     }, seed=TRUE)
     
     then(
@@ -611,7 +618,7 @@ shinyServer(function(input, output, session) {
       theseed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
       
       model_res <- model_outputs$output_listBM[[theseed]]
-      ws <- rowMeans(model_res$wdraw[,-1:-my_inputs()$burnin])
+      ws <- rowMeans(model_res$wdraw[,-1:-model_outputs$my_inputs$burnin])
       
       mytbl <- tibble(
         w = ws
@@ -644,7 +651,7 @@ shinyServer(function(input, output, session) {
                           The model estimates that the average probability to mediate in the sample is ", scales::percent(round(output_HDPI()[[3]]$Mean, digits = 4)), 
                           ", which can be also interpreted as a percent of the sample mediating through the proposed mediator."),
         br(),br(),
-        "The independent variables are: ", paste0(my_inputs()$checkGroup_x, collapse = ", "), ".",
+        "The independent variables are: ", paste0(model_outputs$my_inputs$checkGroup_x, collapse = ", "), ".",
         #br(),br(),
         #"The mean of ρ is ", round(output_HDPI()[[3]]$Mean, digits = 4),
         br(),br(),
@@ -712,7 +719,7 @@ shinyServer(function(input, output, session) {
                                                                 m_var = input$radio_m,
                                                                 z_var = input$covariates_z,
                                                                 seed.list=model_outputs$best.seed, 
-                                                                burnin = my_inputs()$burnin))
+                                                                burnin = model_outputs$my_inputs$burnin))
   })
   
   # display ON SCREEN all non-rho HDPIs
@@ -730,8 +737,8 @@ shinyServer(function(input, output, session) {
     
     test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
                                                                      seed.list=model_outputs$best.seed,  
-                                                                     x_vars   = my_inputs()$checkGroup_x,
-                                                                     burnin   = my_inputs()$burnin)
+                                                                     x_vars   = model_outputs$my_inputs$checkGroup_x,
+                                                                     burnin   = model_outputs$my_inputs$burnin)
     
     test2 <- as.data.frame(test)
     test2$Var <- rownames(test)
@@ -748,8 +755,8 @@ shinyServer(function(input, output, session) {
       tags$thead(
         tags$tr(
           tags$th(''),
-          tags$th(class = 'dt-center', colspan = length(my_inputs()$checkGroup_x), 'Segment M (mediating)'), ##colspan=length(my_inputs()$checkGroup_x)
-          tags$th(class = 'dt-center', colspan = length(my_inputs()$checkGroup_x), 'Segment G (general)')),
+          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$checkGroup_x), 'Segment M (mediating)'), ##colspan=length(my_inputs()$checkGroup_x)
+          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$checkGroup_x), 'Segment G (general)')),
         tags$tr(lapply(colnames(output_proportionsBM()), tags$th))
       ))
   })
@@ -773,8 +780,8 @@ shinyServer(function(input, output, session) {
                                                                 filenamelist = model_outputs$output_listBM,
                                                                 seed.list = seed_list(),
                                                                 seed.selected = model_outputs$best.seed, 
-                                                                burnin   = my_inputs()$burnin,
-                                                                x_var   = my_inputs()$checkGroup_x)
+                                                                burnin   = model_outputs$my_inputs$burnin,
+                                                                x_var   = model_outputs$my_inputs$checkGroup_x)
     
   })    
   output_scatterplotsBM_rho <- reactive({
@@ -784,8 +791,8 @@ shinyServer(function(input, output, session) {
                                                             filenamelist = model_outputs$output_listBM,
                                                             seed.list = seed_list(),
                                                             seed.selected = model_outputs$best.seed, 
-                                                            burnin   = my_inputs()$burnin
-                                                            #x_var   = my_inputs()$checkGroup_x 
+                                                            burnin   = model_outputs$my_inputs$burnin
+                                                            #x_var   = model_outputs$my_inputs$checkGroup_x 
     )                                 
   })
   
@@ -796,8 +803,8 @@ shinyServer(function(input, output, session) {
                                                                  filenamelist = model_outputs$output_listBM,
                                                                  seed.list = seed_list(),
                                                                  seed.selected = model_outputs$best.seed, 
-                                                                 burnin   = my_inputs()$burnin
-                                                                 #x_var   = my_inputs()$checkGroup_x 
+                                                                 burnin   = model_outputs$my_inputs$burnin
+                                                                 #x_var   = model_outputs$my_inputs$checkGroup_x 
       )                                 
   })
   
@@ -808,8 +815,8 @@ shinyServer(function(input, output, session) {
                                                               filenamelist = model_outputs$output_listBM,
                                                               seed.list = seed_list(),
                                                               seed.selected = model_outputs$best.seed, 
-                                                              burnin   = my_inputs()$burnin
-                                                              #x_var   = my_inputs()$checkGroup_x 
+                                                              burnin   = model_outputs$my_inputs$burnin
+                                                              #x_var   = model_outputs$my_inputs$checkGroup_x 
     )
   })    
   # display ON SCREEN scatterplots of posterior draws for each parameter for selected seeds
@@ -823,9 +830,9 @@ shinyServer(function(input, output, session) {
   })
   
   plotCountBM <- reactive({
-    if (is.null(my_inputs()$checkGroup_x)) return(2)
+    if (is.null(model_outputs$my_inputs$checkGroup_x)) return(2)
     
-    length(my_inputs()$checkGroup_x)
+    length(model_outputs$my_inputs$checkGroup_x)
   })
   plotHeightBM <- reactive(350 * max(plotCountBM(), 1))
   
@@ -862,7 +869,7 @@ shinyServer(function(input, output, session) {
                                     filenamelist = model_outputs$output_listBM,
                                     seed.list = seed_list(),
                                     seed.index = seed_index(),
-                                    burnin   = my_inputs()$burnin)
+                                    burnin   = model_outputs$my_inputs$burnin)
   })
   # display ON SCREEN scatterplots of posterior draws for each parameter for selected seeds
   output$plot_MCMC_BM <- renderPlot({
@@ -880,7 +887,7 @@ shinyServer(function(input, output, session) {
                                       filenamelist = model_results(),
                                       seed.list = seed_list(),
                                       seed.index = seed_index(),
-                                      burnin   = my_inputs()$burnin)
+                                      burnin   = model_outputs$my_inputs$burnin)
       dev.off()
     } 
   )
@@ -927,8 +934,8 @@ shinyServer(function(input, output, session) {
                                               filenamelist = model_results(),
                                               seed.list = seed_list(),
                                               seed.selected = c(1,2),
-                                              burnin   = my_inputs()$burnin
-                                              #x_vars   = my_inputs()$checkGroup_x
+                                              burnin   = model_outputs$my_inputs$burnin
+                                              #x_vars   = model_outputs$my_inputs$checkGroup_x
                                             )
                                             dev.off()
                                           })
