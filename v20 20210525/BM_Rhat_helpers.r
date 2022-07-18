@@ -63,9 +63,9 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
   LMD_Max_Sol1 = max(LMD[index_sol1])
   LMD_mean_Sol1 = mean(LMD[index_sol1])
   LMD_seedMax_Sol1 = index_sol1[which.max(LMD[index_sol1])]
-  DIC_Max_Sol1 = max(DIC[index_sol1])
+  DIC_Min_Sol1 = min(DIC[index_sol1])
   DIC_mean_Sol1 = mean(DIC[index_sol1])
-  DIC_seedMax_Sol1 = index_sol1[which.max(DIC[index_sol1])]
+  DIC_seedMin_Sol1 = index_sol1[which.min(DIC[index_sol1])]
   
   if(max(rowSums(table01[temp,]))<(nseeds)){ 
     index_sol2 = c(which(table01[Rhat_sol1,]==0))          # gives index of seeds with solution 2
@@ -78,9 +78,9 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
       LMD_Max_Sol2 = max(LMD[index_sol2])
       LMD_seedMax_Sol2 = index_sol2[which.max(LMD[index_sol2])]
       LMD_mean_Sol2 = mean(LMD[index_sol2])
-      DIC_Max_Sol2 = max(DIC[index_sol2])
+      DIC_Min_Sol2 = min(DIC[index_sol2])
       DIC_mean_Sol2 = mean(DIC[index_sol2])
-      DIC_seedMax_Sol2 = index_sol1[which.max(DIC[index_sol2])]
+      DIC_seedMin_Sol2 = index_sol1[which.min(DIC[index_sol2])]
     }
     else {
       Rhat_sol2 = index_sol2
@@ -89,9 +89,9 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
       LMD_Max_Sol2 = max(LMD[index_sol2])
       LMD_mean_Sol2 = mean(LMD[index_sol2])
       LMD_seedMax_Sol2 = index_sol2
-      DIC_Max_Sol2 = max(DIC[index_sol2])
+      DIC_Min_Sol2 = min(DIC[index_sol2])
       DIC_mean_Sol2 = mean(DIC[index_sol2])
-      DIC_seedMax_Sol2 = index_sol2
+      DIC_seedMin_Sol2 = index_sol2
     }
   }
   else {  
@@ -103,18 +103,18 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
        LMD_Max_Sol2 = max(LMD[index_sol2])
        LMD_mean_Sol2 = mean(LMD[index_sol2])
        LMD_seedMax_Sol2 = index_sol2[which.max(LMD[index_sol2])]
-       DIC_Max_Sol2 = max(DIC[index_sol2])
+       DIC_Min_Sol2 = min(DIC[index_sol2])
        DIC_mean_Sol2 = mean(DIC[index_sol2])
-       DIC_seedMax_Sol2 = index_sol2[which.max(DoC[index_sol2])]
+       DIC_seedMin_Sol2 = index_sol2[which.min(DoC[index_sol2])]
     }
     else {
        index_sol2 = 999
        LMD_Max_Sol2 = 999
        LMD_seedMax_Sol2 = 999
        LMD_mean_Sol2 = 999
-       DIC_Max_Sol2 = 999
+       DIC_Min_Sol2 = 999
        DIC_mean_Sol2 = 999
-       DIC_seedMax_Sol2 = 999
+       DIC_seedMin_Sol2 = 999
     }
   } 
   
@@ -132,7 +132,7 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
   table_forShiny[5,] = c(round(LMD_mean_Sol1,digits=1),   round(LMD_mean_Sol2,digits=1))
   table_forShiny[6,] = c(round(LMD_Max_Sol1,digits=1),    round(LMD_Max_Sol2,digits=1))
   table_forShiny[7,] = c(round(DIC_mean_Sol1,digits=1),   round(DIC_mean_Sol2,digits=1))
-  table_forShiny[8,] = c(round(DIC_Max_Sol1,digits=1),    round(DIC_Max_Sol2,digits=1))
+  table_forShiny[8,] = c(round(DIC_Min_Sol1,digits=1),    round(DIC_Min_Sol2,digits=1))
   
   colnames(table_forShiny) = c("Solution 1","Solution 2")
   rownames(table_forShiny) = c("Seed number selected",
@@ -142,7 +142,7 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
                                "Mean LMD NR",
                                "Max LMD NR",
                                "Mean DIC",
-                               "Max DIC")
+                               "Min DIC")
   
  # if(LMD_Max_Sol1>LMD_Max_Sol2){
     colnames(Rhat) = c("Solution 1","Solution 2")
@@ -160,8 +160,8 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
                   LMD_Max = max(LMD),
                   LMD_seedMax = which.max(LMD), 
                   DIC_mean = mean(DIC),
-                  DIC_Max = max(DIC),
-                  DIC_seedMax = which.max(DIC),
+                  DIC_Min = min(DIC),
+                  DIC_seedMin = which.min(DIC),
                   seed.index=seed.index,
                   burnin=burnin)
  # }

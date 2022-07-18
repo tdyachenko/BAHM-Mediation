@@ -104,65 +104,65 @@
 #-----(Aggregate model)-----------------------#
 # function to generate PDF scatterplots of postreior draws of alphas and beta for aggregate model
 
-FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot = function(dataset, filename, burnin, x_vars) {
-    # dataset = the name (string) of the data file that needs to be displayed (i.e. "Loyalty data")
-    # filename = output file of MCMC (list of objects/tables)
-    # burnin = number of saved draws to exclude from plotting
-    # x_vars = vector of names of variables in X, excluding intercept
-  nvarX = ncol(filename$alphadraw) - 1
-  #pdf(paste(dataset, "Posterior Draws.pdf", sep = " "), width=pdfW, height=pdfH)
-  par(oma=c(0,0,2,0));
-  QuadrantsCounts = array(0, dim=c(4, nvarX))
-  #print(burnin)
-  #print(length(filename$LL_total))
-  DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LL_total), by = 1))
-  pp=pn=np=nn=0
-  for(j in 1:nvarX){  
-    for(r in DrawsAnalysis){ 
-      pp = pp + ifelse(filename$alphadraw[r,j+1,1]>0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
-      pn = pn + ifelse(filename$alphadraw[r,j+1,1]>0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
-      np = np + ifelse(filename$alphadraw[r,j+1,1]<0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
-      nn = nn + ifelse(filename$alphadraw[r,j+1,1]<0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
-    }
-    QuadrantsCounts[,j]=c(pp,pn,np,nn)
-    pp=pn=np=nn=0
-  }
-  Proportions <- QuadrantsCounts/length(DrawsAnalysis)
-  
-  par(mfrow=c(nvarX,2))
-  ylimB = c( min(filename$betaMdraw[-1:-burnin])-0.1*min(filename$betaMdraw[-1:-burnin,1]),
-           max(filename$betaMdraw[-1:-burnin])+0.1*max(filename$betaMdraw[-1:-burnin,1]))
-  for(j in 1:nvarX){
-    ylimA = c( min(filename$alphadraw[-1:-burnin,j+1,1])-0.1*min(filename$alphadraw[-1:-burnin,j+1,1]),
-             max(filename$alphadraw[-1:-burnin,j+1,1])+0.1*max(filename$alphadraw[-1:-burnin,j+1,1]))
-    ylimG = c( min(filename$gammabetaSdraw[-1:-burnin,j+1])-0.1*min(filename$gammabetaSdraw[-1:-burnin,j+1]),
-             max(filename$gammabetaSdraw[-1:-burnin,j+1])+0.1*max(filename$gammabetaSdraw[-1:-burnin,j+1]))
-    breaksCalc = (ylimG[2]-ylimG[1])/25
-    plot(filename$alphadraw[-1:-burnin,j+1,1], filename$betaMdraw[-1:-burnin,1], 
-         main=bquote("Scatterplot of " ~ alpha[.(j)] ~ " and " ~ beta ~ " for variable " ~ .(x_vars[j])),
-         xlab=bquote(alpha[.(j)]), ylab=expression(beta), xlim=ylimA,ylim=ylimB)
-    abline(h=0,v=0,col="gray")
-    if(ylimA[2]>0 & ylimB[2]>0){
-      text(x=c(ylimA[2]),  y=c(ylimB[2]), 
-         labels = c(paste( "I (",round(Proportions[1,j],4),")")), pos=2, font=2,cex=0.9)
-    }
-    if(ylimA[2]>0 & ylimB[1]<0){
-      text(x=c(ylimA[2]),  y=c(ylimB[1]), 
-         labels = c(paste( "II (",round(Proportions[2,j],4),")")), pos=2, font=2,cex=0.9)
-    }
-    if(ylimA[1]<0 & ylimB[1]<0){
-      text(x=c(ylimA[1]),  y=c(ylimB[1]), 
-         labels = c(paste("IV (",round(Proportions[4,j],4),")")), pos=4, font=2,cex=0.9)
-    }
-    if(ylimA[1]<0 & ylimB[2]>0){
-      text(x=c(ylimA[1]),  y=c(ylimB[2]), 
-         labels = c(paste("IV (",round(Proportions[3,j],4),")")), pos=4, font=2,cex=0.9)
-    }
-    hist(filename$gammabetaSdraw[-1:-burnin,j+1], main=bquote(paste("Histogram of ",gamma[.(j)])),
-         xlab=bquote(gamma[.(j)]), xlim=ylimG,
-         breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,j+1]),(max(filename$gammabetaSdraw[-1:-burnin,j+1])+breaksCalc),breaksCalc )))
-    abline(v=0,col="darkred", lwd=2)
-  }
-  #title(main=paste(dataset, "Aggregate Model.  Posterior Draws of parameters."),outer=T)
-# dev.off()
-}
+#FUN_PDF_Mediation_ScatterPlots_Aggregate_forShiny_Plot = function(dataset, filename, burnin, x_vars) {
+#    # dataset = the name (string) of the data file that needs to be displayed (i.e. "Loyalty data")
+#    # filename = output file of MCMC (list of objects/tables)
+#    # burnin = number of saved draws to exclude from plotting
+#    # x_vars = vector of names of variables in X, excluding intercept
+#  nvarX = ncol(filename$alphadraw) - 1
+#  #pdf(paste(dataset, "Posterior Draws.pdf", sep = " "), width=pdfW, height=pdfH)
+#  par(oma=c(0,0,2,0));
+#  QuadrantsCounts = array(0, dim=c(4, nvarX))
+#  #print(burnin)
+#  #print(length(filename$LL_total))
+#  DrawsAnalysis   = c(seq(from = burnin+1, to = length(filename$LL_total), by = 1))
+#  pp=pn=np=nn=0
+#  for(j in 1:nvarX){  
+#    for(r in DrawsAnalysis){ 
+#      pp = pp + ifelse(filename$alphadraw[r,j+1,1]>0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+#      pn = pn + ifelse(filename$alphadraw[r,j+1,1]>0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
+#      np = np + ifelse(filename$alphadraw[r,j+1,1]<0,ifelse(filename$betaMdraw[r,1]>0,1,0),0)
+#      nn = nn + ifelse(filename$alphadraw[r,j+1,1]<0,ifelse(filename$betaMdraw[r,1]<0,1,0),0)
+#    }
+#    QuadrantsCounts[,j]=c(pp,pn,np,nn)
+#    pp=pn=np=nn=0
+#  }
+#  Proportions <- QuadrantsCounts/length(DrawsAnalysis)
+#  
+#  par(mfrow=c(nvarX,2))
+#  ylimB = c( min(filename$betaMdraw[-1:-burnin])-0.1*min(filename$betaMdraw[-1:-burnin,1]),
+#           max(filename$betaMdraw[-1:-burnin])+0.1*max(filename$betaMdraw[-1:-burnin,1]))
+#  for(j in 1:nvarX){
+#    ylimA = c( min(filename$alphadraw[-1:-burnin,j+1,1])-0.1*min(filename$alphadraw[-1:-burnin,j+1,1]),
+#             max(filename$alphadraw[-1:-burnin,j+1,1])+0.1*max(filename$alphadraw[-1:-burnin,j+1,1]))
+#    ylimG = c( min(filename$gammabetaSdraw[-1:-burnin,j+1])-0.1*min(filename$gammabetaSdraw[-1:-burnin,j+1]),
+#             max(filename$gammabetaSdraw[-1:-burnin,j+1])+0.1*max(filename$gammabetaSdraw[-1:-burnin,j+1]))
+#    breaksCalc = (ylimG[2]-ylimG[1])/25
+#    plot(filename$alphadraw[-1:-burnin,j+1,1], filename$betaMdraw[-1:-burnin,1], 
+#         main=bquote("Scatterplot of " ~ alpha[.(j)] ~ " and " ~ beta ~ " for variable " ~ .(x_vars[j])),
+#         xlab=bquote(alpha[.(j)]), ylab=expression(beta), xlim=ylimA,ylim=ylimB)
+#    abline(h=0,v=0,col="gray")
+#    if(ylimA[2]>0 & ylimB[2]>0){
+#      text(x=c(ylimA[2]),  y=c(ylimB[2]), 
+#         labels = c(paste( "I (",round(Proportions[1,j],4),")")), pos=2, font=2,cex=0.9)
+#    }
+#    if(ylimA[2]>0 & ylimB[1]<0){
+#      text(x=c(ylimA[2]),  y=c(ylimB[1]), 
+#         labels = c(paste( "II (",round(Proportions[2,j],4),")")), pos=2, font=2,cex=0.9)
+#    }
+#    if(ylimA[1]<0 & ylimB[1]<0){
+#      text(x=c(ylimA[1]),  y=c(ylimB[1]), 
+#         labels = c(paste("IV (",round(Proportions[4,j],4),")")), pos=4, font=2,cex=0.9)
+#    }
+#    if(ylimA[1]<0 & ylimB[2]>0){
+#      text(x=c(ylimA[1]),  y=c(ylimB[2]), 
+#         labels = c(paste("IV (",round(Proportions[3,j],4),")")), pos=4, font=2,cex=0.9)
+#    }
+#    hist(filename$gammabetaSdraw[-1:-burnin,j+1], main=bquote(paste("Histogram of ",gamma[.(j)])),
+#         xlab=bquote(gamma[.(j)]), xlim=ylimG,
+#         breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,j+1]),(max(filename$gammabetaSdraw[-1:-burnin,j+1])+breaksCalc),breaksCalc )))
+#    abline(v=0,col="darkred", lwd=2)
+#  }
+#  #title(main=paste(dataset, "Aggregate Model.  Posterior Draws of parameters."),outer=T)
+## dev.off()
+#}

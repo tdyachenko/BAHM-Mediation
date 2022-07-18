@@ -186,7 +186,8 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
   breaksCalc = (ylimG[2]-ylimG[1])/25
   for(p in 2:nvarX) {
     plot(filename$alphadraw[-1:-burnin,p,1], filename$betaMdraw[-1:-burnin,2], 
-         main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ " for variable " ~ .(x_var[p-1]) ~ ". Segment M"),
+         #main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ " for variable " ~ .(x_var[p-1]) ~ ". Segment M"),
+         main=bquote("Segment M"),
          #main=paste(x_var[p-1],"\n Segment M"),
        xlab=bquote(alpha[M][.(p-1)]),ylab=expression(beta[M]), xlim=ylimA,ylim=ylimB)
     abline(h=0,v=0,col="gray")
@@ -207,7 +208,8 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
          labels = c(paste("IV (",round(ProportionsM[3,p-1],4),")")), pos=4, font=2,cex=1)
     }
     plot(filename$alphadraw[-1:-burnin,p,2], filename$gammabetaSdraw[-1:-burnin,nvarX+1],
-         main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
+         #main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
+         main=bquote("Segment S"),
          xlab=bquote(alpha[S][.(p-1)]),ylab=expression(beta[S]), xlim=ylimA,ylim=ylimB)
     abline(h=0,v=0,col="gray")
     if(ylimA[2]>0 & ylimB[2]>0){
@@ -227,7 +229,8 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
          labels = c(paste("IV (",round(ProportionsS[3,p-1],4),")")), pos=4, font=2,cex=1)
     }
     hist(filename$gammabetaSdraw[-1:-burnin,p],
-         main=bquote("Histogram of " ~ gamma[.(p-1)] ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
+         #main=bquote("Histogram of " ~ gamma[.(p-1)] ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
+         main=bquote("Segment S"),
          #main=paste(x_var[p-1],"\n Segment S"),
          xlab=bquote(gamma[S][.(p-1)]), xlim=ylimG,
          breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,p]),(max(filename$gammabetaSdraw[-1:-burnin,p])+breaksCalc),breaksCalc )))
