@@ -546,10 +546,10 @@ shinyServer(function(input, output, session) {
                                                                      RhatCutoff   = 1.25)
     
     #model_outputs$best.seed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
-    model_outputs$best.solution <- as.numeric(which.max(model_outputs$output_RhatcalcBM$table_forShiny[,5]))
+    model_outputs$best.solution <- as.numeric(which.max(model_outputs$output_RhatcalcBM$table_forShiny[5,]))
     # select column with the most positive mean LMD
     model_outputs$best.seed <- 
-      as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,model_outputs$best.solution])
+      as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[model_outputs$best.solution,1])
     
 
     return(model_outputs$output_RhatcalcBM)

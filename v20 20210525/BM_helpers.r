@@ -5,7 +5,7 @@
 # this ONLY runs for ONE BEST seed, which will be taken from the results of RHat function
 
 FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny = function(filenamelist,seed.selected,x_vars,burnin)
-  # seed.list is ONE selected seed for analysis, not all seeds
+  # seed.selected is ONE selected seed for analysis, not all seeds
 {  
    nvarX = ncol(filenamelist[[1]]$alphadraw)
    QuadrantsCountsM = matrix(0,nrow=4, ncol=nvarX-1)
@@ -37,8 +37,8 @@ FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny = function(filenamelist
   temp <- c(rep(0,(nvarX-1)*2))
   for(n in 2:nvarX)
   {
-     temp[n-1] <-paste(x_vars[n - 1], " Segment M (mediating)",sep = "")
-     temp[(nvarX-1)+n-1] <- paste(x_vars[n - 1], " Segment G (general)",sep = "")
+     temp[n-1] <-paste(x_vars[n - 1], " M",sep = "")
+     temp[(nvarX-1)+n-1] <- paste(x_vars[n - 1], " G",sep = "")
   }
   colnames(Proportions) <- temp
   rownames(Proportions) <- c("I (++)","II (+-)","III (-+)","IV (--)")
