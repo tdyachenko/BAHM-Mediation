@@ -3,15 +3,6 @@
 
 #library(bayesm);   library(coda); library(gtools)
 
-
-# testing
-#output_list_b = list(output_list_b[[1]],output_list_b[[1]],output_list_b[[1]],output_list_b[[1]])
-#testtemp = FUN_Mediation_LMD_RHat_MS(datafile=output_list_b, seed.index=seq(1:4), burnin=10, RhatCutoff=1.05)
-
-# this will need to be run before some of the other results for the binary model.. since we want to know 
-# which seeds are best for the two solutions (if there are two solutions).
-# also want to print some of these results to screen
-
 # Function is updated 2020-02-28 (TD) to accommodate moderate mediation case
 # lambda is now the parameter which is the transformation of previous rho
 
@@ -22,7 +13,7 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
   nseeds = length(seed.index)
   table01 = permutations(2,nseeds,c(1,0),repeats=TRUE)  # table of all possible combinations of the seeds as groups in two groups
   table01 = table01[-which(rowSums(table01)<2),]        # only select permutations with 2 or more members in each group
-  table01 = table01[-which(rowSums(table01)==(nseeds-1)),]        # only select permutationa with 2 or more members in each group
+  table01 = table01[-which(rowSums(table01)==(nseeds-1)),]        # only select permutations with 2 or more members in each group
   sumindex = as.numeric(apply(table01,1,paste,collapse=""))
   R = length(datafile[[1]]$wdraw[1,])
   LMD= c(rep(0,nseeds))
@@ -30,9 +21,11 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
   r=1
   for(i in seed.index) # does not take long, does not need to be paralleled
   {  listfromdata[[r]] = mcmc (data = cbind(
+       # these lines are from the Gibbs sampler
        datafile[[i]]$alphadraw[-1:-burnin,,1],datafile[[i]]$betaMdraw[-1:-burnin,],
-       datafile[[i]]$alphadraw[-1:-burnin,,2], datafile[[i]]$gammabetaSdraw[-1:-burnin,],  # these lines are for Gibbs sampler
-       datafile[[i]]$lambdadraw[-1:-burnin,] , datafile[[i]]$sigma2mdraw[-1:-burnin,],    datafile[[i]]$sigma2ydraw[-1:-burnin,]
+       datafile[[i]]$alphadraw[-1:-burnin,,2], datafile[[i]]$gammabetaSdraw[-1:-burnin,],  
+       datafile[[i]]$lambdadraw[-1:-burnin,] ,
+       datafile[[i]]$sigma2mdraw[-1:-burnin,],datafile[[i]]$sigma2ydraw[-1:-burnin,]
        #datafile[[i]]$rhodraw[-1:-burnin]
      ), start = burnin+1, end = R, thin = 1 )
      LMD[r] = logMargDenNR(datafile[[i]]$LL_total[-1:-burnin])
@@ -194,11 +187,6 @@ FUN_Mediation_LMD_RHat_MS_cov = function(inputdata, datafile,seed.index,burnin,R
 
 
 
-# --- Generate the best seed ----------------------------------------------------
-FUN_BestSeed_ForShiny  = function(filename)
-  { BestSeed <- as.numeric(filename$table_forShiny[1,1])
-    return(BestSeed)
-}
 
 #FUN_BestSeed_ForShiny(testtemp)
 

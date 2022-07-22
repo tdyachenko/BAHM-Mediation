@@ -2,7 +2,7 @@
 
 
 #---- (Aggregate model Results Page) --------------------------#
-# Proportion of joint (alpha, beta) in each quadrant MULTIX
+# report fit LMD NR for the aggregate model. Why do we need a table here?
 
 FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny  = function(filename, burnin)
 { outputTable = matrix(round(logMargDenNR(filename$LL_total[-1:-burnin]),2),1,1)
@@ -69,17 +69,6 @@ FUN_DIC_mediation = function(Data, McmcOutput,burnin,ModelFlag)
 
 
 # -------------------------------------------------------------------------------
-# Generate list of seeds 
-# -------------------------------------------------------------------------------
-FUN_Mediation_SeedList_ForShiny  = function(seednum_var, seed_var)
-{ set.seed(seed_var)
-  seed.list <- c(sort(round(runif(seednum_var, 0, 10000))))
-  #seed.index <- seq(1, seednum_var, 1)
-  #num_seeds <- length(seed.index)  # should be the same as input$seednum_varalize list
-  return(seed.list)
-}
-
-# -------------------------------------------------------------------------------
 # Proportion of joint (alpha, beta) in each quadrant MULTIX
 # -------------------------------------------------------------------------------
 # updated 7-13-2021
@@ -111,14 +100,24 @@ FUN_PDF_Mediation_AlphaBetaProportion_forShiny  = function(model,filename, burni
   }
 }
 
-# -------------------------------------------------------------------------------
-# HDP MULTIX
-# -------------------------------------------------------------------------------
-# updated 7-13-2021 for aggregate only
-# -------------------------------------------------------------------------------
 
+# --- Generate the best seed ----------------------------------------------------
+FUN_BestSeed_ForShiny  = function(filename)
+  { solution <- as.numeric(which.max(filename$table_forShiny[,5]))
+    BestSeed <- as.numeric(filename$table_forShiny[1,solution])
+    # using mean LMD to pick the best seed
+    return(BestSeed)
+}
+
+
+# -------------------------------------------------------------------------------
+# HDPI MULTIX       updated 7-13-2021 for aggregate only
+# -------------------------------------------------------------------------------
+# 
 FUN_PDF_Mediation_HDPI_forShiny  = function(model,filename, burnin, x_vars,  m_var, CIband)
-{ if(model==1)
+{ 
+  # Aggregate ONLY
+  if(model==1) 
   { nvarX = ncol(filename$alphadraw)
     tempa = t(apply(filename$alphadraw[-1:-burnin,,2],2,hdi,credMass = CIband))
     outputTable = cbind(c(colMeans(filename$alphadraw[-1:-burnin,,2])),tempa)
@@ -137,7 +136,7 @@ FUN_PDF_Mediation_HDPI_forShiny  = function(model,filename, burnin, x_vars,  m_v
     }
     #outputTable = cbind(rownames_list,outputTable)
     
-    colnames(outputTable) <- c("Mean","Lower limit","Upper limit")
+    colnames(outputTable) <- c("Mean","HPDI Lower limit","HPDI Upper limit")
     rownames(outputTable) <- rownames_list
     
     outputTable <- cbind("Variable" = c("Intercept", x_vars,"Intercept", x_vars, m_var), outputTable)
@@ -148,6 +147,86 @@ FUN_PDF_Mediation_HDPI_forShiny  = function(model,filename, burnin, x_vars,  m_v
     #return(htmlTable(outputTable))
   }
 }
+
+# -------------------------------------------------------------------------------
+# HDPI MULTIX       updated 7-22-2020 for BM only
+# -------------------------------------------------------------------------------
+# this is based on the best seed, # outputs HPD intervals
+
+FUN_PDF_Mediation_Parameters_MSmixture_forShiny  = function(filenamelist, x_vars, m_var, z_vars, seed.selected, burnin, CIband)
+  { filename = filenamelist[[seed.selected]]
+    nvarX = ncol(filename$alphadraw[-1:-burnin,,1])
+    tempCIs_M = rbind(
+       cbind(colMeans(filename$alphadraw[-1:-burnin,,1]), 
+         t( apply(filename$alphadraw[-1:-burnin,,1],2,hdi,credMass = CIband))),  # aM
+       cbind(colMeans(filename$betaMdraw[-1:-burnin,]),
+         t( apply(filename$betaMdraw[-1:-burnin,],2,hdi,credMass = CIband)))     # bM
+       #cbind(colMeans(filename$alphadraw[-1:-burnin,,1]*filename$betaMdraw[-1:-burnin,2]),
+         #t(apply((filename$alphadraw[-1:-burnin,,1]*filename$betaMdraw[-1:-burnin,2]),2, hdi,credMass = 0.95)))  # abM
+    )
+    tempCIs_S = rbind(
+       cbind(colMeans(filename$alphadraw[-1:-burnin,,2]), 
+         t( apply(filename$alphadraw[-1:-burnin,,2],2,hdi,credMass = CIband))),    # aS
+       cbind(colMeans(filename$gammabetaSdraw[-1:-burnin,]),
+         t( apply(filename$gammabetaSdraw[-1:-burnin,],2,hdi,credMass = CIband))) # gbS
+       #cbind(colMeans(filename$alphadraw[-1:-burnin,,2]*filename$gammabetaSdraw[-1:-burnin,3]),
+         #t(apply((filename$alphadraw[-1:-burnin,,2]*filename$gammabetaSdraw[-1:-burnin,3]),2, hdi,credMass = 0.95))) # abS
+    )
+    tempCIs_Rho =  matrix(c(mean(filename$rhodraw[-1:-burnin]),
+                     t(hdi(filename$rhodraw[-1:-burnin], credMass = CIband))),ncol=3,nrow=1)
+    tempCIs_lambda = cbind(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE]),
+         t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = .95)))
+    #templambda = t(apply(filename$lambdadraw[-1:-burnin, , drop = FALSE],2,hdi,credMass = CIband))
+    #tempCIs_lambda = cbind(c(colMeans(filename$lambdadraw[-1:-burnin, , drop = FALSE])),templambda)
+    
+    colnames(tempCIs_M)   <- c("Mean","HPDI lower limit","HPDI upper limit")
+    colnames(tempCIs_S)   <- c("Mean","HPDI lower limit","HPDI upper limit")
+    colnames(tempCIs_Rho) <- c("Mean","HPDI lower limit","HPDI upper limit")
+    colnames(tempCIs_lambda) <- c("Mean","HPDI lower limit","HPDI upper limit")
+    
+    rownames_list_M = c(rep(0,nrow(tempCIs_M)))
+    rownames_list_M[nvarX+1] = "beta_{M_0}"
+    rownames_list_M[nvarX+2] = "beta_{M_1}"
+    for(i in 1:nvarX) {
+      rownames_list_M[i]=paste0("alpha_{M_", i - 1, "}")
+      #rownames_list_M[nvarX+2+i]=paste0("alphabeta_{M_", i - 1, "}")
+    }
+    rownames_list_S = c(rep(0,nrow(tempCIs_S)))
+    rownames_list_S[nvarX+nvarX+1] = "beta_{S}"
+    for(i in 1:nvarX) {
+      rownames_list_S[i]=paste0("alpha_{S_", i - 1, "}")
+      rownames_list_S[nvarX+i]=paste0("gamma_{S_", i - 1, "}")
+      #rownames_list_S[nvarX+nvarX+1+i]=paste0("alphabeta_{S_", i - 1, "}")
+    }
+    rownames_list_Rho = expression(rho)
+    rownames(tempCIs_M) <- rownames_list_M
+    # print(rownames_list_M)
+    rownames(tempCIs_S) <- rownames_list_S
+    rownames(tempCIs_Rho) <- rownames_list_Rho
+    
+    nvarZ = nrow(tempCIs_lambda)
+    rownames_list_Lambda = c(rep(0,nvarZ))
+    for(i in 1:nvarZ) {
+      rownames_list_Lambda[i]=paste0("lambda_{", i - 1, "}")
+    }
+    rownames(tempCIs_lambda) <- rownames_list_Lambda
+    
+    tempCIs_M <- cbind("Variable" = c("Intercept", x_vars,"Intercept", m_var), tempCIs_M)
+    tempCIs_S <- cbind("Variable" = c("Intercept", x_vars,"Intercept", x_vars, m_var), tempCIs_S)
+    
+    print("=====")
+    print(z_vars)
+    print(tempCIs_lambda)
+    print(filename$lambdadraw[100:110, ])
+    print("=====")
+    
+    tempCIs_lambda <- cbind("Variable" = c("Intercept", z_vars), tempCIs_lambda)
+    
+    return(list(tempCIs_M,tempCIs_S,tempCIs_Rho,tempCIs_lambda))
+}
+
+# testing
+#temp_test = FUN_PDF_Mediation_Parameters_MSmixture_forShiny (output_list_b,seed.list=c(1),burnin=10)
 
 
 #-----(Aggregate model)-----------------------#
@@ -219,6 +298,8 @@ if(model==1){
   # dev.off()
   }
 }
+
+
 
 
 # -------------------------------------------------------------------------------

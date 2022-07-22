@@ -545,8 +545,13 @@ shinyServer(function(input, output, session) {
                                                                      burnin   = 500,
                                                                      RhatCutoff   = 1.25)
     
-    model_outputs$best.seed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
+    #model_outputs$best.seed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
+    model_outputs$best.solution <- as.numeric(which.max(model_outputs$output_RhatcalcBM$table_forShiny[,5]))
+    # select column with the most positive mean LMD
+    model_outputs$best.seed <- 
+      as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,model_outputs$best.solution])
     
+
     return(model_outputs$output_RhatcalcBM)
   })
   
@@ -719,8 +724,9 @@ shinyServer(function(input, output, session) {
                                                                 x_vars = input$checkGroup_x,
                                                                 m_var = input$radio_m,
                                                                 z_var = input$covariates_z,
-                                                                seed.list=model_outputs$best.seed, 
-                                                                burnin = model_outputs$my_inputs$burnin))
+                                                                seed.selected=model_outputs$best.seed, 
+                                                                burnin = model_outputs$my_inputs$burnin,
+                                                                CIband = 0.95))
   })
   
   # display ON SCREEN all non-rho HDPIs
@@ -739,7 +745,7 @@ shinyServer(function(input, output, session) {
       print(model_outputs$my_inputs)
     
     test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
-                                                                     seed.list=model_outputs$best.seed,  
+                                                                     seed.selected=model_outputs$best.seed,  
                                                                      x_vars   = model_outputs$my_inputs$x_vars,
                                                                      burnin   = model_outputs$my_inputs$burnin)
     
@@ -916,18 +922,6 @@ shinyServer(function(input, output, session) {
   # })
   
   
-  ###############
-  #  FIX the rownames
-  ###############
-  
-  # print proportions of posterior draws by quadrant
-  #output$proportionsM <- renderTable(expr = output_proportionsBM()[[1]]$ProportionsM,
-  #                                   rownames=TRUE, colnames=TRUE, bordered=TRUE)
-  #output$proportionsS <- renderTable(expr = output_proportionsBM()[[2]]$ProportionsS,
-  #                                   rownames=TRUE, colnames=TRUE, bordered=TRUE)
-  
-  
-  
   # download button for pdf
    output$downloadPDF_b <- downloadHandler(filename='posterior_draws.pdf',
                                          content= function(file){
@@ -935,8 +929,7 @@ shinyServer(function(input, output, session) {
                                            FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot(
                                               dataset="",
                                               filenamelist = model_results(),
-                                              seed.list = seed_list(),
-                                              seed.selected = c(1,2),
+                                              seed.selected = model_outputs$output_RhatcalcBM$table_forShiny[1,],
                                               burnin   = model_outputs$my_inputs$burnin
                                               #x_vars   = model_outputs$my_inputs$checkGroup_x
                                             )

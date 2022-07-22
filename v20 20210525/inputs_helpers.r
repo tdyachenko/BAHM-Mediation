@@ -17,6 +17,17 @@
 # output_list <- FUN_MediationGibbs_oneMediator_Aggregate_forShinyApp(input_list$Data, input_list$Prior, input_list$Mcmc)
 # props  <- FUN_PDF_Mediation_AlphaBetaProportion_Aggregate_forShiny(output_list, burnin=100, x_vars)
 
+# -------------------------------------------------------------------------------
+# Generate list of seeds (removed duplicate in "output_helpers.r" file 2022-07-22)
+# -------------------------------------------------------------------------------
+FUN_Mediation_SeedList_ForShiny  = function(seednum_var, seed_var)
+{ set.seed(seed_var)
+  seed.list <- c(sort(round(runif(seednum_var, 0, 10000))))
+  #seed.index <- seq(1, seednum_var, 1)
+  #num_seeds <- length(seed.index)  # should be the same as input$seednum_varalize list
+  return(seed.list)
+}
+
 
 #------(Aggregate model)--------------------------------#
 # prep inputs for aggregate model: returns a list of inputs for Data, Mcmc, Prior
@@ -111,11 +122,3 @@ get_inputs_binary <-function(df, x_vars, y_var, m_var, z_vars,
   return(list(Data=Data, Prior=Prior, Mcmc=Mcmc))
 }
 
-# --- Generate list of seeds ----------------------------------------------------
-FUN_Mediation_SeedList_ForShiny  = function(seednum_var, seed_var)
-{ set.seed(seed_var)
-  seed.list <- c(sort(round(runif(seednum_var, 0, 10000))))
-  #seed.index <- seq(1, seednum_var, 1)
-  #num_seeds <- length(seed.index)  # should be the same as input$seednum_varalize list
-  return(seed.list)
-}
