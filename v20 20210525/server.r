@@ -656,8 +656,8 @@ shinyServer(function(input, output, session) {
         paste0(scales::percent(max(prop_bm)), " of the joint posterior distirbution of parameters α and ß for at least one of the segments is in quadrant ", max_quad, ". 
                           The model estimates that the average probability to mediate in the sample is ", scales::percent(round(output_HDPI()[[3]]$Mean, digits = 4)), 
                           ", which can be also interpreted as a percent of the sample mediating through the proposed mediator."),
-        br(),br(),
-        "The independent variables are: ", paste0(model_outputs$my_inputs$checkGroup_x, collapse = ", "), ".",
+        #br(),br(),
+        #"The independent variables are: ", paste0(model_outputs$my_inputs$checkGroup_x, collapse = ", "), ".",
         #br(),br(),
         #"The mean of ρ is ", round(output_HDPI()[[3]]$Mean, digits = 4),
         br(),br(),
@@ -707,7 +707,7 @@ shinyServer(function(input, output, session) {
       y$Parameter <- mystr
       
       if ("Variable" %in% names(y)) {
-          y <- y %>% select(Variable, Parameter, everything())
+          y <- y %>% dplyr::select(Variable, Parameter, everything())
           y <- y[,c("Variable", "Parameter", setdiff(names(y), c("Variable", "Parameter")))]
       } else {
           y <- y[,c("Parameter", setdiff(names(y), c("Parameter")))]
