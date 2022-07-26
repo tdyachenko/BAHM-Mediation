@@ -101,15 +101,6 @@ FUN_PDF_Mediation_AlphaBetaProportion_forShiny  = function(model,filename, burni
 }
 
 
-# --- Generate the best seed ----------------------------------------------------
-FUN_BestSeed_ForShiny  = function(filename)
-  { solution <- as.numeric(which.max(filename$table_forShiny[,5]))
-    BestSeed <- as.numeric(filename$table_forShiny[1,solution])
-    # using mean LMD to pick the best seed
-    return(BestSeed)
-}
-
-
 # -------------------------------------------------------------------------------
 # HDPI MULTIX       updated 7-13-2021 for aggregate only
 # -------------------------------------------------------------------------------

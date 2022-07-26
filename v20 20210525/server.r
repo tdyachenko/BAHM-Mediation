@@ -378,7 +378,7 @@ shinyServer(function(input, output, session) {
                                                 x_vars   = aggregate_outputs$checkGroup_x,
                                                 m_var   = aggregate_outputs$radio_m,
                                                 burnin   = aggregate_outputs$select_burnin,
-                                                CIband=0.95) # Need to change to a variable/input 7-13-2021
+                                                CIband=0.95) # TODO: (Also look for hard coded instances of this value) Shiny input on settings page to dynamically populate this value (.95 default) # Need to change to a variable/input 7-13-2021
     )
   })
   
@@ -457,10 +457,10 @@ shinyServer(function(input, output, session) {
   
   # print model fit
   output$fitA <- renderTable(expr = {
-      y <- output_fitLMD()
+      y <- output_fitLMD()  # TODO - the output helpers does not need a separate function for this
       x <- rbind(y, as.matrix(output_fitLMD_DIC()))
       
-      rownames(x) <- c("LMD NR", "DIC")
+      rownames(x) <- c("LMD NR", "DIC")  # TODO: These will be vectors, one per seed, pick best seed for table
       
       return(x)
   }, rownames=TRUE, colnames=FALSE, bordered=TRUE)
@@ -726,7 +726,7 @@ shinyServer(function(input, output, session) {
                                                                 z_var = input$covariates_z,
                                                                 seed.selected=model_outputs$best.seed, 
                                                                 burnin = model_outputs$my_inputs$burnin,
-                                                                CIband = 0.95))
+                                                                CIband = 0.95)) # TODO: Shiny input on settings page to dynamically populate this value (.95 default)
   })
   
   # display ON SCREEN all non-rho HDPIs
