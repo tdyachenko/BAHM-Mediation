@@ -122,6 +122,7 @@ dashboardPage(
           ),
             
           # Input Tab - show model settings and default parameters, allow user to change them
+          
           tabPanel("Settings for Analysis", value = 'Settings for Analysis', 
                   
              h5("INSTRUCTIONS: Review Settings for Analysis"),
@@ -398,13 +399,13 @@ dashboardPage(
               #actionButton("runBMRhat", "Run Convergence Diagnostic", style="color: #fff; background-color: #FF0000; border-color: #DC143C; width:30%"),
        
               h5(strong('Model fit and Diagnostics', align='left')),  #table
-              tableOutput("test"),
+              tableOutput("fitBM"),
               br(),
               h5(strong('Rhat for each variable (point est.)', align='left')),  #table
               tableOutput("RhatEst"),
               
               br(),
-              h5(strong('Lambda Rejection rate (shoud be around 65-75%', align='left')),  #table
+              h5(strong('Lambda Rejection rate (shoud be around 0.65-0.75)', align='left')),  #table
               tableOutput("rejectRate"),
               
               #h4('Table: Convergence Diagnostics', align='left'),

@@ -177,7 +177,7 @@ shinyServer(function(input, output, session) {
   output$select_burnin <- renderUI({
     #numericInput("select_burnin", label=("Burnin (number of saved MCMC draws to remove before analysis (default is 0.5*R/keep))"), 
     numericInput("select_burnin", label=NULL, 
-                 value = round(input$select_R/20,0), step=1)
+                 value = round(0.5* input$select_R/input$select_keep,0), step=1)
   })
   output$select_seednum <- renderUI({
     numericInput("select_seednum", label=NULL,   value = 12, step=1)
@@ -549,7 +549,7 @@ shinyServer(function(input, output, session) {
     model_outputs$best.solution <- as.numeric(which.max(model_outputs$output_RhatcalcBM$table_forShiny[5,]))
     # select column with the most positive mean LMD
     model_outputs$best.seed <- 
-      as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[model_outputs$best.solution,1])
+      as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,model_outputs$best.solution])
     
 
     return(model_outputs$output_RhatcalcBM)
@@ -621,9 +621,9 @@ shinyServer(function(input, output, session) {
   output$download_csv <- downloadHandler(
     filename = function(){"bm_w_means.csv"}, 
     content = function(fname){
-      theseed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
+      #theseed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
       
-      model_res <- model_outputs$output_listBM[[theseed]]
+      model_res <- model_outputs$output_listBM[[ model_outputs$best.seed]]
       ws <- rowMeans(model_res$wdraw[,-1:-model_outputs$my_inputs$burnin])
       
       mytbl <- tibble(
@@ -678,14 +678,14 @@ shinyServer(function(input, output, session) {
   })
   
   # print Rhat metrics
-  output$test  <- renderTable({
+  output$fitBM  <- renderTable({
     model_outputs$output_RhatcalcBM$table_forShiny  #  Should include DIC now
   }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
   output$RhatEst  <- renderTable({
     model_outputs$output_RhatcalcBM$RhatEst
   }, rownames=TRUE, colnames=TRUE, bordered=TRUE)
   output$rejectRate  <- renderTable({
-     mean(model_outputs$output_listBM[[model_outputs$best.seed]]$reject[input$select_R])/input$select_R
+     max(model_outputs$output_listBM[[model_outputs$best.seed]]$reject)/ input$select_R
   }, rownames=FALSE, colnames=FALSE, bordered=TRUE)
   
   # select the solution to display
@@ -743,6 +743,8 @@ shinyServer(function(input, output, session) {
     if (is.null(model_mediation())) return(NULL)
       
       print(model_outputs$my_inputs)
+      print(model_outputs$output_listBM[[model_outputs$best.seed]]$reject)
+      print(model_outputs$output_listBM[[model_outputs$best.seed]]$LL_total)
     
     test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
                                                                      seed.selected=model_outputs$best.seed,  
