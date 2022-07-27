@@ -4,11 +4,6 @@
 #---- (Aggregate model Results Page) --------------------------#
 # report fit LMD NR for the aggregate model. Why do we need a table here?
 
-FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny  = function(filename, burnin)
-{ outputTable = matrix(round(logMargDenNR(filename$LL_total[-1:-burnin]),2),1,1)
-rownames(outputTable) <- c("LMD NR")
-return(outputTable)
-}
 
 # --- DIC (both models defined by ModelFlag (2022-02-01) ----------------------------------------------
 

@@ -166,6 +166,10 @@ dashboardPage(
                column(6, "Initial MH step size for lambda (default is 0.05)"),
                column(3, uiOutput("select_slambda"))
              ),
+             fluidRow(
+                 column(6, "Confidence Interval Band (default is 0.95)"),
+                 column(3, uiOutput("select_ciband"))
+             ),
              br(),
              hr(),
              

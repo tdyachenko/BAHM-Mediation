@@ -185,6 +185,9 @@ shinyServer(function(input, output, session) {
   output$select_slambda <- renderUI({
     numericInput("select_slambda", label = NULL, value = 0.5, step=0.01)
   })
+  output$select_ciband <- renderUI({
+      numericInput("select_ciband", label = NULL, value = 0.95, step=0.01, max=1, min=.8)
+  })
   
   output$ySelection <- renderText({
     paste0('Dependent Variable: ', input$radio_y)
@@ -378,15 +381,18 @@ shinyServer(function(input, output, session) {
                                                 x_vars   = aggregate_outputs$checkGroup_x,
                                                 m_var   = aggregate_outputs$radio_m,
                                                 burnin   = aggregate_outputs$select_burnin,
-                                                CIband=0.95) # TODO: (Also look for hard coded instances of this value) Shiny input on settings page to dynamically populate this value (.95 default) # Need to change to a variable/input 7-13-2021
+                                                CIband=input$select_ciband)
     )
   })
   
   # calculate model fit (LMD NR)
   output_fitLMD <- reactive({ 
     if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
-    return(FUN_PDF_Mediation_LMD_NR_Aggregate_forShiny(filename = aggregate_outputs$output_listA,
-                                                       burnin   = aggregate_outputs$select_burnin))
+      
+      outputTable = matrix(round(logMargDenNR(aggregate_outputs$output_listA$LL_total[-1:-aggregate_outputs$select_burnin]),2),1,1)
+      rownames(outputTable) <- c("LMD NR")
+      
+      return(outputTable)
   })
   # calculate model fit (DIC)
   output_fitLMD_DIC <- reactive({ 
@@ -457,7 +463,7 @@ shinyServer(function(input, output, session) {
   
   # print model fit
   output$fitA <- renderTable(expr = {
-      y <- output_fitLMD()  # TODO - the output helpers does not need a separate function for this
+      y <- output_fitLMD()
       x <- rbind(y, as.matrix(output_fitLMD_DIC()))
       
       rownames(x) <- c("LMD NR", "DIC")  # TODO: These will be vectors, one per seed, pick best seed for table
@@ -726,7 +732,7 @@ shinyServer(function(input, output, session) {
                                                                 z_var = input$covariates_z,
                                                                 seed.selected=model_outputs$best.seed, 
                                                                 burnin = model_outputs$my_inputs$burnin,
-                                                                CIband = 0.95)) # TODO: Shiny input on settings page to dynamically populate this value (.95 default)
+                                                                CIband = input$select_ciband))
   })
   
   # display ON SCREEN all non-rho HDPIs
