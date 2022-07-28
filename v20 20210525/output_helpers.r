@@ -13,7 +13,7 @@ FUN_DIC_mediation = function(Data, McmcOutput,burnin,ModelFlag)
   Data <- list(y = Data$y, 
                X = as.matrix(Data$X), 
                m = Data$m)
-
+  
   y = Data$y
   X = Data$X
   m = Data$m

@@ -222,6 +222,7 @@ shinyServer(function(input, output, session) {
   outputOptions(output, "select_burnin", suspendWhenHidden=FALSE)
   outputOptions(output, "select_seednum", suspendWhenHidden=FALSE)
   outputOptions(output, "select_slambda", suspendWhenHidden=FALSE)
+  outputOptions(output, "select_ciband", suspendWhenHidden=FALSE)
   
   
   #------------------ show Raw data ----------------------------------#
@@ -235,85 +236,55 @@ shinyServer(function(input, output, session) {
     paste("keep alive ", input$count)
   })
   
-  #------------------ User Selected Inputs ----------------------------------#
-  # 3. Define Model Inputs and Display in Inputs tab
-  
-  # calculate inputs only when Run Model button is clicked.
-  # ref: https://shiny.rstudio.com/articles/action-buttons.html
-  input_listA <- reactive({
-      
-      aggregate_outputs$output_listA <<- NULL
-    
-    #req(input$select_R)
-    #req(input$select_seed)
-    #req(input$select_keep)
-    # validate(need(input$select_R, message="cannot run! Visit 'Inputs for Analysis' tab"))
-    
-    # Data
-    x_vars <- input$checkGroup_x
-    y_var  <- input$radio_y
-    m_var  <- input$radio_m
-    z_var  <- input$covariates_z   # need for both models now
-    
-    # Priors
-    Aa_var  <- input$select_Aa
-    Abg_var <- input$select_Abg
-    nu_var  <- input$select_nu
-    qy_var  <- input$select_qy
-    qm_var  <- input$select_qm
-    
-    # MCMC
-    R_var    <- input$select_R
-    seed_var <- input$select_seed
-    seednum_var <- input$select_seednum
-    keep_var <- input$select_keep
-    slambda_var <- input$select_slambda
-    burnin <- input$select_burnin
-    
-    numx_vars <<- length(input$checkGroup_x)
-    
-    return(get_inputs_agg(df(), 
-                          x_vars, y_var, m_var, z_var, # Data
-                          Aa_var, Abg_var, nu_var, qy_var, qm_var, #Priors
-                          R_var, seed_var, keep_var)) # MCMC
-    
-  })
-  
   #-------------------- Aggregate: Run Model ---------------------------------------#
   #  Run Aggregate Model! 
   
   # add progress bar https://shiny.rstudio.com/articles/progress.html
-  aggregate_outputs <- reactiveValues(checkGroup_x = NULL, select_burnin = NULL, output_listA = NULL)
+  aggregate_outputs <- reactiveValues(checkGroup_x = NULL, select_burnin = NULL, output_listA = NULL,
+                                      output_listA_allseeds = NULL)
   
-  parallel_compute_A <- function(model_data, model_prior, model_mcmc, progress) {
+  parallel_compute_A <- function(all_seeds, my_inputs, progress) {
     progress$inc(amount = 1)
     progress$set(message = paste0("Beginning model fitting."))
     
-    model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
-      Model = 1,
-      Data  = model_data,
-      Prior = model_prior,
-      Mcmc  = model_mcmc)
+    x <- future_lapply(1:length(all_seeds), function(j) {
+        my_inputs$Mcmc$seed <- all_seeds[j]
+        
+        progress$inc(amount = .25)
+        progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Inputs Created."))
+        
+        model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
+            Model = 1,
+            Data = my_inputs$Data,
+            Prior = my_inputs$Prior,
+            Mcmc  = my_inputs$Mcmc)
+        
+        progress$inc(amount = .25)
+        progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Model Complete."))
+        
+        return(model_run)
+    }, future.seed=TRUE)
     
-    progress$inc(amount = 2)
-    progress$set(message = paste0("Beginning model post-processing..."))
-    
-    return(model_run)
+    return(x)
   }
   
   observeEvent(input$runA, {
     aggregate_outputs$checkGroup_x <<- input$checkGroup_x
     aggregate_outputs$radio_m <<- input$radio_m
     aggregate_outputs$select_burnin <<- input$select_burnin
+    aggregate_outputs$select_ciband <<- input$select_ciband
     
-    model_data <- input_listA()$Data
-    model_prior <- input_listA()$Prior
-    model_mcmc <- input_listA()$Mcmc
+    all_seeds <- seed_list()
+    model_outputs$my_inputs <- my_inputs()
+    inp <- my_inputs()
     
-    progress <- AsyncProgress$new(session, min = 1, max = 4, message = "Beginning Model Estimation", detail = "This may take several minutes...")
+    progress <- AsyncProgress$new(session, min = 1, max = length(all_seeds), message = "Beginning Model Estimation", detail = "This may take several minutes...")
     
     my_future <- future_promise({
-      parallel_compute_A(model_data, model_prior, model_mcmc, progress)
+        # TODO Your new code here?
+        # slambda <- get_jump_size()
+        # my_inputs["slambda"] <- slambda
+        parallel_compute_A(all_seeds, inp, progress)
     }, seed=TRUE)
     
     then(
@@ -321,12 +292,24 @@ shinyServer(function(input, output, session) {
       onFulfilled = function(value) {
         progress$close()
         
-        aggregate_outputs$output_listA <<- value
+        aggregate_outputs$output_listA_allseeds <<- value
       },
       onRejected = NULL
     )
     
     return(NULL)
+  })
+  
+  observe({
+      agg_out <- aggregate_outputs$output_listA_allseeds
+      if (!is.null(agg_out)) {
+
+          LMD_values <- lapply(agg_out, function(output_listA) {
+              logMargDenNR(output_listA$LL_total[-1:-aggregate_outputs$select_burnin])
+          })
+          
+          aggregate_outputs$output_listA <- agg_out[[which.max(LMD_values)]]
+      }
   })
   
   agg_prop <- reactive({
@@ -381,7 +364,7 @@ shinyServer(function(input, output, session) {
                                                 x_vars   = aggregate_outputs$checkGroup_x,
                                                 m_var   = aggregate_outputs$radio_m,
                                                 burnin   = aggregate_outputs$select_burnin,
-                                                CIband=input$select_ciband)
+                                                CIband=aggregate_outputs$select_ciband)
     )
   })
   
@@ -399,9 +382,9 @@ shinyServer(function(input, output, session) {
     if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
       
       mydat <- list(
-          y = input_listA()$Data$y,
-          X = input_listA()$Data$X,
-          m = input_listA()$Data$m
+          y = my_inputs()$Data$y,
+          X = my_inputs()$Data$X,
+          m = my_inputs()$Data$m
       )
     
     return(FUN_DIC_mediation(mydat,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
@@ -463,6 +446,8 @@ shinyServer(function(input, output, session) {
   
   # print model fit
   output$fitA <- renderTable(expr = {
+      if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
+      
       y <- output_fitLMD()
       x <- rbind(y, as.matrix(output_fitLMD_DIC()))
       
@@ -747,10 +732,6 @@ shinyServer(function(input, output, session) {
   # calculate proportion of posterior draws in each quadrant for selected seeds
   output_proportionsBM <- reactive({
     if (is.null(model_mediation())) return(NULL)
-      
-      print(model_outputs$my_inputs)
-      print(model_outputs$output_listBM[[model_outputs$best.seed]]$reject)
-      print(model_outputs$output_listBM[[model_outputs$best.seed]]$LL_total)
     
     test <- FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny(model_outputs$output_listBM,
                                                                      seed.selected=model_outputs$best.seed,  
