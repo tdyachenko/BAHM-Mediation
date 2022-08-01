@@ -60,7 +60,8 @@ dashboardPage(
     tabItems(
         
         tabItem(tabName = "how",
-                h4(strong("Disclaimer:")),
+                h4(strong("Welcome!")),
+        				br(),
                 helpText("This application is currently under continuous development. While most functionality works, you may encounter unexpected behavior, please contact <email>,
                          and we will do our best to look into it and correct it if needed. Thank you!"),
                 helpText("More information will be provided shortly. Please go to Input Tab to perform the analysis."),
@@ -80,7 +81,10 @@ dashboardPage(
                   hr(),
                             # add widgets for user to select variables
                             # this is dynamically done based on the file they upload using the RenderUI function in the server
-                  h4(strong("Upload Data: (may take several minutes in this BETA version)")),
+                  h4(strong("Upload Data:")),
+          				h5(strong("This may take several minutes in this BETA version.")),
+          				h5(strong("You should see the table with your data below when it is done.")),
+          				br(),
                   fileInput('file1', 
                            em('Upload CSV file or use default data'),
                            accept = c("text/csv",
@@ -437,11 +441,15 @@ dashboardPage(
  #                  
      # SIDE tab content - # TAB Models (aggregate) 
      tabItem(tabName = "ref",
-             h3("Resources"),
-             "This app is based on the working paper:",
-             em("Bayesian Analysis of Heterogeneous Mediation,"),
-             "which is currently under review process in the Journal of Consumer Research.",  br(),
-             "  Authors' names are temporarily hidden to adhere to the blind review process.",
+             h4(strong("Resources")),
+     				 br(),
+             "This app is based on the working paper ",
+             em("Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM),"),
+             #"by Tatiana L. Dyachenko (University of Georgia, Terry College of Business) and Greg M. Allenby
+             # (The Ohio State University, Fisher College of Business). The paper is conditionally accepted in the Journal of Consumer Research.",  
+     				 br(),
+     				 br(),
+             " The paper with a short tutorial on how to use the app will be avaiable here for download in Fall 2022.",
              br(),
              br(),
              #p("This link will be removed when submitting for review:"),

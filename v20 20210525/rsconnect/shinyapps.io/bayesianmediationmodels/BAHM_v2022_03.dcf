@@ -5,9 +5,9 @@ account: bayesianmediationmodels
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5852336
-bundleId: 6109272
+bundleId: 6155082
 url: https://bayesianmediationanalysis.shinyapps.io/BAHM_v2022_03/
-when: 1658172751.87605
-lastSyncTime: 1658172751.87712
+when: 1659387217.50938
+lastSyncTime: 1659387217.50938
 asMultiple: FALSE
 asStatic: FALSE
