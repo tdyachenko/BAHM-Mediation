@@ -167,7 +167,7 @@ dashboardPage(
                column(3, uiOutput("select_seednum"))
              ),
              fluidRow(
-               column(6, "Initial MH step size for lambda (default is 0.05)"),
+               column(6, "Initial MH step size for lambda (default is 0.5)"),
                column(3, uiOutput("select_slambda"))
              ),
              fluidRow(

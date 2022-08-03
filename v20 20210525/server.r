@@ -35,6 +35,7 @@ source('output_helpers.r')
 source('agg_helpers.r')
 source('BM_helpers.r')
 source('BM_Rhat_helpers.r')
+source("FUN_Mediation_MH_step.R")
 source("FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R")
 
 
@@ -49,20 +50,21 @@ shinyServer(function(input, output, session) {
   # 1. define df - the reactive function is explained here: 
   # https://shiny.rstudio.com/tutorial/written-tutorial/lesson6/
   df <- reactive({
-    
-    # check for input
-    inFile <- input$file1
-    
-    # if no file is uploaded by user, then return the sample file
-    if (is.null(inFile)){
-      return(sample_df)
-    }
-    
-    # otherwise, use the file uploaded by user
-    else {
-      validate(need(sum(is.na(read.csv(inFile$datapath))) == 0, "Error: please remove missing values in your file and upload again"))
-      return(read.csv(inFile$datapath))
-    }
+    withProgress(message = "Uploading File", detail = "Please wait a few moments...", expr = {
+        # check for input
+        inFile <- input$file1
+        
+        # if no file is uploaded by user, then return the sample file
+        if (is.null(inFile)){
+            return(sample_df)
+        }
+        
+        # otherwise, use the file uploaded by user
+        else {
+            validate(need(sum(is.na(read.csv(inFile$datapath))) == 0, "Error: please remove missing values in your file and upload again"))
+            return(read.csv(inFile$datapath))
+        }
+    })
   })
   
   output$obs <- renderText({
@@ -281,9 +283,6 @@ shinyServer(function(input, output, session) {
     progress <- AsyncProgress$new(session, min = 1, max = length(all_seeds), message = "Beginning Model Estimation", detail = "This may take several minutes...")
     
     my_future <- future_promise({
-        # TODO Your new code here?
-        # slambda <- get_jump_size()
-        # my_inputs["slambda"] <- slambda
         parallel_compute_A(all_seeds, inp, progress)
     }, seed=TRUE)
     
@@ -330,7 +329,7 @@ shinyServer(function(input, output, session) {
     colnum <- maxloc %/% 4 + 1
     max_quad <- rownames(prop_agg)[maxloc %% 4]
     
-    if (any(prop_agg >= .95)) {
+    if (any(prop_agg >= input$select_ciband)) {
       ## Mediation
       tagList(
         strong("According to the aggregate model, mediation is present in the sample for variable(s)", paste0(aggregate_outputs$checkGroup_x[colnum]),". "),
@@ -382,9 +381,9 @@ shinyServer(function(input, output, session) {
     if(is.null(aggregate_outputs$output_listA)) {return(NULL)}
       
       mydat <- list(
-          y = my_inputs()$Data$y,
-          X = my_inputs()$Data$X,
-          m = my_inputs()$Data$m
+          y = model_outputs$my_inputs$Data$y,
+          X = model_outputs$my_inputs$Data$X,
+          m = model_outputs$my_inputs$Data$m
       )
     
     return(FUN_DIC_mediation(mydat,   ### NEED TO SEND THE ORIGINAL DATA that was used for estimation
@@ -451,7 +450,7 @@ shinyServer(function(input, output, session) {
       y <- output_fitLMD()
       x <- rbind(y, as.matrix(output_fitLMD_DIC()))
       
-      rownames(x) <- c("LMD NR", "DIC")  # TODO: These will be vectors, one per seed, pick best seed for table
+      rownames(x) <- c("LMD NR", "DIC")
       
       return(x)
   }, rownames=TRUE, colnames=FALSE, bordered=TRUE)
@@ -529,11 +528,18 @@ shinyServer(function(input, output, session) {
           m = model_outputs$my_inputs$Data$m,
           Z = model_outputs$my_inputs$Data$Z
       )
-    
+      
+      mydat <- list(
+          y = test3$Data$y,
+          X = test3$Data$X,
+          m = test3$Data$m,
+          Z = test3$Data$Z
+      )
+
     model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=mydat,
                                                                      datafile=model_results(),
                                                                      seed.index = seed_index(),
-                                                                     burnin   = 500,
+                                                                     burnin   = model_outputs$my_inputs$burnin,
                                                                      RhatCutoff   = 1.25)
     
     #model_outputs$best.seed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
@@ -546,22 +552,20 @@ shinyServer(function(input, output, session) {
     return(model_outputs$output_RhatcalcBM)
   })
   
-  parallel_compute <- function(all_seeds, my_inputs, progress) {
+  parallel_compute <- function(all_seeds, model_inputs, progress) {
     progress$set(message = "Beginning parallel computation")
-     
-    in_list <- my_inputs
 
     x <- future_lapply(1:length(all_seeds), function(j) {
-      my_inputs$Mcmc$seed <- all_seeds[j]
+      model_inputs$Mcmc$seed <- all_seeds[j]
 
       progress$inc(amount = .25)
       progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Inputs Created."))
       
       model_run <- FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp(
         Model = 2,
-        Data = my_inputs$Data,
-        Prior = my_inputs$Prior,
-        Mcmc  = my_inputs$Mcmc)
+        Data = model_inputs$Data,
+        Prior = model_inputs$Prior,
+        Mcmc  = model_inputs$Mcmc)
       
       progress$inc(amount = .25)
       progress$set(message = paste0("Seed ", j, " of ", length(all_seeds), " Model Complete."))
@@ -576,21 +580,29 @@ shinyServer(function(input, output, session) {
   
   observeEvent(input$runBM, {
     shinyjs::disable("runBM")
+    
     model_outputs$started <- TRUE
     model_outputs$ output_listBM = NULL
     model_outputs$output_RhatcalcBM = NULL
     model_outputs$best.seed = NULL
+    
     all_seeds <- seed_list()
-    model_outputs$my_inputs <- my_inputs()
-    inp <- my_inputs()
+    model_inputs <- my_inputs()
+    model_outputs$my_inputs <- model_inputs
     
     progress <- AsyncProgress$new(session, min = 1, max = length(all_seeds), message = "Beginning Model Estimation", detail = "This may take several minutes...")
     
     my_future <- future_promise({
-      # Your new code here?
-      # slambda <- get_jump_size()
-      # my_inputs["slambda"] <- slambda
-      parallel_compute(all_seeds, inp, progress)
+        mh_step_result <- FUN_Mediation_MH_step(
+            Model = 2,
+            Data = model_inputs$Data,
+            Prior = model_inputs$Prior,
+            Mcmc  = model_inputs$Mcmc
+        )
+        slambda <- mh_step_result$slambda
+        model_inputs$slambda_var <<- slambda
+        
+        parallel_compute(all_seeds, model_inputs, progress)
     }, seed=TRUE)
     
     then(
@@ -639,7 +651,7 @@ shinyServer(function(input, output, session) {
     colnum <- maxloc %/% 4 + 1
     max_quad <- rownames(prop_bm)[maxloc %% 4]
     
-    if (any(prop_bm >= .95)) {
+    if (any(prop_bm >= input$select_ciband)) {
       ## Mediation
       
       tagList(
