@@ -528,13 +528,6 @@ shinyServer(function(input, output, session) {
           m = model_outputs$my_inputs$Data$m,
           Z = model_outputs$my_inputs$Data$Z
       )
-      
-      mydat <- list(
-          y = test3$Data$y,
-          X = test3$Data$X,
-          m = test3$Data$m,
-          Z = test3$Data$Z
-      )
 
     model_outputs$output_RhatcalcBM <- FUN_Mediation_LMD_RHat_MS_cov(inputdata=mydat,
                                                                      datafile=model_results(),
