@@ -336,7 +336,7 @@ dashboardPage(
                               status = "primary",
                               uiOutput("plotsBM_effects.ui"),
                               h5('Downloads:', align='left'),
-                              downloadButton('downloadPDF_b', 'PDF of Plots' ),# TO DO: size to make a function of number of parameters
+                              downloadButton('downloadPDF_b', 'PDF of Plots' ),
                           )
                          ),
                   column(width = 8,
@@ -348,7 +348,7 @@ dashboardPage(
                          ),
                          box(width = NULL,
                              solidHeader = FALSE,
-                             title = "Parameter 95% HPDIs for the General Segment (S)", #table
+                             title = "Parameter 95% HPDIs for the General Segment (S)", #table  # TODO change to M* if segmentFlag ==2
                              status = "primary",
                              tableOutput("hdpiBM_S_tbl")
                          )
@@ -366,7 +366,7 @@ dashboardPage(
                           solidHeader = FALSE,
                           title = "Distribution of the individual probabilities to mediate",  #Figure
                           status = "primary",
-                          plotOutput("plotBM_w", height = "400px")  # TO DO make it a function of number of variables (Maybe)
+                          plotOutput("plotBM_w", height = "400px")  # LATER make it a function of number of variables (Maybe)
                       ),
                       box(width=NULL,
                           solidHeader = FALSE,
@@ -443,17 +443,17 @@ dashboardPage(
      tabItem(tabName = "ref",
              h4(strong("Resources")),
      				 br(),
-             "This app is based on the working paper ",
-             em("Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM),"),
-             #"by Tatiana L. Dyachenko (University of Georgia, Terry College of Business) and Greg M. Allenby
-             # (The Ohio State University, Fisher College of Business). The paper is conditionally accepted in the Journal of Consumer Research.",  
+             "This app is based on the paper ",
+             em("Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM)"),
+                "by Tatiana L. Dyachenko (University of Georgia, Terry College of Business) and Greg M. Allenby
+                (The Ohio State University, Fisher College of Business). The paper is forthcoming in the Journal of Consumer Research.",  
      				 br(),
      				 br(),
-             " The paper with a short tutorial on how to use the app will be avaiable here for download in Fall 2022.",
+             " The paper with a short tutorial will be avaiable shortly using the link below.",
              br(),
              br(),
              #p("This link will be removed when submitting for review:"),
-             #a(href="https://ssrn.com/abstract=2600140", "link to the paper"),
+             a(href="https://doi.org/10.1093/jcr/ucac041", "link to the paper"),
              br(),
              br(),
              a(href="https://www.rdocumentation.org/packages/coda/versions/0.19-2/topics/gelman.diag", "References for function gelman.diag"),
@@ -461,8 +461,10 @@ dashboardPage(
              p("Gelman, A and Rubin, DB (1992) Inference from iterative simulation using multiple sequences, Statistical Science, 7, 457-511."),
              p("Brooks, S P. and Gelman, A. (1998) General Methods for Monitoring Convergence of Iterative Simulations.
                   Journal of Computational and Graphical Statistics, 7, 434-455."),
-             br()
-             
+             br(),
+     				 "Development assistance for this was provided by ",
+     				 a(href="https://omnianalytics.org", "Omni Analytics Group"),
+     				 br()
 
      )
   )  # end of tabItems

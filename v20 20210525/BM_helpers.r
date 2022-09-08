@@ -84,17 +84,22 @@ FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot = function(dataset,filename
         abline(h=0,v=0,col="gray")
       }
       for(p in 2:nvarX) {   
-        plot(filename$alphadraw[-1:-burnin,p,2], filename$gammabetaSdraw[-1:-burnin,nvarX+1], main=paste("Segment G. Seed=",seed.selected[i]),
+        plot(filename$alphadraw[-1:-burnin,p,2], filename$gammabetaSdraw[-1:-burnin,nvarX+1], 
+           main=ifelse(segmentFlag==1,paste("Segment G. Seed=",seed.selected[i]),paste("Segment M*. Seed=",seed.selected[i])),
            xlab=bquote(alpha[S][.(p-1)]),ylab=expression(beta[S]), xlim=ylimA,ylim=ylimB)
         abline(h=0,v=0,col="gray")
       }
       for(p in 2:nvarX){
-         hist(filename$gammabetaSdraw[-1:-burnin,p], xlab=bquote(gamma[S][.(p-1)]), xlim=ylimG, main=paste("Segment G. Seed=",seed.selected[i]),
+         hist(filename$gammabetaSdraw[-1:-burnin,p], xlab=bquote(gamma[S][.(p-1)]), xlim=ylimG, 
+           main=ifelse(segmentFlag==1,paste("Segment G. Seed=",seed.selected[i]),paste("Segment M*. Seed=",seed.selected[i])),
            breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,p]),(max(filename$gammabetaSdraw[-1:-burnin,p])+breaksCalc),breaksCalc )))
          abline(v=0,col="darkred",lwd=2)
       }
-      hist(filename$rhodraw[-1:-burnin], main=paste("Rho. Seed=",seed.selected[i]), xlab=bquote(rho), xlim=c(0,1),
-           breaks=50)
+      if(segmentFlag==1) { hist(filename$rhodraw[-1:-burnin], main=paste("Rho. Seed=",seed.selected[i]), xlab=bquote(rho), xlim=c(0,1),
+           breaks=50)}
+      else{hist(1-filename$rhodraw[-1:-burnin], main=paste("Rho. Seed=",seed.selected[i]), xlab=bquote(rho), xlim=c(0,1),
+           breaks=50)}
+      
     }
   #title(main=paste(dataset," Final Results. Binary mixture"),outer=T)
   #dev.off()
@@ -103,7 +108,7 @@ FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot = function(dataset,filename
 #-------------- BM model scatterplots (updated version for the App)--------------------
 # for one seed only
 
-FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,filenamelist,seed.list,seed.selected,burnin,x_var){
+FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,filenamelist,seed.list,seed.selected,burnin,x_var,segmentFlag){
   nvarX = ncol(filenamelist[[1]]$alphadraw[,,1])
    QuadrantsCountsM = matrix(0,nrow=4, ncol=nvarX-1)
    QuadrantsCountsS = matrix(0,nrow=4, ncol=nvarX-1)
@@ -171,7 +176,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
     }
     plot(filename$alphadraw[-1:-burnin,p,2], filename$gammabetaSdraw[-1:-burnin,nvarX+1],
          #main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
-         main=bquote("Segment S"),
+         main=ifelse(segmentGlag==1,bquote("Segment S"),bquote("Segment M*")),
          xlab=bquote(alpha[S][.(p-1)]),ylab=expression(beta[S]), xlim=ylimA,ylim=ylimB)
     abline(h=0,v=0,col="gray")
     if(ylimA[2]>0 & ylimB[2]>0){
@@ -192,7 +197,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
     }
     hist(filename$gammabetaSdraw[-1:-burnin,p],
          #main=bquote("Histogram of " ~ gamma[.(p-1)] ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
-         main=bquote("Segment S"),
+         main=ifelse(segmentGlag==1,bquote("Segment S"),bquote("Segment M*")),
          #main=paste(x_var[p-1],"\n Segment S"),
          xlab=bquote(gamma[S][.(p-1)]), xlim=ylimG,
          breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,p]),(max(filename$gammabetaSdraw[-1:-burnin,p])+breaksCalc),breaksCalc )))
@@ -206,29 +211,29 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
 #FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects(dataset="",filenamelist=output_list_b,seed.list,seed.selected=c(1),burnin=10)
 
 
-FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Rho = function(dataset,filenamelist,seed.list,seed.selected,burnin){
+FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Rho = function(dataset,filenamelist,seed.list,seed.selected,burnin,segmentFlag){
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   filename = filenamelist[[seed.selected]]
-  hist((filename$rhodraw[-1:-burnin,]), main="", xlab=bquote(rho), xlim=c(0,1),col = "#75AADB",
-       breaks=50)
+  if(segmentFlag==1) {  hist((filename$rhodraw[-1:-burnin,]), main="", xlab=bquote(rho), xlim=c(0,1),col = "#75AADB", breaks=50)}
+  else { hist((1-filename$rhodraw[-1:-burnin,]), main="", xlab=bquote(rho), xlim=c(0,1),col = "#75AADB", breaks=50)}
 }
   
-FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW = function(dataset,filenamelist,seed.list,seed.selected,burnin){
+FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_meanW = function(dataset,filenamelist,seed.list,seed.selected,burnin,segmentFlag){
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   filename = filenamelist[[seed.selected]]
-  hist(rowMeans(filename$wdraw[,-1:-burnin]), main="", xlab="Mean w's", xlim=c(0,1),col = "#75AADB",
-       breaks=50)
+  if(segmentFlag==1) { hist(rowMeans(filename$wdraw[,-1:-burnin]), main="", xlab="Mean w's", xlim=c(0,1),col = "#75AADB", breaks=50)}
+  else {hist(1-rowMeans(filename$wdraw[,-1:-burnin]), main="", xlab="Mean w's", xlim=c(0,1),col = "#75AADB", breaks=50)}
   #title(main=paste(dataset," Final Results. Binary mixture"),outer=T)
   #dev.off()
 }
 
-FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,filenamelist,seed.list,seed.selected,burnin){
+FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Lambda = function(dataset,filenamelist,seed.list,seed.selected,burnin,segmentFlag){
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   filename = filenamelist[[seed.selected]]
   numCharts = ncol(filename$lambdadraw)
   par(oma=c(0,0,2,0));   par(mfrow=c(numCharts,1))
   for(i in 1:numCharts)
-  {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i-1]),
+  {  hist(filename$lambdadraw[-1:-burnin,i], main="", xlab=bquote(lambda[i-1]),  # NEED TO FIGURE OUT how to update this as a fucntion of segmentFlag
           xlim=c(min(filename$lambdadraw[-1:-burnin,i]),max(filename$lambdadraw[-1:-burnin,i])),col = "#75AADB",
        breaks=30)
   }
