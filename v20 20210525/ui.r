@@ -462,7 +462,11 @@ dashboardPage(
              p("Brooks, S P. and Gelman, A. (1998) General Methods for Monitoring Convergence of Iterative Simulations.
                   Journal of Computational and Graphical Statistics, 7, 434-455."),
              br(),
+<<<<<<< HEAD
      				 "Development assistance for this application was provided by ",
+=======
+     				 "Development assistance for this was provided by ",
+>>>>>>> 3089b22639f81e7a88a8da8b6337f08694766c56
      				 a(href="https://omnianalytics.org", "Omni Analytics Group"),
      				 br()
 
