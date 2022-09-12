@@ -762,7 +762,7 @@ shinyServer(function(input, output, session) {
   # display ON SCREEN HDPIs for rho and lambda
   #output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   #output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  output$hdpiRho_tbl <- renderTable(expr = 1-output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   # NEED TO FIGURE OUT how to transform lambda
   
