@@ -472,7 +472,8 @@ shinyServer(function(input, output, session) {
   #-------------------- Binary: Run Model ---------------------------------------#
   
   # Store outputs for the model as reactive values
-  model_outputs <- reactiveValues(my_inputs = NULL, started = FALSE, output_listBM = NULL, output_RhatcalcBM = NULL, best.seed = NULL)
+  model_outputs <- reactiveValues(my_inputs = NULL, started = FALSE, output_listBM = NULL, output_RhatcalcBM = NULL, best.seed = NULL,
+                                  segment_flag = 2)
   
   my_inputs <- reactive({
       
@@ -620,7 +621,7 @@ shinyServer(function(input, output, session) {
       #theseed <- as.numeric(model_outputs$output_RhatcalcBM$table_forShiny[1,1])
       
       model_res <- model_outputs$output_listBM[[ model_outputs$best.seed]]
-      if( segmentFlag==1)  { ws <- rowMeans(model_res$wdraw[,-1:-model_outputs$my_inputs$burnin])}
+      if( model_outputs$segment_flag == 1 )  { ws <- rowMeans(model_res$wdraw[,-1:-model_outputs$my_inputs$burnin])}
       else { ws <- 1- rowMeans(model_res$wdraw[,-1:-model_outputs$my_inputs$burnin])}
       
       mytbl <- tibble(
@@ -650,6 +651,11 @@ shinyServer(function(input, output, session) {
     # if the max% is in segment M (second column of the output_proportionsBM),
     # then segmentFlag==1, else { segmentFlag==2 }
     
+    if (colnum == 2) {
+        model_outputs$segment_flag <- 1
+    } else {
+        model_outputs$segment_flag <- 2
+    }
     
     if (any(prop_bm >= input$select_ciband)) {
       ## Mediation
@@ -661,7 +667,7 @@ shinyServer(function(input, output, session) {
           " of the joint posterior distirbution of parameters α and ß for at least one of the segments is one quadrant ", ". 
                           The model estimates that the average probability to mediate in the sample is ", 
                           # CHECK the next line
-                          scales::percent(round(ifelse(segmentFlag==1,output_HDPI()[[3]]$Mean,1-output_HDPI()[[3]]$Mean), digits = 4)), 
+                          scales::percent(round(ifelse(model_outputs$segment_flag==1,output_HDPI()[[3]]$Mean,1-output_HDPI()[[3]]$Mean), digits = 4)), 
                           ", which can be also interpreted as a percent of the sample mediating through the proposed mediator."),
         #br(),br(),
         #"The independent variables are: ", paste0(model_outputs$my_inputs$checkGroup_x, collapse = ", "), ".",
@@ -671,7 +677,7 @@ shinyServer(function(input, output, session) {
         "You can download individual specific proabilities to mediate by clicking the button below.
                           The probabilities are calculated as posterior means of individual parameters w.",
         br(),
-        if(segmentFlag==1) {
+        if(model_outputs$segment_flag==1) {
           h6("Please note that due to lable switching during estimation, segment G is now labeled as M* 
           and treated as mediating for reporting purposes.")}, 
         br(),
@@ -741,7 +747,15 @@ shinyServer(function(input, output, session) {
   output$hdpiBM_M_tbl <- renderTable(expr = output_HDPI()[[1]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   #output$hdpiBM_S_tbl <- renderTable(expr = output_HDPI()[[2]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   # new line
-  output$hdpiBM_S_tbl <- renderTable(expr = output_HDPI()[[2]], colnames=ifelse(segmentFlag==1,TRUE,c("Segment M", "Segment M*")),
+  reactive_output_hdpi <- reactive({
+      res <- output_HDPI()[[2]]
+      if( model_outputs$segment_flag == 1 ) {
+          names(res) <- c("Segment M", "Segment M*")
+      }
+      
+      return(res)
+  })
+  output$hdpiBM_S_tbl <- renderTable(expr = reactive_output_hdpi(), colnames=TRUE,
                                      bordered=TRUE, sanitize.text.function = function(x) x)
 
   
@@ -780,9 +794,9 @@ shinyServer(function(input, output, session) {
           tags$th(''),
           tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), 'Segment M (mediating)'), 
           ##colspan=length(my_inputs()$checkGroup_x)
-          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), 'Segment G (general)')),  # TODO: if segmentFlag=2 change to M*
+          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), paste0('Segment ', ifelse(model_outputs$segment_flag == 1, 'G (general)', 'M*'))),  # TODO: if segmentFlag=2 change to M*
         tags$tr(lapply(colnames(output_proportionsBM()), tags$th))
-      ))
+      )))
   })
   output$proportionsBM <- DT::renderDataTable({
     DT::datatable(output_proportionsBM(), container = container_dt(), rownames = FALSE, colnames = TRUE, class = "",
@@ -806,7 +820,7 @@ shinyServer(function(input, output, session) {
                                                                 seed.selected = model_outputs$best.seed, 
                                                                 burnin   = model_outputs$my_inputs$burnin,
                                                                 x_var   = model_outputs$my_inputs$checkGroup_x,
-                                                                segmentFlag = segmentFlag)
+                                                                segmentFlag = model_outputs$segment_flag)
     
   })    
   output_scatterplotsBM_rho <- reactive({
@@ -817,7 +831,7 @@ shinyServer(function(input, output, session) {
                                                             seed.list = seed_list(),
                                                             seed.selected = model_outputs$best.seed, 
                                                             burnin   = model_outputs$my_inputs$burnin,
-                                                            segmentFlag = segmentFlag
+                                                            segmentFlag = model_outputs$segment_flag
                                                             #x_var   = model_outputs$my_inputs$checkGroup_x 
     )                                 
   })
@@ -830,7 +844,7 @@ shinyServer(function(input, output, session) {
                                                                  seed.list = seed_list(),
                                                                  seed.selected = model_outputs$best.seed, 
                                                                  burnin   = model_outputs$my_inputs$burnin,
-                                                                 segmentFlag = segmentFlag
+                                                                 segmentFlag = model_outputs$segment_flag
                                                                  #x_var   = model_outputs$my_inputs$checkGroup_x 
       )                                 
   })
@@ -843,7 +857,7 @@ shinyServer(function(input, output, session) {
                                                               seed.list = seed_list(),
                                                               seed.selected = model_outputs$best.seed, 
                                                               burnin   = model_outputs$my_inputs$burnin,
-                                                              segmentFlag = segmentFlag
+                                                              segmentFlag = model_outputs$segment_flag
                                                               #x_var   = model_outputs$my_inputs$checkGroup_x 
     )
   })    
