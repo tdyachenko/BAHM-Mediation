@@ -176,7 +176,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
     }
     plot(filename$alphadraw[-1:-burnin,p,2], filename$gammabetaSdraw[-1:-burnin,nvarX+1],
          #main=bquote("Scatterplot of " ~ alpha[.(p-1)] ~ " and " ~ beta ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
-         main=ifelse(segmentGlag==1,bquote("Segment S"),bquote("Segment M*")),
+         main=ifelse(segmentFlag==1,bquote("Segment S"),bquote("Segment M*")),
          xlab=bquote(alpha[S][.(p-1)]),ylab=expression(beta[S]), xlim=ylimA,ylim=ylimB)
     abline(h=0,v=0,col="gray")
     if(ylimA[2]>0 & ylimB[2]>0){
@@ -197,7 +197,7 @@ FUN_PDF_Mediation_ParameterPlots_MSmixture_forShiny_Effects = function(dataset,f
     }
     hist(filename$gammabetaSdraw[-1:-burnin,p],
          #main=bquote("Histogram of " ~ gamma[.(p-1)] ~ ". Variable " ~ .(x_var[p-1]) ~ ". Segment S"),
-         main=ifelse(segmentGlag==1,bquote("Segment S"),bquote("Segment M*")),
+         main=ifelse(segmentFlag==1,bquote("Segment S"),bquote("Segment M*")),
          #main=paste(x_var[p-1],"\n Segment S"),
          xlab=bquote(gamma[S][.(p-1)]), xlim=ylimG,
          breaks=c(seq(min(filename$gammabetaSdraw[-1:-burnin,p]),(max(filename$gammabetaSdraw[-1:-burnin,p])+breaksCalc),breaksCalc )))
