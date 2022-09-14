@@ -57,13 +57,14 @@ FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny = function(filenamelist
 #-------------- BM model scatterplots (original version)--------------------
 # used to output PDF plots of the effects
 
-FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot = function(dataset,filenamelist,seed.selected,burnin){
+FUN_PDF_Mediation_FinalPlots_MSmixture_forShiny_Plot = function(dataset,filenamelist,seed.selected,burnin,segmentFlag){
   nvarX = ncol(filenamelist[[1]]$alphadraw[,,1])
   #pdf(paste(dataset,"_FinalPlots.pdf", sep = ""), width=pdfW, height=pdfH)
   par(oma=c(0,0,2,0));   par(mfcol=c(3*(nvarX-1)+1,length(seed.selected)))
-  filename = filenamelist[[seed.selected[1]]]
-  for( i in seed.selected)
-    { filename = filenamelist[[i]]
+  par(mar = c(1, 1, 1, 1))
+  # filename = filenamelist[[as.numeric(seed.selected[1])]]
+  for( i in 1:length(seed.selected) )
+    { filename = filenamelist[[as.numeric(seed.selected[i])]]
       ylimA = c( min(filename$alphadraw[-1:-burnin,-1,1],filename$alphadraw[-1:-burnin,-1,2])-
                     0.1*min(filename$alphadraw[-1:-burnin,-1,1],filename$alphadraw[-1:-burnin,-1,2]),
                  max(filename$alphadraw[-1:-burnin,-1,1],filename$alphadraw[-1:-burnin,-1,2])+

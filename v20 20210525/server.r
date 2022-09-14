@@ -89,6 +89,15 @@ shinyServer(function(input, output, session) {
                 selected = 'avg_m')
   })
   
+  output$table_box <- renderText({
+      x <- "Parameter 95% HPDIs for the General Segment (S)"
+      if (model_outputs$segment_flag == 2) {
+          x <- "Parameter 95% HPDIs for the General Segment (M*)"
+      }
+      
+      return(x)
+  })
+  
   output$checkGroup_x <- renderUI({
     input$covariates_z  # ????
     df()
@@ -677,8 +686,8 @@ shinyServer(function(input, output, session) {
         "You can download individual specific proabilities to mediate by clicking the button below.
                           The probabilities are calculated as posterior means of individual parameters w.",
         br(),
-        if(model_outputs$segment_flag==1) {
-          h6("Please note that due to lable switching during estimation, segment G is now labeled as M* 
+        if(model_outputs$segment_flag==2) {
+          h6("Please note that due to label switching during estimation, segment G is now labeled as M* 
           and treated as mediating for reporting purposes.")}, 
         br(),
         downloadButton("download_csv","Download CSV")
@@ -750,7 +759,7 @@ shinyServer(function(input, output, session) {
   reactive_output_hdpi <- reactive({
       res <- output_HDPI()[[2]]
       if( model_outputs$segment_flag == 1 ) {
-          names(res) <- c("Segment M", "Segment M*")
+          names(res)[1:2] <- c("Segment M", "Segment M*")
       }
       
       return(res)
@@ -963,7 +972,8 @@ shinyServer(function(input, output, session) {
                                               dataset="",
                                               filenamelist = model_results(),
                                               seed.selected = model_outputs$output_RhatcalcBM$table_forShiny[1,],
-                                              burnin   = model_outputs$my_inputs$burnin
+                                              burnin   = model_outputs$my_inputs$burnin,
+                                              segmentFlag = model_outputs$segment_flag
                                               #x_vars   = model_outputs$my_inputs$checkGroup_x
                                             )
                                             dev.off()

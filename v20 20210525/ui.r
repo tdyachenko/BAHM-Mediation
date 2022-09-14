@@ -348,7 +348,7 @@ dashboardPage(
                          ),
                          box(width = NULL,
                              solidHeader = FALSE,
-                             title = "Parameter 95% HPDIs for the General Segment (S)", #table  # TODO change to M* if segmentFlag ==2
+                             title = textOutput("table_box"), #table  # TODO change to M* if segmentFlag ==2
                              status = "primary",
                              tableOutput("hdpiBM_S_tbl")
                          )
