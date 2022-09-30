@@ -177,7 +177,7 @@ shinyServer(function(input, output, session) {
   output$select_seed <- renderUI({
     #numericInput("select_seed", label=('Random seed/starting value'), value = 123, step=1)
     numericInput("select_seed", label=NULL, #value = round(runif(1,0,10^5)))
-                 value = 125                   )  # FOR TESTING ONLY
+                 value = 100                   )  # FOR TESTING ONLY
   })
   
   output$select_keep <- renderUI({
@@ -687,7 +687,7 @@ shinyServer(function(input, output, session) {
                           The probabilities are calculated as posterior means of individual parameters w.",
         br(),
         if(model_outputs$segment_flag==2) {
-          h6("Please note that due to label switching during estimation, segment G is now labeled as M* 
+          h6("Please note that due to label switching during estimation, segment S is now labeled as M* 
           and treated as mediating for reporting purposes.")}, 
         br(),
         downloadButton("download_csv","Download CSV")
@@ -759,7 +759,7 @@ shinyServer(function(input, output, session) {
   reactive_output_hdpi <- reactive({
       res <- output_HDPI()[[2]]
       if( model_outputs$segment_flag == 1 ) {
-          names(res)[1:2] <- c("Segment M", "Segment M*")
+          names(res)[1:2] <- c("Segment M", "Segment M*")  # TODO: Does not show the column names correctly
       }
       
       return(res)
@@ -771,9 +771,12 @@ shinyServer(function(input, output, session) {
   # display ON SCREEN HDPIs for rho and lambda
   #output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   #output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  if( model_outputs$segment_flag == 1 ) {
+    output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)}
+  else {
+    output$hdpiRho_tbl <- renderTable(expr = 1-output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)}
   output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  # NEED TO FIGURE OUT how to transform lambda
+  # NEED TO FIGURE OUT how to transform lambda for segment_flag=2
   
   #----------------------------------------------------  
   # calculate proportion of posterior draws in each quadrant for selected seeds
@@ -803,7 +806,8 @@ shinyServer(function(input, output, session) {
           tags$th(''),
           tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), 'Segment M (mediating)'), 
           ##colspan=length(my_inputs()$checkGroup_x)
-          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), paste0('Segment ', ifelse(model_outputs$segment_flag == 1, 'G (general)', 'M*'))),  # TODO: if segmentFlag=2 change to M*
+          tags$th(class = 'dt-center', colspan = length(model_outputs$my_inputs$x_vars), paste0('Segment ', ifelse(model_outputs$segment_flag == 1, 'S (general)', 'M*'))),  
+    # TODO: if segmentFlag=2 change to M*
         tags$tr(lapply(colnames(output_proportionsBM()), tags$th))
       )))
   })

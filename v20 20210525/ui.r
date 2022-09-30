@@ -225,6 +225,7 @@ dashboardPage(
  
        # button which will re-run model
         actionButton("runA", "Run Aggregate Model", style="color: #fff; background-color: #FF0000; border-color: #DC143C; width:30%"),
+        "NOTE: starting to rerun the model might take a few minutes",
         br(),
         br(),
         fluidRow(

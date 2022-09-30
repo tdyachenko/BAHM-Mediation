@@ -38,7 +38,7 @@ FUN_PDF_Mediation_AlphaBetaProportion_MSmixture_forShiny = function(filenamelist
   for(n in 2:nvarX)
   {
      temp[n-1] <-paste(x_vars[n - 1], " M",sep = "")
-     temp[(nvarX-1)+n-1] <- paste(x_vars[n - 1], " G",sep = "")
+     temp[(nvarX-1)+n-1] <- paste(x_vars[n - 1], " S",sep = "")
   }
   colnames(Proportions) <- temp
   rownames(Proportions) <- c("I (++)","II (+-)","III (-+)","IV (--)")
