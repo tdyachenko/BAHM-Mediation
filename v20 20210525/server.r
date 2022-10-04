@@ -777,7 +777,8 @@ shinyServer(function(input, output, session) {
       my_tbl <- output_HDPI()[[3]]
       
       if ( model_outputs$segment_flag != 1 ) {
-          my_tbl <- 1 - my_tbl
+          # my_tbl <- 1 - my_tbl
+          my_tbl[sapply(is.numeric, my_tbl)] <- lapply(my_tbl[sapply(is.numeric, my_tbl)], function(x) 1 - x)
       }
   }, colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   
