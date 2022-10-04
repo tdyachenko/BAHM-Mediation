@@ -780,6 +780,8 @@ shinyServer(function(input, output, session) {
           # my_tbl <- 1 - my_tbl
           my_tbl[sapply(is.numeric, my_tbl)] <- lapply(my_tbl[sapply(is.numeric, my_tbl)], function(x) 1 - x)
       }
+      
+      return(my_tbl)
   }, colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   
   # TODO: NEED TO FIGURE OUT how to transform lambda for segment_flag=2
