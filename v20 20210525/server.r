@@ -771,12 +771,17 @@ shinyServer(function(input, output, session) {
   # display ON SCREEN HDPIs for rho and lambda
   #output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   #output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  if( model_outputs$segment_flag == 1 ) {
-    output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)}
-  else {
-    output$hdpiRho_tbl <- renderTable(expr = 1-output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)}
-  output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  # NEED TO FIGURE OUT how to transform lambda for segment_flag=2
+  
+  
+  output$hdpiRho_tbl <- renderTable({
+      my_tbl <- output_HDPI()[[3]]
+      
+      if ( model_outputs$segment_flag != 1 ) {
+          my_tbl <- 1 - my_tbl
+      }
+  }, colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  
+  # TODO: NEED TO FIGURE OUT how to transform lambda for segment_flag=2
   
   #----------------------------------------------------  
   # calculate proportion of posterior draws in each quadrant for selected seeds
