@@ -775,10 +775,10 @@ shinyServer(function(input, output, session) {
   
   output$hdpiRho_tbl <- renderTable({
       my_tbl <- output_HDPI()[[3]]
-      
+
       if ( model_outputs$segment_flag != 1 ) {
           # my_tbl <- 1 - my_tbl
-          my_tbl[sapply(is.numeric, my_tbl)] <- lapply(my_tbl[sapply(is.numeric, my_tbl)], function(x) 1 - x)
+          my_tbl[sapply(my_tbl, is.numeric)] <- lapply(my_tbl[sapply(my_tbl, is.numeric)], function(x) 1 - x)
       }
       
       return(my_tbl)
