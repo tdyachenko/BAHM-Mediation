@@ -34,7 +34,7 @@ source('inputs_helpers.r')
 source('output_helpers.r')
 source('agg_helpers.r')
 source('BM_helpers.r')
-source('BM_Rhat_helpers.r')
+source('BM_Rhat_helpers.r') # TODO: Look at speed improvements, parallelize if possible
 source("FUN_Mediation_MH_step.R")
 source("FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R")
 
@@ -758,9 +758,7 @@ shinyServer(function(input, output, session) {
   # new line
   reactive_output_hdpi <- reactive({
       res <- output_HDPI()[[2]]
-      if( model_outputs$segment_flag == 1 ) {
-          names(res)[1:2] <- c("Segment M", "Segment M*")  # TODO: Does not show the column names correctly
-      }
+      names(res)[1:2] <- c("Variable", "Parameter")
       
       return(res)
   })

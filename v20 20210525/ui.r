@@ -329,7 +329,8 @@ dashboardPage(
                           box(width = NULL,solidHeader = FALSE,
                               title = "Proportions of posterior distribution by Quadrant",  #table
                               status = "primary",
-                              DT::dataTableOutput("proportionsBM")
+                              DT::dataTableOutput("proportionsBM")  # TODO: when labels switch, update S to M* in Variable row
+                              # TODO: Remove "Var" from first row, first column
                           ),
                           box(width = NULL,solidHeader = FALSE,
                               title = "Plots of the Posterior Draws of Parameters",  #Figure
