@@ -1,0 +1,13 @@
+name: BAHM
+title:
+username:
+account: bayesianmediationmodels
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7175044
+bundleId: 6697487
+url: https://bayesianmediationanalysis.shinyapps.io/BAHM/
+when: 1672850180.25446
+lastSyncTime: 1672850180.25446
+asMultiple: FALSE
+asStatic: FALSE

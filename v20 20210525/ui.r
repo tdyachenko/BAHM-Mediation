@@ -62,8 +62,9 @@ dashboardPage(
         tabItem(tabName = "how",
                 h4(strong("Welcome!")),
         				br(),
-                helpText("This application is currently under continuous development. While most functionality works, you may encounter unexpected behavior, please contact <email>,
-                         and we will do our best to look into it and correct it if needed. Thank you!"),
+                helpText("This application is currently under continuous development. While most functionality works, 
+                          you may encounter unexpected behavior, please contact Tatiana Dyachenko at ResearchGate.com,
+                          and we will do our best to look into it and correct it if needed. Thank you!"),
                 helpText("More information will be provided shortly. Please go to Input Tab to perform the analysis."),
         ),
                 
@@ -252,6 +253,12 @@ dashboardPage(
             ),
            column(width = 8, 
                   box(width=NULL,
+                      solidHeader = FALSE,
+                      title = "Aggregate Model. Parameter 95% HPDIs",   #table
+                      status = "primary",
+                      tableOutput("hdpiA_tbl")
+                  ),
+           			  box(width=NULL,
                       status = "primary",
                       solidHeader = FALSE,
                       title = "Aggregate Model. Plots of the Posterior Draws of Parameters",    #Figure
@@ -262,13 +269,8 @@ dashboardPage(
                       h5('Downloads:', align='left'),
                       downloadButton('downloadPDF', 'PDF of Plots' ),
                       br()
-                  ),
-                  box(width=NULL,
-                      solidHeader = FALSE,
-                      title = "Aggregate Model. Parameter 95% HPDIs",   #table
-                      status = "primary",
-                      tableOutput("hdpiA_tbl")
                   )
+                 
            )
         )
      ),
@@ -448,13 +450,12 @@ dashboardPage(
              "This app is based on the paper ",
              em("Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM)"),
                 "by Tatiana L. Dyachenko (University of Georgia, Terry College of Business) and Greg M. Allenby
-                (The Ohio State University, Fisher College of Business). The paper is forthcoming in the Journal of Consumer Research.",  
+                (The Ohio State University, Fisher College of Business). The paper is available from the Journal of Consumer Research.",  
      				 br(),
      				 br(),
-             " The paper with a short tutorial will be avaiable shortly using the link below.",
+             " The paper with a short tutorial is avaiable using the link below.",
              br(),
              br(),
-             #p("This link will be removed when submitting for review:"),
              a(href="https://doi.org/10.1093/jcr/ucac041", "link to the paper"),
              br(),
              br(),
