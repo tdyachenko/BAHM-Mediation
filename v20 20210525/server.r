@@ -768,15 +768,18 @@ shinyServer(function(input, output, session) {
   
   # display ON SCREEN HDPIs for rho and lambda
   #output$hdpiRho_tbl <- renderTable(expr = output_HDPI()[[3]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
-  #output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
+  output$hdpiLambda_tbl <- renderTable(expr = output_HDPI()[[4]], colnames=TRUE, bordered=TRUE, sanitize.text.function = function(x) x)
   
   
   output$hdpiRho_tbl <- renderTable({
       my_tbl <- output_HDPI()[[3]]
+      
+      save(my_tbl, file = "wtf.RData")
 
       if ( model_outputs$segment_flag != 1 ) {
           # my_tbl <- 1 - my_tbl
           my_tbl[sapply(my_tbl, is.numeric)] <- lapply(my_tbl[sapply(my_tbl, is.numeric)], function(x) 1 - x)
+          my_tbl <- my_tbl %>% dplyr::select(Parameter, Mean, `HPDI lower limit` = `HPDI upper limit`, `HPDI upper limit` = `HPDI lower limit`)
       }
       
       return(my_tbl)
