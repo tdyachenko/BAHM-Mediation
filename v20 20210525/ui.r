@@ -65,7 +65,14 @@ dashboardPage(
                 helpText("This application is currently under continuous development. While most functionality works, 
                           you may encounter unexpected behavior, please contact Tatiana Dyachenko at ResearchGate.com,
                           and we will do our best to look into it and correct it if needed. Thank you!"),
-                helpText("More information will be provided shortly. Please go to Input Tab to perform the analysis."),
+                helpText("More information will be provided shortly."),
+        				br(),
+        				helpText("Please go to",em("Input"),"Tab to upload your data and select varaibles and then to",
+        				em("Models"),"to perform analysis."),
+        				br(),
+        				helpText("Please cite as:"),
+        				strong("Tatiana L. Dyachenko, Greg M. Allenby (2022). Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM),
+        				Journal of Consumer Research, https://doi.org/10.1093/jcr/ucac041/")
         ),
                 
       
@@ -453,7 +460,7 @@ dashboardPage(
                 (The Ohio State University, Fisher College of Business). The paper is available from the Journal of Consumer Research.",  
      				 br(),
      				 br(),
-             " The paper with a short tutorial is avaiable using the link below.",
+             " The paper with a short tutorial is avaiable using the link below. A longer tutorial is being developed.",
              br(),
              br(),
              a(href="https://doi.org/10.1093/jcr/ucac041", "link to the paper"),
