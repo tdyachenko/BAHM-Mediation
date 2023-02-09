@@ -774,7 +774,7 @@ shinyServer(function(input, output, session) {
   output$hdpiRho_tbl <- renderTable({
       my_tbl <- output_HDPI()[[3]]
       
-      save(my_tbl, file = "wtf.RData")
+      #save(my_tbl, file = "testerror.RData")
 
       if ( model_outputs$segment_flag != 1 ) {
           # my_tbl <- 1 - my_tbl
