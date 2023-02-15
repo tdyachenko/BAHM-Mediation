@@ -79,12 +79,12 @@ shinyServer(function(input, output, session) {
   
   # Data
   output$radio_y <- renderUI({
-    selectInput("radio_y", label = h5(em("Dependent Variable (y). Select one.")),
+    selectInput("radio_y", label = h5(em("Dependent (continuous) Variable (y). Select one.")),
                 choices = df_column_list(), selected = "y1")
   })
   
   output$radio_m <- renderUI({
-    selectInput("radio_m", label = h5(em("Mediator (m). Select one.")),
+    selectInput("radio_m", label = h5(em("Mediator (continuous) (m). Select one.")),
                 choices = df_column_list()[df_column_list() != input$radio_y], 
                 selected = 'avg_m')
   })
@@ -124,6 +124,7 @@ shinyServer(function(input, output, session) {
       tagList(
       selectizeInput("covariates_z",
                      label    = h5(em("Covariates. Leave BLANK if no covariates. 
+                                       Please mean-center the variables before uploading your files.
                                       ")), 
                      choices  = setdiff(df_column_list(), c(input$radio_y, input$radio_m, input$checkGroup_x)),
                      selected = if (!is.null(input$covariates_z)[1]) input$covariates_z else NA,
