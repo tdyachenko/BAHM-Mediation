@@ -1,0 +1,14 @@
+name: BAHM
+title:
+username:
+account: bayesianmediationmodels
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 7175044
+bundleId: 6849995
+url: https://bayesianmediationanalysis.shinyapps.io/BAHM/
+when: 1676474212.75838
+lastSyncTime: 1676474212.75838
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: Study4_ForR_short_MissingReplaced.csv|TC SC & Moral Perception 3 (MTurk) - October 2018.csv
