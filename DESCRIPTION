@@ -5,12 +5,9 @@ Version: 0.1.0
 Authors: Tatiana Dyachenko and Eric Hare
 Maintainer: The package maintainer <yourself@somewhere.net>
 Description: The package allows download of full application in R onto user's machine to run Bayesian analysis of heterogneous meditaion described in
-
     Tatiana L Dyachenko, Greg M Allenby (2022 in press), Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM),
     Journal of Consumer Research, https://doi.org/10.1093/jcr/ucac041
-
     (The new code for categorical outcome (y) and mediator (m) variables will be added soon.)
-
     Use four spaces when indenting paragraphs within the Description.
 License: GPL-3
 Encoding: UTF-8
