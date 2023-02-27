@@ -23,7 +23,7 @@ download_bahm <- function(path = getwd()) {
 #'     run_bahm()
 #' }
 run_bahm <- function(path = getwd()) {
-  path <- file.path(path, "bahm", "v20 20210525")
+  path <- file.path(path, "bahm", "BAHM_2023")
 
   if (!file.exists(path)) {
     download_bahm()
