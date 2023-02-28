@@ -6,6 +6,7 @@
 #
 #-#
 
+tags$head(includeHTML(("google-analytics.html")))
 
 # import libraries
 library(shiny)

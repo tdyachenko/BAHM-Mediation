@@ -34,7 +34,7 @@ source('inputs_helpers.r')
 source('output_helpers.r')
 source('agg_helpers.r')
 source('BM_helpers.r')
-source('BM_Rhat_helpers.r') # TODO: Look at speed improvements, parallelize if possible
+source('BM_Rhat_helpers.r') # TODO: Look at speed improvements, parallel if possible
 source("FUN_Mediation_MH_step.R")
 source("FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R")
 
