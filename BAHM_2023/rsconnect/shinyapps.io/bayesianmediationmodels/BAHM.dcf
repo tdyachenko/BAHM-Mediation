@@ -5,10 +5,10 @@ account: bayesianmediationmodels
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 7175044
-bundleId: 6898893
+bundleId: 6898931
 url: https://bayesianmediationanalysis.shinyapps.io/BAHM/
-when: 1677612198.99769
-lastSyncTime: 1677612198.99769
+when: 1677612715.49945
+lastSyncTime: 1677612715.49945
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: agg_helpers.r|BM_helpers.r|BM_Rhat_helpers.r|FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R|FUN_Mediation_MH_step.R|inputs_helpers.r|output_helpers.r|sample_data_Loyalty.csv|Study4_ForR_short_MissingReplaced_mc.csv
