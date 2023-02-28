@@ -59,13 +59,13 @@ dashboardPage(
   dashboardBody(
     
     # somewhere inside the UI
-    shiny::tags$head(
-      shiny::tags$script(
-         src = "https://www.googletagmanager.com/gtag/js?id=G-2P4LB5T5CJ",
-         async = ""
-      ),
-      shiny::tags$script( src = "gtag.js" )
-    ),
+    #shiny::tags$head(
+    #  shiny::tags$script(
+    #     src = "https://www.googletagmanager.com/gtag/js?id=G-2P4LB5T5CJ",
+    #     async = ""
+    #  ),
+    #  shiny::tags$script( src = "gtag.js" )
+    #),
     
     #tags$head(includeHTML(("google-analytics_Shiny.html"))),
     
