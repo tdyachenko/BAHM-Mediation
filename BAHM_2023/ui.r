@@ -29,7 +29,6 @@ $(document).on('shiny:value', function(event) {
 })
 "
 
-
 # define UI
 dashboardPage(
   
@@ -39,6 +38,8 @@ dashboardPage(
   dashboardSidebar(
     
     tags$head(
+      includeHTML("google_analytics.html"),
+
       useShinyjs(),
       tags$link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css", integrity="sha384-9tPv11A+glH/on/wEu99NVwDPwkMQESOocs/ZGXPoIiLE8MU/qkqUcZ3zzL+6DuH", crossorigin="anonymous"),
       tags$script(src="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.js", integrity="sha384-U8Vrjwb8fuHMt6ewaCy8uqeUXv4oitYACKdB0VziCerzt011iQ/0TqlSlv8MReCm", crossorigin="anonymous"),
@@ -58,18 +59,7 @@ dashboardPage(
   
   dashboardBody(
     
-    # somewhere inside the UI
-    #shiny::tags$head(
-    #  shiny::tags$script(
-    #     src = "https://www.googletagmanager.com/gtag/js?id=G-2P4LB5T5CJ",
-    #     async = ""
-    #  ),
-    #  shiny::tags$script( src = "gtag.js" )
-    #),
-    
-    #tags$head(includeHTML(("google-analytics_Shiny.html"))),
-    
-  	tabItems(
+    tabItems(
         
         tabItem(tabName = "how",
                 h4(strong("Welcome!")),
@@ -187,8 +177,7 @@ dashboardPage(
                column(3, uiOutput("select_seednum"))
              ),
              fluidRow(
-               column(6, "Initial MH step size for lambda (default is 0.5). This parameter will be adjusted during estimation
-               			      to get rejection rate 0.65-0.75."),
+               column(6, "Initial MH step size for lambda (default is 0.5)"),
                column(3, uiOutput("select_slambda"))
              ),
              fluidRow(
