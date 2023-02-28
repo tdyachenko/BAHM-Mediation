@@ -6,7 +6,6 @@
 #
 #-#
 
-tags$head(includeHTML(("google-analytics.html")))
 
 # import libraries
 library(shiny)
@@ -29,6 +28,7 @@ $(document).on('shiny:value', function(event) {
   }
 })
 "
+
 
 # define UI
 dashboardPage(
@@ -58,7 +58,18 @@ dashboardPage(
   
   dashboardBody(
     
-    tabItems(
+    # somewhere inside the UI
+    shiny::tags$head(
+      shiny::tags$script(
+         src = "https://www.googletagmanager.com/gtag/js?id=G-2P4LB5T5CJ",
+         async = ""
+      ),
+      shiny::tags$script( src = "gtag.js" )
+    ),
+    
+    #tags$head(includeHTML(("google-analytics_Shiny.html"))),
+    
+  	tabItems(
         
         tabItem(tabName = "how",
                 h4(strong("Welcome!")),
