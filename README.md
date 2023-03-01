@@ -8,7 +8,7 @@ Journal of Consumer Research, 	https://doi.org/10.1093/jcr/ucac041_
 (new code for categorical outcome (y) and mediator (m) variables, which is work-in-progess)
   
     
-**You can get an R package "bahm" here following instructions below.**
+## You can get an R package "bahm" following instructions below.
 
 1. You need to have R installed on your computer:
 	- go to https://cran.r-project.org/mirrors.html
@@ -16,10 +16,18 @@ Journal of Consumer Research, 	https://doi.org/10.1093/jcr/ucac041_
 	- you can also install R and RStudio (which provide some convenience) from one place:
   https://posit.co/download/rstudio-desktop/
 
-2. Open file called LinesToLoad_BAHM.R
+2. Open file called LinesToLoad_BAHM.R and follow the instructions in the file (3 lines)
 
-3. Follow the instructions in the file (3 lines)
+```
+## Getting the package from github 
+devtools::install_github("tdyachenko/BAHM-Mediation", ref = "r-pkg")
 
-The app can also be run as a web application, but it can be slower with some bugs.
+## Loading the package 
+library(bahm)
+
+## Starting the app on your device
+run_bahm()
+```
+This will open the application on your device. Alternatively, the app can be run as a web application, but it might be much slower.
 https://bayesianmediationanalysis.shinyapps.io/BAHM/
 
