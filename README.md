@@ -5,10 +5,10 @@ This project hosts code for Bayesian heterogneous meditaion described in
 _Tatiana L Dyachenko, Greg M Allenby (2022 in press), Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM), 
 Journal of Consumer Research, 	https://doi.org/10.1093/jcr/ucac041_
 
-(new code for categorical outcome (y) and mediator (m) variables, which is work-in-progess)
+(new code for categorical outcome (y) and mediator (m) variables is coming soon)
   
     
-## You can get an R package "bahm" following instructions below.
+## You can get an R package "bahm" following instructions below. This will open the application on your device.
 
 1. You need to have R installed on your computer:
 	- go to https://cran.r-project.org/mirrors.html
@@ -28,6 +28,6 @@ library(bahm)
 ## Starting the app on your device
 run_bahm()
 ```
-This will open the application on your device. Alternatively, the app can be run as a web application, but it might be much slower.
+Alternatively, the app can be run as a web application, but it might be much slower.
 https://bayesianmediationanalysis.shinyapps.io/BAHM/
 
