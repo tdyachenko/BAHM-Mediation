@@ -14,7 +14,7 @@ library(shinydashboard)
 library(shinyjs)
 library(DT)
 
-# ??? what does this do?
+# Allows for greek letters to be displayed
 ketex_js <- " 
 $(document).on('shiny:value', function(event) {
   if(event.name.endsWith('_tbl')) {
@@ -42,7 +42,9 @@ dashboardPage(
 
       useShinyjs(),
       tags$link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css", integrity="sha384-9tPv11A+glH/on/wEu99NVwDPwkMQESOocs/ZGXPoIiLE8MU/qkqUcZ3zzL+6DuH", crossorigin="anonymous"),
-      tags$script(src="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.js", integrity="sha384-U8Vrjwb8fuHMt6ewaCy8uqeUXv4oitYACKdB0VziCerzt011iQ/0TqlSlv8MReCm", crossorigin="anonymous"),
+      tags$script(src="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.js",
+      						integrity="sha384-U8Vrjwb8fuHMt6ewaCy8uqeUXv4oitYACKdB0VziCerzt011iQ/0TqlSlv8MReCm", 
+      						crossorigin="anonymous"),
       tags$script(HTML(ketex_js))
     ),
     
@@ -66,15 +68,15 @@ dashboardPage(
         				br(),
                 helpText("This application is currently under continuous development. While most functionality works, 
                           you may encounter unexpected behavior, please contact Tatiana Dyachenko at ResearchGate.com,
-                          and we will do our best to look into it and correct it if needed. Thank you!"),
+                          and we will do our best to look into it and correct it. Thank you!"),
                 helpText("More information will be provided shortly."),
         				br(),
         				helpText("Please go to",em("Input"),"Tab to upload your data and select varaibles and then to",
         				em("Models"),"to perform analysis."),
         				br(),
         				helpText("Please cite as:"),
-        				strong("Tatiana L. Dyachenko, Greg M. Allenby (2022). Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM),
-        				Journal of Consumer Research, https://doi.org/10.1093/jcr/ucac041/")
+        				strong("Dyachenko, T. L., & Allenby, G. M. (2023). Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM).
+        							 Journal of Consumer Research, 50(1), 116-141. https://doi.org/10.1093/jcr/ucac041")
         ),
                 
       
