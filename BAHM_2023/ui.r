@@ -49,13 +49,13 @@ dashboardPage(
     ),
     
     sidebarMenu(id = "mysidebar",
-      menuItem("How to use", tabName = "how", icon = icon("question",lib = "font-awesome"),selected = TRUE),
-      menuItem("Input", tabName = "input", icon = icon("th",lib = "font-awesome")),
-      menuItem("Models", tabName = "input", icon = icon("bar-chart-o",lib = "font-awesome"),
-          menuSubItem("Heterogeneous (BM)", tabName = "BM",icon = icon("angle-double-right")),
-          menuSubItem("Aggregate", tabName = "aggregate",icon = icon("angle-double-right"))
+      menuItem("How to use", tabName = "how", icon = icon("home",lib = "glyphicon"),selected = TRUE),
+      menuItem("Input", tabName = "input", icon = icon("file",lib = "glyphicon")),
+      menuItem("Models", tabName = "input", icon = icon("th-list", lib = "glyphicon"),
+          menuSubItem("Heterogeneous (BM)", tabName = "BM",icon = icon("menu-right", lib = "glyphicon")),
+          menuSubItem("Aggregate", tabName = "aggregate",icon = icon("menu-right", lib = "glyphicon"))
       ),
-      menuItem("Resources", tabName = "ref", icon = icon("book",lib = "font-awesome"))
+      menuItem("Resources", tabName = "ref", icon = icon("book",lib = "glyphicon"))
       )
   ), 
   
@@ -75,7 +75,7 @@ dashboardPage(
         				em("Models"),"to perform analysis."),
         				br(),
         				helpText("Please cite as:"),
-        				strong("Dyachenko, T. L., & Allenby, G. M. (2023). Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM).
+        				em("Dyachenko, T. L., & Allenby, G. M. (2023). Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM).
         							 Journal of Consumer Research, 50(1), 116-141. https://doi.org/10.1093/jcr/ucac041")
         ),
                 
@@ -94,11 +94,12 @@ dashboardPage(
                             # add widgets for user to select variables
                             # this is dynamically done based on the file they upload using the RenderUI function in the server
                   h4(strong("Upload Data:")),
-          				h5(strong("This may take several minutes in this BETA version.")),
+          				h5(strong("This may take several (~5-7) minutes in this BETA version.")),
           				h5(strong("You should see the table with your data below when it is done.")),
           				br(),
                   fileInput('file1', 
-                           em('Upload CSV file or use default data'),
+                           em('Upload your CSV file or use default data'),
+                  				 multiple = FALSE,
                            accept = c("text/csv",
                                       "text/comma-separated-values,text/plain",
                                       ".csv",
@@ -132,6 +133,7 @@ dashboardPage(
                         title = "Table: Raw Data",
                         status = "primary",
                         DT::dataTableOutput("Raw_table")
+                   		  #tableOutput("Raw_table")
                         )
             #)
                    #)

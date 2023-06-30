@@ -1,13 +1,20 @@
 #-#
-# 
 # This is the server logic for a Shiny web application.
-#
 #-#
 
 #setwd("D:/Dropbox/Mediation/Shiny APP dev/R code/Shiny Code/v5")
-#setwd("/Users/kgedney/Dropbox/Mediation/Shiny APP dev/R code/Shiny Code/v4")
 
 # import libraries
+
+#library("pacman")
+##pacman will not accept a character vector so the same packages are repeated
+#pacman::p_load("shiny", "bayesm", "HDInterval", "coda", "gtools", "dplyr", "readr", "DT", "future",
+#							 "promises", "ipc", "future.callr","future.apply", "data.table")
+
+#setwd("G:/Dropbox/GitHub/BAHM-Mediation/BAHM_2023")
+#library(profvis)
+#profvis(shiny::runApp())
+
 library('shiny')
 library('bayesm')
 library('HDInterval')
@@ -21,6 +28,9 @@ library(promises)
 library(ipc)
 library(future.callr)
 library(future.apply)
+library(data.table)
+
+#options(shiny.maxRequestSize = 30*1024^2)
 
 plan(list(
   tweak(callr, workers = max(1, availableCores() %/% 4)),
@@ -28,8 +38,10 @@ plan(list(
 ))
 
 # load sample data to use as default # moved to see if this helps on the server
+#sample_df <- data.frame(fread("sample_data_Loyalty.csv"))
 sample_df <- read.csv("sample_data_Loyalty.csv")
 
+# load helper functions
 source('inputs_helpers.r')
 source('output_helpers.r')
 source('agg_helpers.r')
@@ -38,19 +50,18 @@ source('BM_Rhat_helpers.r') # TODO: Look at speed improvements, parallel if poss
 source("FUN_Mediation_MH_step.R")
 source("FUN_Mediation_LCRM_2class_MS_Gibbs_Moderated_forShinyApp.R")
 
-
-
 shinyServer(function(input, output, session) {
   
-  # load helper functions
-  
-  
-  
+ 
   #------------------------- get data --------------------------------#
   # 1. define df - the reactive function is explained here: 
   # https://shiny.rstudio.com/tutorial/written-tutorial/lesson6/
   df <- reactive({
-    withProgress(message = "Uploading File", detail = "Please wait a few moments...", expr = {
+    #inFile <- sample_df
+  	#inFile <- read.csv("sample_data_Loyalty.csv")
+  	
+  	## the message does not help
+  	withProgress(message = "Uploading File", detail = "Please wait a few moments...", expr = {
         # check for input
         inFile <- input$file1
         
@@ -74,6 +85,23 @@ shinyServer(function(input, output, session) {
   df_column_list <- reactive({
     return(names(df()))
   })
+  
+  #------------------ show Raw data ----------------------------------#
+  # 2. render Raw Data inFile_table "Input" table
+  #output$Raw_table <- renderTable({
+  #   df()
+  # 	}, bordered = TRUE, striped = TRUE, align = "c"
+  output$Raw_table <- DT::renderDataTable({
+     df()
+   	}
+    , options = list(scrollX = TRUE, pageLength=20)
+  )
+  
+  #output$keepAlive <- renderText({
+  #  req(input$count)
+  #  paste("keep alive ", input$count)
+  #})
+  
   
   #---- add renderUI functionality to create dropdowns based on file uploaded -----#
   
@@ -238,16 +266,7 @@ shinyServer(function(input, output, session) {
   outputOptions(output, "select_ciband", suspendWhenHidden=FALSE)
   
   
-  #------------------ show Raw data ----------------------------------#
-  # 2. render Raw Data inFile_table "Input" table
-  output$Raw_table <- DT::renderDataTable({
-    df()
-  }, options = list(scrollX = TRUE))
-  
-  output$keepAlive <- renderText({
-    req(input$count)
-    paste("keep alive ", input$count)
-  })
+ 
   
   #-------------------- Aggregate: Run Model ---------------------------------------#
   #  Run Aggregate Model! 
@@ -468,11 +487,6 @@ shinyServer(function(input, output, session) {
   
   # print HDPI of posterior draws
   output$hdpiA_tbl <- renderTable(expr=output_HDPI_A(), colnames=TRUE, bordered=TRUE) 
-  
-  
-  ###############
-  #  FIX the rownames
-  ###############
   
   # print proportions of posterior draws by quadrant
   output$proportionsA <- renderTable(expr = output_proportions(), 
