@@ -19,7 +19,10 @@ Journal of Consumer Research, 	https://doi.org/10.1093/jcr/ucac041_
 2. Open file called LinesToLoad_BAHM.R and follow the instructions in the file (3 lines)
 
 ```
-## Getting the package from github 
+## Install needed libraries 
+install.packages(c("shiny", "bayesm", "HDInterval", "coda", "gtools","dplyr", "readr", "DT", "future", "promises", "ipc", "future.callr", "future.apply", "data.table"))
+
+## Getting the package from github
 devtools::install_github("tdyachenko/BAHM-Mediation", ref = "r-pkg")
 
 ## Loading the package 
