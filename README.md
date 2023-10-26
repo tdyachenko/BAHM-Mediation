@@ -1,14 +1,14 @@
 # Bayesian Analysis of Heterogeneous Mediation (BAHM)
  
-This project hosts code for Bayesian heterogneous meditaion described in
+This project hosts code for Bayesian heterogeneous mediation described in
  
-_Tatiana L Dyachenko, Greg M Allenby (2022 in press), Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM), 
-Journal of Consumer Research, 	https://doi.org/10.1093/jcr/ucac041_
+_Tatiana L Dyachenko, Greg M Allenby (2023), Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM), 
+Journal of Consumer Research, 50(1), p.116-141.	https://doi.org/10.1093/jcr/ucac041_
 
 (new code for categorical outcome (y) and mediator (m) variables is coming soon)
   
     
-## You can get an R package "bahm" following instructions below. This will open the application on your device.
+## You can get an R package "bahm" following the instructions below. This will open the application on your device.
 
 1. You need to have R installed on your computer:
 	- go to https://cran.r-project.org/mirrors.html
