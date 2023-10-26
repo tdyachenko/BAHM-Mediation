@@ -1,0 +1,12 @@
+name: BAHM_2023
+title: BAHM_2023
+username: bayesianmediationanalysis
+account: bayesianmediationanalysis
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 10317405
+bundleId: 7853679
+url: https://bayesianmediationanalysis.shinyapps.io/BAHM_2023/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

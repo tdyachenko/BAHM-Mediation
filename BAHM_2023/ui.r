@@ -65,18 +65,41 @@ dashboardPage(
         
         tabItem(tabName = "how",
                 h4(strong("Welcome!")),
-        				br(),
-                helpText("This application is currently under continuous development. While most functionality works, 
+        				helpText("This application is currently under continuous development. While most functionality works, 
                           you may encounter unexpected behavior, please contact Tatiana Dyachenko at ResearchGate.com,
                           and we will do our best to look into it and correct it. Thank you!"),
                 helpText("More information will be provided shortly."),
-        				br(),
-        				helpText("Please go to",em("Input"),"Tab to upload your data and select varaibles and then to",
-        				em("Models"),"to perform analysis."),
-        				br(),
         				helpText("Please cite as:"),
         				em("Dyachenko, T. L., & Allenby, G. M. (2023). Is Your Sample Truly Mediating? Bayesian Analysis of Heterogeneous Mediation (BAHM).
-        							 Journal of Consumer Research, 50(1), 116-141. https://doi.org/10.1093/jcr/ucac041")
+        							 Journal of Consumer Research, 50(1), 116-141."),
+        				a(href="https://doi.org/10.1093/jcr/ucac041", "https://doi.org/10.1093/jcr/ucac041"),
+        				br(),
+        				h4(strong("IMPORTANT:")),
+        				helpText("It is strongly recommended to load the package from GitHub directly and run the app on your computers.",
+        				         strong(a(href="https://github.com/tdyachenko/BAHM-Mediation","https://github.com/tdyachenko/BAHM-Mediation"))),
+        				tags$ul(
+                    tags$li("You can get an R package ", tags$code("bahm"), " following instructions below. This will open the application on your device. 
+        				          To have R installed on your computer go to ",
+                          a(href="https://cran.r-project.org/mirrors.html","https://cran.r-project.org/mirrors.html"),
+        				          "and select a mirror/location and download and install R software."),
+                    tags$li("You can also install R and RStudio from one place:",
+        				         a(href="https://posit.co/download/rstudio-desktop/","https://posit.co/download/rstudio-desktop/")),
+        				    tags$li("Open the file on GitHub called", tags$code("LinesToLoad_BAHM.R"),
+        				         "and follow the instructions (3 lines. You can copy them also from here):")
+                ),
+        				tags$pre(
+                  tags$code(
+'
+ ## Getting the package from github")
+  devtools::install_github(\"tdyachenko/BAHM-Mediation\", ref = \"r-pkg\")"),
+ ## Loading the package
+  library(bahm)
+ ## Starting the app on your device
+  run_bahm()'
+              )),
+          br(),
+        	helpText(strong("If you'd like to proceed, please go to"),em("Input"),strong("tab to upload your data and select varaibles and then to"),
+        	em("Models"),strong("to perform analysis."))
         ),
                 
       

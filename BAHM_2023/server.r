@@ -78,10 +78,6 @@ shinyServer(function(input, output, session) {
     })
   })
   
-  output$obs <- renderText({
-      return(paste0("Your file has ", nrow(df()), " observations and ", ncol(df()), " variables."))
-  })
-  
   df_column_list <- reactive({
     return(names(df()))
   })
