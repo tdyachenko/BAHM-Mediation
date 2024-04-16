@@ -33,9 +33,14 @@ library(data.table)
 #options(shiny.maxRequestSize = 30*1024^2)
 
 plan(list(
-  tweak(callr, workers = max(1, availableCores() %/% 4)),
-  tweak(multisession, workers = max(1, availableCores() %/% 2))
+  tweak(callr, workers = max(1, detectCores() %/% 4)),
+  tweak(multisession, workers = max(1, (detectCores()-1) %/% 2))
 ))
+
+#plan(list(
+#  tweak(callr, workers = max(1, availableCores() %/% 4)),
+#  tweak(multisession, workers = max(1, availableCores() %/% 2))
+#))
 
 # load sample data to use as default # moved to see if this helps on the server
 #sample_df <- data.frame(fread("sample_data_Loyalty.csv"))
