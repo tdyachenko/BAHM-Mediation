@@ -20,7 +20,8 @@ Journal of Consumer Research, 50(1), p.116-141.	https://doi.org/10.1093/jcr/ucac
 
 ```
 ## Install needed libraries 
-install.packages(c("shiny", "bayesm", "HDInterval", "coda", "gtools","dplyr", "readr", "DT", "future", "promises", "ipc", "future.callr", "future.apply", "data.table"))
+install.packages(c("shiny", "bayesm", "HDInterval", "coda", "gtools","dplyr", "readr", "DT", "future", "promises", "ipc", "future.callr",
+                   "future.apply", "data.table", "shinyWidgets", "devtools"))
 
 ## Getting the package from github
 devtools::install_github("tdyachenko/BAHM-Mediation", ref = "r-pkg")
