@@ -24,7 +24,7 @@ install.packages(c("shiny", "bayesm", "HDInterval", "coda", "gtools","dplyr", "r
                    "future.apply", "data.table", "shinyWidgets", "devtools","htmltools", "shinydashboard","shinyjs"))
 
 ## Getting the package from github
-devtools::install_github("tdyachenko/BAHM-Mediation", ref = "r-pkg")
+devtools::install_github("tdyachenko/BAHM-Mediation", ref = "r-pkg",force = TRUE)
 
 ## Loading the package 
 library(bahm)
